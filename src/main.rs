@@ -177,7 +177,7 @@ mod tests {
         let ws_url = format!("ws://{}/ws", addr);
         let (mut ws_stream, _) = connect_async(&ws_url).await.unwrap();
 
-        // 1. Create Room in Torneo mode
+        // 1. Create Room in Feria mode
         ws_stream
             .send(WsMsg::Text(
                 json!({
@@ -186,7 +186,7 @@ mod tests {
                     "avatar": "🔮",
                     "color": "#06b6d4",
                     "settings": {
-                        "game_mode": "torneo",
+                        "game_mode": "feria",
                         "win_condition": "rounds",
                         "max_rounds": 5,
                         "target_score": 250,

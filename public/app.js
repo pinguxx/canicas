@@ -342,12 +342,11 @@
     return marbles;
   }
 
-  function stageForRoundLocal(gameMode, roundNumber) {
-    if (gameMode === 'feria' || gameMode === 'circulo' || gameMode === 'hoyita') {
+  function stageForRoundLocal(gameMode, _roundNumber) {
+    if (gameMode === 'circulo' || gameMode === 'hoyita') {
       return gameMode;
     }
-    const idx = (Math.max(1, roundNumber) - 1) % 3;
-    return idx === 0 ? 'feria' : idx === 1 ? 'circulo' : 'hoyita';
+    return 'feria';
   }
 
   function simulateFeriaShotLocal(rawPower, rawAngle, rawSpin, occupiedIds, isGolden, bonusRule) {
@@ -359,104 +358,124 @@
     const path = [];
     const pinHits = [];
 
-    for (let i = 0; i < 8; i++) {
-      path.push({ x: 908, y: 1120 - (i / 7) * 900 });
+    for (let i = 0; i < 16; i++) {
+      path.push({ x: 908, y: Math.round((1120 - (i / 15) * 900) * 10) / 10 });
     }
-    const jitter = (Math.random() - 0.5) * 56;
+    const jitter = (Math.random() - 0.5) * 44;
     const targetEntryX = Math.max(165, Math.min(775, 760 - power * 520 + angle * 135 + jitter));
-    for (let i = 1; i <= 6; i++) {
-      const frac = i / 6;
+    for (let i = 1; i <= 14; i++) {
+      const frac = i / 14;
+      const ease = 1 - Math.pow(1 - frac, 2);
       path.push({
-        x: 908 - (908 - targetEntryX) * frac,
-        y: 220 - Math.sin(frac * Math.PI) * 95 - frac * 65
+        x: Math.round((908 - (908 - targetEntryX) * ease) * 10) / 10,
+        y: Math.round((220 - Math.sin(frac * Math.PI) * 88 - frac * 68) * 10) / 10
       });
     }
 
     let x = targetEntryX;
-    let y = 155;
-    let vx = angle * 3.8 - power * 1.4 + (Math.random() - 0.5) * 3.2;
-    let vy = 2.6 + power * 1.8;
+    let y = 152;
+    let vx = angle * 3.4 - power * 1.1 + (Math.random() - 0.5) * 2.4;
+    let vy = 3.2 + power * 1.4;
+    const marbleR = 13.5;
     let capturedHole = null;
     let stepIdx = path.length;
 
-    for (let simStep = 0; simStep < 150; simStep++) {
-      vy += 0.34;
-      vx += spin * 0.085;
-      vx *= 0.985;
-      vy *= 0.988;
+    for (let simStep = 0; simStep < 320; simStep++) {
+      vy = Math.max(2.2, Math.min(7.2, vy + 0.24));
+      vx = Math.max(-5.8, Math.min(5.8, (vx + spin * 0.08) * 0.96));
       x += vx;
       y += vy;
 
-      if (x < 115) {
-        x = 115;
-        vx = Math.abs(vx) * 0.78 + 0.8;
-      } else if (x > 820) {
-        x = 820;
-        vx = -Math.abs(vx) * 0.78 - 0.8;
+      if (x < 118) {
+        x = 118;
+        vx = Math.abs(vx) * 0.75 + 1.4;
+      } else if (x > 818) {
+        x = 818;
+        vx = -Math.abs(vx) * 0.75 - 1.4;
       }
 
       for (const nail of nails) {
         const dx = x - nail.x;
         const dy = y - nail.y;
         const dist = Math.hypot(dx, dy);
-        const minDist = 14 + nail.radius;
-        if (dist < minDist && dist > 0.001) {
-          const nx = dx / dist;
-          const ny = dy / dist;
-          x = nail.x + nx * (minDist + 1);
-          y = nail.y + ny * (minDist + 1);
-          const dot = vx * nx + vy * ny;
-          if (dot < 0) {
-            vx = (vx - 1.85 * dot * nx) * 0.76 + (Math.random() - 0.5) * 1.8;
-            vy = Math.max(1.6, (vy - 1.85 * dot * ny) * 0.72);
-            pinHits.push({
-              step: stepIdx,
-              nail_id: nail.id,
-              x: nail.x,
-              y: nail.y,
-              intensity: Math.min(1, Math.max(0.25, Math.abs(dot) / 8))
-            });
-          }
+        const minDist = marbleR + nail.radius;
+        if (dist < minDist) {
+          const side =
+            Math.abs(dx) > 0.5
+              ? Math.sign(dx)
+              : Math.abs(spin) > 0.05
+                ? Math.sign(spin)
+                : Math.random() < 0.5
+                  ? 1
+                  : -1;
+          const curAng = Math.atan2(dy, dx);
+          const newAng =
+            side > 0
+              ? Math.min(0.45, curAng + 0.34)
+              : Math.max(-Math.PI - 0.45, curAng - 0.34);
+          const safeR = minDist + 0.8;
+          x = Math.max(118, Math.min(818, nail.x + safeR * Math.cos(newAng)));
+          y = Math.max(y + 1.4, nail.y + safeR * Math.sin(newAng));
+          vx = side * (2.6 + Math.random() * 1.2);
+          vy = Math.max(2.2, Math.min(5.2, vy * 0.82));
+          pinHits.push({
+            step: stepIdx,
+            nail_id: nail.id,
+            x: nail.x,
+            y: nail.y,
+            intensity: Math.min(1, Math.max(0.3, (Math.abs(vx) + vy) / 8.5))
+          });
         }
+      }
+
+      if (y >= 995) {
+        const bottomHole = holes
+          .filter((h) => h.y >= 1050)
+          .reduce((best, h) => (Math.abs(h.x - x) < Math.abs(best.x - x) ? h : best));
+        if (bottomHole) {
+          const bdx = bottomHole.x - x;
+          const bdy = Math.max(1.5, bottomHole.y - y);
+          const bdist = Math.max(1, Math.hypot(bdx, bdy));
+          vx = vx * 0.55 + (bdx / bdist) * 3.4;
+          vy = Math.max(1.8, Math.min(4.8, vy * 0.65 + (bdy / bdist) * 2.2));
+        }
+        if (y > 1088) y = 1088;
       }
 
       for (const hole of holes) {
         const dx = hole.x - x;
         const dy = hole.y - y;
         const dist = Math.hypot(dx, dy);
-        const speed = Math.hypot(vx, vy);
-        if (dist < hole.radius + 12) {
-          vx += (dx / Math.max(1, dist)) * 0.55;
-          vy += (dy / Math.max(1, dist)) * 0.55;
+        if (dist < hole.radius + 14) {
+          const pull = hole.y >= 1050 ? 1.65 : 0.95;
+          vx = vx * 0.74 + (dx / Math.max(1, dist)) * pull;
+          if (dy > 0) {
+            vy = Math.max(1.8, Math.min(5.2, vy * 0.78 + (dy / Math.max(1, dist)) * pull));
+          }
         }
-        const capR = simStep > 20 ? hole.radius * 0.78 : hole.radius * 0.65;
-        if (dist < capR && (speed < 9.2 || hole.y > 1000)) {
+        if (dist < hole.radius * 0.74) {
           capturedHole = hole;
           break;
         }
       }
 
-      if (simStep % 2 === 0) {
-        path.push({ x, y });
-        stepIdx++;
-      }
-      if (capturedHole || y >= 1110) break;
+      path.push({ x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 });
+      stepIdx++;
+      if (capturedHole) break;
     }
 
     const finalHole =
       capturedHole ||
-      holes
-        .filter((h) => h.y >= 900)
-        .reduce((best, h) =>
-          Math.hypot(h.x - x, h.y - y) < Math.hypot(best.x - x, best.y - y) ? h : best
-        );
+      holes.reduce((best, h) =>
+        Math.hypot(h.x - x, h.y - y) < Math.hypot(best.x - x, best.y - y) ? h : best
+      );
 
     const lastPt = path[path.length - 1] || { x: finalHole.x, y: finalHole.y };
-    for (let i = 1; i <= 4; i++) {
-      const f = i / 4;
+    for (let i = 1; i <= 6; i++) {
+      const f = i / 6;
       path.push({
-        x: lastPt.x + (finalHole.x - lastPt.x) * f,
-        y: lastPt.y + (finalHole.y - lastPt.y) * f
+        x: Math.round((lastPt.x + (finalHole.x - lastPt.x) * f) * 10) / 10,
+        y: Math.round((lastPt.y + (finalHole.y - lastPt.y) * f) * 10) / 10
       });
     }
 
@@ -1784,6 +1803,20 @@
       });
     }
 
+    // Wooden bottom lane dividers between the 5 bottom collector holes (#16..#20)
+    [233.5, 390.0, 546.5, 702.5].forEach((divX) => {
+      ctx.beginPath();
+      ctx.moveTo(divX, 1028);
+      ctx.lineTo(divX - 18, 1126);
+      ctx.lineTo(divX + 18, 1126);
+      ctx.closePath();
+      ctx.fillStyle = '#b45309';
+      ctx.fill();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = '#fde047';
+      ctx.stroke();
+    });
+
     arenaMeta.feria_holes.forEach((h) => {
       ctx.beginPath();
       ctx.arc(h.x, h.y, h.radius + 7, 0, Math.PI * 2);
@@ -1804,19 +1837,21 @@
           ctx,
           h.x,
           h.y,
-          h.radius * 0.68,
+          h.radius * 0.66,
           occ.color,
           MARBLE_SKINS[skinIdx].id,
           0.4,
           false,
           false
         );
-        if (currentRoom.settings.combo_multiplier) {
-          ctx.fillStyle = '#fde047';
-          ctx.font = '900 14px system-ui, sans-serif';
-          ctx.textAlign = 'center';
-          ctx.fillText('x2', h.x, h.y - h.radius - 10);
-        }
+        ctx.fillStyle = '#fde047';
+        ctx.font = '900 13px system-ui, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(
+          currentRoom.settings.combo_multiplier ? `${h.points} (x2)` : `${h.points}`,
+          h.x,
+          h.y - h.radius - 10
+        );
       } else {
         ctx.font = '18px system-ui, sans-serif';
         ctx.textAlign = 'center';

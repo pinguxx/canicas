@@ -348,53 +348,60 @@ pub fn feria_holes() -> Vec<FeriaHole> {
 }
 
 pub fn feria_nails() -> Vec<FeriaNail> {
-    let mut nails = Vec::new();
+    let holes = feria_holes();
+    let mut nails: Vec<FeriaNail> = Vec::new();
     let mut id_counter = 1;
 
-    // 1. Protective brass pin crowns above the top jackpot holes (#1, #2, #3, #4, #5, #6)
+    let can_place_nail = |nx: f64, ny: f64, existing: &[FeriaNail]| -> bool {
+        let too_close_to_hole = holes
+            .iter()
+            .any(|h| ((h.x - nx).powi(2) + (h.y - ny).powi(2)).sqrt() < h.radius + 30.0);
+        let too_close_to_nail = existing
+            .iter()
+            .any(|n| ((n.x - nx).powi(2) + (n.y - ny).powi(2)).sqrt() < 64.0);
+        !too_close_to_hole && !too_close_to_nail
+    };
+
+    // 1. Wide flanking shoulder pegs beside the top jackpot holes (leaving a wide 95px+ top funnel opening)
     let guarded_centers = [
-        (468.0, 235.0, 48.0),
-        (255.0, 305.0, 46.0),
-        (680.0, 305.0, 46.0),
-        (355.0, 440.0, 46.0),
-        (580.0, 440.0, 46.0),
-        (468.0, 565.0, 46.0),
+        (468.0, 235.0, 62.0),
+        (255.0, 305.0, 62.0),
+        (680.0, 305.0, 62.0),
+        (355.0, 440.0, 62.0),
+        (580.0, 440.0, 62.0),
+        (468.0, 565.0, 62.0),
     ];
     for (cx, cy, r) in guarded_centers {
-        for deg in [-145.0_f64, -110.0, -70.0, -35.0] {
+        for deg in [-150.0_f64, -30.0] {
             let rad = deg.to_radians();
-            nails.push(FeriaNail {
-                id: id_counter,
-                x: (cx + r * rad.cos()).round(),
-                y: (cy + r * rad.sin()).round(),
-                radius: 5.5,
-            });
-            id_counter += 1;
+            let nx = (cx + r * rad.cos()).round();
+            let ny = (cy + r * rad.sin()).round();
+            if can_place_nail(nx, ny, &nails) {
+                nails.push(FeriaNail {
+                    id: id_counter,
+                    x: nx,
+                    y: ny,
+                    radius: 5.0,
+                });
+                id_counter += 1;
+            }
         }
     }
 
-    // 2. Staggered lattice rows across the board (avoiding overlapping holes)
-    let holes = feria_holes();
-    let row_ys = [175.0, 265.0, 370.0, 500.0, 630.0, 760.0, 890.0, 1015.0];
+    // 2. Staggered lattice rows across the board with >= 64px minimum spacing so a marble can never wedge
+    let row_ys = [175.0, 265.0, 370.0, 495.0, 625.0, 755.0, 885.0, 995.0];
     for (row_idx, &ry) in row_ys.iter().enumerate() {
         let count = if row_idx % 2 == 0 { 7 } else { 6 };
-        let start_x = if row_idx % 2 == 0 { 145.0 } else { 195.0 };
+        let start_x = if row_idx % 2 == 0 { 145.0 } else { 198.0 };
         let step_x = 108.0;
         for i in 0..count {
             let nx = start_x + (i as f64) * step_x;
-            // Ensure nail is not inside any hole's rim
-            let too_close_to_hole = holes
-                .iter()
-                .any(|h| ((h.x - nx).powi(2) + (h.y - ry).powi(2)).sqrt() < h.radius + 18.0);
-            let too_close_to_nail = nails
-                .iter()
-                .any(|n: &FeriaNail| ((n.x - nx).powi(2) + (n.y - ry).powi(2)).sqrt() < 22.0);
-            if !too_close_to_hole && !too_close_to_nail {
+            if can_place_nail(nx, ry, &nails) {
                 nails.push(FeriaNail {
                     id: id_counter,
                     x: nx,
                     y: ry,
-                    radius: 5.5,
+                    radius: 5.0,
                 });
                 id_counter += 1;
             }
@@ -428,89 +435,118 @@ pub fn simulate_feria_shot(
     let holes = feria_holes();
     let nails = feria_nails();
 
-    let mut path = Vec::with_capacity(95);
+    let mut path = Vec::with_capacity(180);
     let mut pin_hits = Vec::new();
 
-    // Phase 1: Plunger channel launch (x = 908, y: 1120 -> 210) and top arch curve
-    for i in 0..8 {
-        let frac = (i as f64) / 7.0;
+    // Phase 1A: Plunger channel launch (x = 908, y: 1120 -> 220)
+    for i in 0..16 {
+        let frac = (i as f64) / 15.0;
         let y = 1120.0 - frac * 900.0;
-        path.push(TrajectoryPoint { x: 908.0, y });
+        path.push(TrajectoryPoint {
+            x: 908.0,
+            y: (y * 10.0).round() / 10.0,
+        });
     }
 
-    // Top arch exit point depends on launch power & angle flap
-    // Higher power carries the marble further left across the top arch
-    let jitter: f64 = rng.random_range(-28.0..28.0);
+    // Phase 1B: Top wooden arch exit point depends on launch power & angle flap
+    let jitter: f64 = rng.random_range(-22.0..22.0);
     let target_entry_x = (760.0 - power * 520.0 + angle * 135.0 + jitter).clamp(165.0, 775.0);
 
-    for i in 1..=6 {
-        let frac = (i as f64) / 6.0;
-        let arch_x = 908.0 - (908.0 - target_entry_x) * frac;
-        let arch_y = 220.0 - (frac * PI).sin() * 95.0 - frac * 65.0;
+    for i in 1..=14 {
+        let frac = (i as f64) / 14.0;
+        let ease = 1.0 - (1.0 - frac).powi(2);
+        let arch_x = 908.0 - (908.0 - target_entry_x) * ease;
+        let arch_y = 220.0 - (frac * PI).sin() * 88.0 - frac * 68.0;
         path.push(TrajectoryPoint {
             x: (arch_x * 10.0).round() / 10.0,
             y: (arch_y * 10.0).round() / 10.0,
         });
     }
 
-    // Phase 2: Tilted pinball board descent
+    // Phase 2: Tilted pinball board descent (continuous downward roll, zero stalling, zero teleporting)
     let mut x = target_entry_x;
-    let mut y = 155.0;
-    let mut vx = angle * 3.8 - power * 1.4 + rng.random_range(-1.8..1.8);
-    let mut vy = 2.6 + power * 1.8;
-    let marble_r = 14.0;
+    let mut y = 152.0;
+    let mut vx = angle * 3.4 - power * 1.1 + rng.random_range(-1.2..1.2);
+    let mut vy = 3.2 + power * 1.4;
+    let marble_r = 13.5;
 
     let mut captured_hole: Option<FeriaHole> = None;
-    let mut step_idx = path.len() as u32;
 
-    for sim_step in 0..150 {
+    for _sim_step in 0..320 {
+        let step_idx = path.len() as u32;
         // Gravity down the tilted wooden board + subtle chanfle spin curve
-        vy += 0.34;
-        vx += spin * 0.085;
-        vx *= 0.985;
-        vy *= 0.988;
+        vy = (vy + 0.24).clamp(2.2, 7.2);
+        vx = (vx + spin * 0.08) * 0.96;
+        vx = vx.clamp(-5.8, 5.8);
 
         x += vx;
         y += vy;
 
         // Board side rail rebounds
-        if x < 115.0 {
-            x = 115.0;
-            vx = vx.abs() * 0.78 + 0.8;
-        } else if x > 820.0 {
-            x = 820.0;
-            vx = -vx.abs() * 0.78 - 0.8;
+        if x < 118.0 {
+            x = 118.0;
+            vx = vx.abs() * 0.75 + 1.4;
+        } else if x > 818.0 {
+            x = 818.0;
+            vx = -vx.abs() * 0.75 - 1.4;
         }
 
-        // Check collisions with brass nails
+        // Check collisions with brass nails: rolling marble glides smoothly around the nail's circular arc
         for nail in &nails {
             let dx = x - nail.x;
             let dy = y - nail.y;
             let dist = (dx * dx + dy * dy).sqrt();
             let min_dist = marble_r + nail.radius;
-            if dist < min_dist && dist > 0.001 {
-                let nx = dx / dist;
-                let ny = dy / dist;
-                x = nail.x + nx * (min_dist + 1.0);
-                y = nail.y + ny * (min_dist + 1.0);
+            if dist < min_dist {
+                let side = if dx.abs() > 0.5 {
+                    dx.signum()
+                } else if spin.abs() > 0.05 {
+                    spin.signum()
+                } else if rng.random_bool(0.5) {
+                    1.0
+                } else {
+                    -1.0
+                };
 
-                let dot = vx * nx + vy * ny;
-                if dot < 0.0 {
-                    let bounce_jitter: f64 = rng.random_range(-0.95..0.95);
-                    vx = (vx - 1.85 * dot * nx) * 0.76 + bounce_jitter;
-                    vy = (vy - 1.85 * dot * ny) * 0.72;
-                    if vy < 1.2 {
-                        vy = 1.6;
-                    }
-                    let intensity = (dot.abs() / 8.0).clamp(0.25, 1.0);
-                    pin_hits.push(PinHitEvent {
-                        step: step_idx,
-                        nail_id: nail.id,
-                        x: nail.x,
-                        y: nail.y,
-                        intensity: (intensity * 100.0).round() / 100.0,
-                    });
-                }
+                let cur_ang = dy.atan2(dx);
+                let new_ang = if side > 0.0 {
+                    (cur_ang + 0.34).min(0.45)
+                } else {
+                    (cur_ang - 0.34).max(-PI - 0.45)
+                };
+                let safe_r = min_dist + 0.8;
+                x = (nail.x + safe_r * new_ang.cos()).clamp(118.0, 818.0);
+                y = (nail.y + safe_r * new_ang.sin()).max(y + 1.4);
+                vx = side * rng.random_range(2.6..3.8);
+                vy = (vy * 0.82).clamp(2.2, 5.2);
+
+                let intensity = ((vx.abs() + vy) / 8.5).clamp(0.3, 1.0);
+                pin_hits.push(PinHitEvent {
+                    step: step_idx,
+                    nail_id: nail.id,
+                    x: nail.x,
+                    y: nail.y,
+                    intensity: (intensity * 100.0).round() / 100.0,
+                });
+            }
+        }
+
+        // Bottom wooden lane dividers funnel marbles at the bottom apron (y >= 995) into their lane's bottom hole
+        if y >= 995.0 {
+            if let Some(bottom_hole) = holes.iter().filter(|h| h.y >= 1050.0).min_by(|a, b| {
+                (a.x - x)
+                    .abs()
+                    .partial_cmp(&(b.x - x).abs())
+                    .unwrap_or(std::cmp::Ordering::Equal)
+            }) {
+                let bdx = bottom_hole.x - x;
+                let bdy = (bottom_hole.y - y).max(1.5);
+                let bdist = (bdx * bdx + bdy * bdy).sqrt().max(1.0);
+                vx = vx * 0.55 + (bdx / bdist) * 3.4;
+                vy = (vy * 0.65 + (bdy / bdist) * 2.2).clamp(1.8, 4.8);
+            }
+            if y > 1088.0 {
+                y = 1088.0;
             }
         }
 
@@ -519,44 +555,36 @@ pub fn simulate_feria_shot(
             let dx = hole.x - x;
             let dy = hole.y - y;
             let dist = (dx * dx + dy * dy).sqrt();
-            let speed = (vx * vx + vy * vy).sqrt();
 
-            // Rim gravity well
-            if dist < hole.radius + 12.0 {
-                vx += (dx / dist.max(1.0)) * 0.55;
-                vy += (dy / dist.max(1.0)) * 0.55;
+            // Beveled wooden rim pulls nearby marbles toward the cup center
+            if dist < hole.radius + 14.0 {
+                let pull = if hole.y >= 1050.0 { 1.65 } else { 0.95 };
+                vx = vx * 0.74 + (dx / dist.max(1.0)) * pull;
+                if dy > 0.0 {
+                    vy = (vy * 0.78 + (dy / dist.max(1.0)) * pull).clamp(1.8, 5.2);
+                }
             }
 
-            // Capture inside hole
-            let capture_radius = if sim_step > 20 {
-                hole.radius * 0.78
-            } else {
-                hole.radius * 0.65
-            };
-            if dist < capture_radius && (speed < 9.2 || hole.y > 1000.0) {
+            // Capture inside hole rim (marble is already physically inside the hole!)
+            if dist < hole.radius * 0.74 {
                 captured_hole = Some(hole.clone());
                 break;
             }
         }
 
-        if sim_step % 2 == 0 {
-            path.push(TrajectoryPoint {
-                x: (x * 10.0).round() / 10.0,
-                y: (y * 10.0).round() / 10.0,
-            });
-            step_idx += 1;
-        }
+        path.push(TrajectoryPoint {
+            x: (x * 10.0).round() / 10.0,
+            y: (y * 10.0).round() / 10.0,
+        });
 
-        if captured_hole.is_some() || y >= 1110.0 {
+        if captured_hole.is_some() {
             break;
         }
     }
 
-    // If marble reached the bottom rail without dropping into a hole yet, settle into nearest bottom hole
     let final_hole = captured_hole.unwrap_or_else(|| {
         holes
             .iter()
-            .filter(|h| h.y >= 900.0)
             .min_by(|a, b| {
                 let da = (a.x - x).powi(2) + (a.y - y).powi(2);
                 let db = (b.x - x).powi(2) + (b.y - y).powi(2);
@@ -566,13 +594,13 @@ pub fn simulate_feria_shot(
             .unwrap_or_else(|| holes.last().unwrap().clone())
     });
 
-    // Smooth final spiral/settle into the center of `final_hole`
+    // Smooth final cup settle inside the rim of `final_hole`
     let last_pt = path.last().cloned().unwrap_or(TrajectoryPoint {
         x: final_hole.x,
         y: final_hole.y,
     });
-    for i in 1..=4 {
-        let frac = (i as f64) / 4.0;
+    for i in 1..=6 {
+        let frac = (i as f64) / 6.0;
         let sx = last_pt.x + (final_hole.x - last_pt.x) * frac;
         let sy = last_pt.y + (final_hole.y - last_pt.y) * frac;
         path.push(TrajectoryPoint {
@@ -1222,12 +1250,22 @@ mod tests {
         assert_eq!(holes[19].points, 10);
 
         let nails = feria_nails();
-        assert!(nails.len() >= 40);
-        // Verify no nail is inside a hole center
-        for n in &nails {
+        assert!(nails.len() >= 35);
+        // Verify no nail is inside a hole rim and no two nails can ever wedge a marble
+        for (i, n) in nails.iter().enumerate() {
             for h in &holes {
                 let d = ((h.x - n.x).powi(2) + (h.y - n.y).powi(2)).sqrt();
-                assert!(d >= h.radius);
+                assert!(d >= h.radius + 20.0);
+            }
+            for m in nails.iter().skip(i + 1) {
+                let dn = ((m.x - n.x).powi(2) + (m.y - n.y).powi(2)).sqrt();
+                assert!(
+                    dn >= 61.5,
+                    "Nails {} and {} too close: {:.1}px",
+                    n.id,
+                    m.id,
+                    dn
+                );
             }
         }
     }
@@ -1238,7 +1276,47 @@ mod tests {
         assert!(sim.hole.id >= 1 && sim.hole.id <= 20);
         assert!(sim.total_points >= 20); // Golden marble doubles points
         assert!(sim.multiplier >= 2);
-        assert!(sim.path.len() >= 15);
+        assert!(sim.path.len() >= 35);
+
+        // Stress-test 300 Feria shots across all power/angle/spin combinations:
+        // Verify zero teleporting (no step > 16px in pinfield) and zero stalling between nails.
+        for s in 0..300 {
+            let p = 0.15 + ((s % 10) as f64) * 0.085;
+            let a = -0.9 + (((s / 10) % 10) as f64) * 0.2;
+            let sp = -0.8 + ((s / 100) as f64) * 0.8;
+            let run = simulate_feria_shot(p, a, sp, &[], false, true);
+            let n = run.path.len();
+            assert!(n >= 36);
+            // Pinfield starts at index 30 (after 16 plunger + 14 arch points)
+            for i in 30..(n - 1) {
+                let dx = run.path[i + 1].x - run.path[i].x;
+                let dy = run.path[i + 1].y - run.path[i].y;
+                let step_d = (dx * dx + dy * dy).sqrt();
+                assert!(
+                    step_d <= 16.5,
+                    "Teleport jump detected at step {}/{}: {:.1}px (hole #{})",
+                    i,
+                    n,
+                    step_d,
+                    run.hole.id
+                );
+            }
+            // Verify marble never sits spinning in place before the final 6-step cup settle
+            if n > 46 {
+                for i in 30..(n - 14) {
+                    let dx8 = run.path[i + 8].x - run.path[i].x;
+                    let dy8 = run.path[i + 8].y - run.path[i].y;
+                    let move8 = (dx8 * dx8 + dy8 * dy8).sqrt();
+                    assert!(
+                        move8 >= 6.0,
+                        "Marble stalled spinning in place at step {}/{}: moved only {:.1}px over 8 frames",
+                        i,
+                        n,
+                        move8
+                    );
+                }
+            }
+        }
     }
 
     #[test]

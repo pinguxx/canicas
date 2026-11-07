@@ -30,7 +30,7 @@ pub const BOT_PROFILES: [(&str, &str); 9] = [
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameSettings {
     #[serde(default = "default_game_mode")]
-    pub game_mode: String, // "feria", "circulo", "hoyita", "torneo"
+    pub game_mode: String, // "feria", "circulo", "hoyita"
     #[serde(default = "default_win_condition")]
     pub win_condition: String, // "rounds" or "target"
     #[serde(default = "default_max_rounds")]
@@ -50,7 +50,7 @@ pub struct GameSettings {
 }
 
 fn default_game_mode() -> String {
-    "torneo".to_string()
+    "feria".to_string()
 }
 fn default_win_condition() -> String {
     "rounds".to_string()
@@ -95,11 +95,8 @@ impl Default for GameSettings {
 
 impl GameSettings {
     pub fn sanitized(mut self) -> Self {
-        if !matches!(
-            self.game_mode.as_str(),
-            "feria" | "circulo" | "hoyita" | "torneo"
-        ) {
-            self.game_mode = "torneo".to_string();
+        if !matches!(self.game_mode.as_str(), "feria" | "circulo" | "hoyita") {
+            self.game_mode = "feria".to_string();
         }
         if !matches!(self.win_condition.as_str(), "rounds" | "target") {
             self.win_condition = "rounds".to_string();
@@ -280,19 +277,11 @@ pub fn generate_room_code() -> String {
         .collect()
 }
 
-pub fn stage_for_round(game_mode: &str, round_number: u32) -> String {
+pub fn stage_for_round(game_mode: &str, _round_number: u32) -> String {
     match game_mode {
-        "feria" => "feria".to_string(),
         "circulo" => "circulo".to_string(),
         "hoyita" => "hoyita".to_string(),
-        _ => {
-            // "torneo" cycles through all 3 iconic Mexican Canicas arenas!
-            match (round_number.saturating_sub(1)) % 3 {
-                0 => "feria".to_string(),
-                1 => "circulo".to_string(),
-                _ => "hoyita".to_string(),
-            }
-        }
+        _ => "feria".to_string(),
     }
 }
 
@@ -918,9 +907,9 @@ mod tests {
     }
 
     #[test]
-    fn test_room_lifecycle_and_torneo_stage_rotation() {
+    fn test_room_lifecycle_and_fixed_selected_game_mode() {
         let settings = GameSettings {
-            game_mode: "torneo".to_string(),
+            game_mode: "feria".to_string(),
             max_rounds: 3,
             bonus_shot_rule: false, // Disable bonus shot for deterministic turn advance test
             ..Default::default()
@@ -942,17 +931,17 @@ mod tests {
         assert!(out1.points_scored >= 10);
 
         let _out2 = room.execute_shot(&p2_id, 0.65, 0.1, -0.1).unwrap();
-        // Now Round 2 begins: Torneo switches to "circulo"!
+        // Round 2 stays in Feria (never switches to another game type!)
         assert_eq!(room.round_number, 2);
-        assert_eq!(room.active_stage, "circulo");
+        assert_eq!(room.active_stage, "feria");
 
         let out3 = room.execute_shot(&p1_id, 0.85, 0.0, 0.0).unwrap();
-        assert_eq!(out3.stage, "circulo");
+        assert_eq!(out3.stage, "feria");
         let _out4 = room.execute_shot(&p2_id, 0.80, 0.0, 0.0).unwrap();
 
-        // Now Round 3 begins: Torneo switches to "hoyita"!
+        // Round 3 stays in Feria
         assert_eq!(room.round_number, 3);
-        assert_eq!(room.active_stage, "hoyita");
+        assert_eq!(room.active_stage, "feria");
 
         let _out5 = room.execute_shot(&p1_id, 0.55, 0.0, 0.0).unwrap();
         let _out6 = room.execute_shot(&p2_id, 0.60, 0.0, 0.0).unwrap();

@@ -2238,6 +2238,26 @@
       ctx.fillText(fp.text, fp.x, fp.y);
       ctx.restore();
     }
+    if (isDraggingCanvas) {
+      ctx.save();
+      const pct = Math.round(shotPower * 100);
+      const deg = Math.round(aimAngle * 36);
+      const dirTxt = deg === 0 ? '0°' : deg > 0 ? `+${deg}°` : `${deg}°`;
+      const bannerTxt =
+        lang === 'en'
+          ? `⚡ ${pct}% (${dirTxt}) • RELEASE TO SHOOT!`
+          : `⚡ ${pct}% (${dirTxt}) • ¡SUELTA PARA TIRAR!`;
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 3;
+      ctx.fillRect(220, 1020, 560, 56);
+      ctx.strokeRect(220, 1020, 560, 56);
+      ctx.fillStyle = '#fde047';
+      ctx.font = '900 22px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(bannerTxt, 500, 1056);
+      ctx.restore();
+    }
   }
 
   // ==========================================================================
@@ -2287,14 +2307,20 @@
     };
   }
 
+  let dragMaxDist = 0;
+
   canvas.addEventListener('pointerdown', (ev) => {
     if (!currentRoom || currentRoom.state !== 'playing' || isAnimatingShot) return;
     const activePlayer = currentRoom.players[currentRoom.current_turn_idx];
     if (!activePlayer || activePlayer.id !== myPlayerId) return;
 
+    window.canicasAudio.ensureContext();
     isDraggingCanvas = true;
+    dragMaxDist = 0;
     dragStartPt = getCanvasCoords(ev);
-    canvas.setPointerCapture(ev.pointerId);
+    try {
+      canvas.setPointerCapture(ev.pointerId);
+    } catch (_) {}
   });
 
   canvas.addEventListener('pointermove', (ev) => {
@@ -2308,15 +2334,32 @@
     updateAngleLabel();
 
     const dist = Math.hypot(dx, dy);
-    if (dist > 15) {
-      setPower(Math.min(1.0, 0.25 + dist / 340));
+    dragMaxDist = Math.max(dragMaxDist, dist);
+    if (dist > 12) {
+      setPower(Math.min(1.0, 0.25 + dist / 320));
     }
   });
 
-  canvas.addEventListener('pointerup', () => {
+  function finishCanvasTouch(ev) {
     if (!isDraggingCanvas) return;
+    const startPt = dragStartPt;
     isDraggingCanvas = false;
     dragStartPt = null;
+
+    // Shoot when releasing a drag gesture OR when tapping directly on the plunger / shooter marble
+    const tappedPlunger = startPt && startPt.x >= 830 && startPt.y >= 820;
+    const tappedBottomLaunch = startPt && startPt.y >= 860;
+    if (dragMaxDist >= 14 || tappedPlunger || tappedBottomLaunch) {
+      triggerShoot();
+    }
+    dragMaxDist = 0;
+  }
+
+  canvas.addEventListener('pointerup', finishCanvasTouch);
+  canvas.addEventListener('pointercancel', () => {
+    isDraggingCanvas = false;
+    dragStartPt = null;
+    dragMaxDist = 0;
   });
 
   document.getElementById('input-angle').addEventListener('input', (ev) => {
@@ -2353,12 +2396,15 @@
   });
 
   const btnShoot = document.getElementById('btn-shoot');
+  const btnCanvasShoot = document.getElementById('btn-canvas-shoot');
   let holdTriggered = false;
 
-  btnShoot.addEventListener('pointerdown', () => {
-    if (btnShoot.disabled) return;
+  function startChargeHold(btnEl) {
+    if (!btnEl || btnEl.disabled) return;
+    window.canicasAudio.ensureContext();
     holdTriggered = false;
     let dir = 1;
+    if (chargeInterval) clearInterval(chargeInterval);
     chargeInterval = setInterval(() => {
       holdTriggered = true;
       isCharging = true;
@@ -2373,7 +2419,7 @@
       setPower(nextP);
       window.canicasAudio.playChargeTick(shotPower);
     }, 55);
-  });
+  }
 
   function stopChargeAndFire() {
     if (chargeInterval) {
@@ -2386,7 +2432,12 @@
     }
   }
 
+  btnShoot.addEventListener('pointerdown', () => startChargeHold(btnShoot));
   btnShoot.addEventListener('pointerup', stopChargeAndFire);
+  if (btnCanvasShoot) {
+    btnCanvasShoot.addEventListener('pointerdown', () => startChargeHold(btnCanvasShoot));
+    btnCanvasShoot.addEventListener('pointerup', stopChargeAndFire);
+  }
 
   document.getElementById('btn-marble-skin').addEventListener('click', () => {
     skinIdx = (skinIdx + 1) % MARBLE_SKINS.length;

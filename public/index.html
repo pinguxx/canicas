@@ -268,8 +268,13 @@
           <!-- High-DPI HTML5 Canvas for both Feria Pinball Board & Patio Dirt Ring -->
           <canvas id="canicas-canvas" width="1000" height="1150"></canvas>
 
-          <div id="canvas-drag-hint" class="canvas-drag-hint">
-            👆 <span data-i18n="drag_hint">Arrastra en el tablero para apuntar o usa los controles abajo</span>
+          <div class="canvas-touch-bar">
+            <div id="canvas-drag-hint" class="canvas-drag-hint">
+              👆 <span data-i18n="drag_hint">Arrastra y suelta en el tablero para lanzar, o presiona:</span>
+            </div>
+            <button id="btn-canvas-shoot" type="button" class="canvas-shoot-btn">
+              🔮 <span data-i18n="btn_quick_shoot">¡TIRAR!</span>
+            </button>
           </div>
         </div>
 

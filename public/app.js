@@ -1,5 +1,6 @@
 // ============================================================================
 // CANICAS MEXICANAS 3D • CLIENT APPLICATION (FERIA DE CLAVOS & PATIO DE TIERRA)
+// Supports both Rust/Axum WebSockets AND Standalone Artifact Offline Mode!
 // ============================================================================
 
 (() => {
@@ -7,6 +8,17 @@
   const COLORS = [
     '#06b6d4', '#ec4899', '#f59e0b', '#10b981', '#3b82f6',
     '#8b5cf6', '#ef4444', '#f97316', '#14b8a6', '#eab308', '#18181b'
+  ];
+  const BOT_PROFILES = [
+    ['🤖 El Chavo Bot', '🧢'],
+    ['🤖 Don Ramón Bot', '🤠'],
+    ['🤖 Quico Bot', '🔮'],
+    ['🤖 La Chilindrina Bot', '🌺'],
+    ['🤖 El Santo Bot', '🥊'],
+    ['🤖 La Catrina Bot', '💀'],
+    ['🤖 Cantinflas Bot', '🎭'],
+    ['🤖 Lupita Bot', '🌵'],
+    ['🤖 Don Goyo Bot', '🦅']
   ];
   const MARBLE_SKINS = [
     { id: 'aguita', labelEs: 'Agüita', labelEn: 'Cat-Eye' },
@@ -19,6 +31,66 @@
     { id: 'patio', labelEs: 'Patio', labelEn: 'Dirt Yard' },
     { id: 'talavera', labelEs: 'Talavera', labelEn: 'Talavera' }
   ];
+
+  // Built-in Feria Holes & Brass Nails (so standalone HTML artifact works with zero network requests)
+  const DEFAULT_FERIA_HOLES = [
+    { id: 1, x: 468, y: 235, radius: 31, points: 100, tier: 'oro', icon: '👑', name_es: 'El Gallo de Oro', name_en: 'The Golden Rooster', dicho_es: '«¡Cien puntos al Gallo de Oro, te llevaste el premio mayor de la feria!»', dicho_en: '"100 points in the Golden Rooster, you won the grand carnival prize!"', color: '#f59e0b' },
+    { id: 2, x: 255, y: 305, radius: 30, points: 75, tier: 'diamante', icon: '💎', name_es: 'La Corona Real', name_en: 'The Royal Crown', dicho_es: '«¡Tiro de maestro directo a la Corona Real!»', dicho_en: '"Master shot straight into the Royal Crown!"', color: '#06b6d4' },
+    { id: 3, x: 680, y: 305, radius: 30, points: 75, tier: 'diamante', icon: '🌟', name_es: 'Estrella Azteca', name_en: 'Aztec Star', dicho_es: '«¡Brilló la Estrella Azteca con setenta y cinco tantos!»', dicho_en: '"The Aztec Star shone bright for 75 points!"', color: '#06b6d4' },
+    { id: 4, x: 355, y: 440, radius: 30, points: 50, tier: 'fuego', icon: '☀️', name_es: 'El Sol', name_en: 'The Sun', dicho_es: '«¡Como el sol de mediodía, cincuenta puntos al bolsillo!»', dicho_en: '"Like the midday sun, fifty points in your pocket!"', color: '#ef4444' },
+    { id: 5, x: 580, y: 440, radius: 30, points: 50, tier: 'fuego', icon: '🔥', name_es: 'El Diablo', name_en: 'The Fire Devil', dicho_es: '«¡Canica encendida, cayó en el hoyito de cincuenta!»', dicho_en: '"Blazing marble, right into the 50-point hole!"', color: '#ef4444' },
+    { id: 6, x: 468, y: 565, radius: 30, points: 50, tier: 'fuego', icon: '🌙', name_es: 'La Luna', name_en: 'The Moon', dicho_es: '«¡Por el centro del tablero, La Luna te da cincuenta!»', dicho_en: '"Right down the center, The Moon grants you fifty!"', color: '#ec4899' },
+    { id: 7, x: 185, y: 565, radius: 29, points: 30, tier: 'esmeralda', icon: '🔔', name_es: 'La Campana', name_en: 'The Bell', dicho_es: '«¡Suena la campana de la kermés con treinta puntos!»', dicho_en: '"The fairground bell rings for thirty points!"', color: '#10b981' },
+    { id: 8, x: 750, y: 565, radius: 29, points: 30, tier: 'esmeralda', icon: '❤️', name_es: 'El Corazón', name_en: 'The Heart', dicho_es: '«¡Directo al Corazón, treinta buenos tantos!»', dicho_en: '"Straight to the Heart, thirty solid points!"', color: '#10b981' },
+    { id: 9, x: 310, y: 695, radius: 29, points: 30, tier: 'esmeralda', icon: '🦜', name_es: 'El Perico', name_en: 'The Parrot', dicho_es: '«¡Cantó el perico verde, treinta puntos seguros!»', dicho_en: '"The green parrot sang, thirty safe points!"', color: '#10b981' },
+    { id: 10, x: 625, y: 695, radius: 29, points: 30, tier: 'esmeralda', icon: '🎸', name_es: 'El Mariachi', name_en: 'The Mariachi', dicho_es: '«¡Con música de mariachi sumas treinta al marcador!»', dicho_en: '"With mariachi music you add thirty to the scoreboard!"', color: '#10b981' },
+    { id: 11, x: 170, y: 825, radius: 29, points: 20, tier: 'barrio', icon: '🍉', name_es: 'La Sandía', name_en: 'The Watermelon', dicho_es: '«¡Fresca la sandía, veinte puntos bien ganados!»', dicho_en: '"Fresh watermelon, twenty points well earned!"', color: '#3b82f6' },
+    { id: 12, x: 368, y: 825, radius: 29, points: 20, tier: 'barrio', icon: '🌵', name_es: 'El Nopal', name_en: 'The Cactus', dicho_es: '«¡Sin espinarse en los clavos, veinte puntos al Nopal!»', dicho_en: '"Dodging the brass nails, twenty points in The Cactus!"', color: '#3b82f6' },
+    { id: 13, x: 568, y: 825, radius: 29, points: 20, tier: 'barrio', icon: '🌶️', name_es: 'El Chile', name_en: 'The Chili Pepper', dicho_es: '«¡Picosito pero sabroso, veinte tantos más!»', dicho_en: '"Spicy and sweet, twenty more points!"', color: '#3b82f6' },
+    { id: 14, x: 765, y: 825, radius: 29, points: 20, tier: 'barrio', icon: '🏺', name_es: 'El Jarrito', name_en: 'The Clay Pitcher', dicho_es: '«¡Adentro del Jarrito de barro, veinte puntos!»', dicho_en: '"Inside the clay pitcher, twenty points!"', color: '#3b82f6' },
+    { id: 15, x: 468, y: 955, radius: 29, points: 20, tier: 'barrio', icon: '🌺', name_es: 'La Dalia', name_en: 'The Dahlia', dicho_es: '«¡En la flor nacional, veinte puntos para tu cuenta!»', dicho_en: '"In the national flower, twenty points for your tally!"', color: '#3b82f6' },
+    { id: 16, x: 155, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '🪙', name_es: 'El Quinto', name_en: 'The Nickel', dicho_es: '«¡De diez en diez se llena el jarrito!»', dicho_en: '"Ten by ten fills the pitcher!"', color: '#a855f7' },
+    { id: 17, x: 312, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '💀', name_es: 'La Calavera', name_en: 'The Sugar Skull', dicho_es: '«¡La Calaverita de azúcar te regala diez puntos!»', dicho_en: '"The sugar skull treats you to ten points!"', color: '#a855f7' },
+    { id: 18, x: 468, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '🤠', name_es: 'El Charro', name_en: 'The Charro', dicho_es: '«¡Con sombrero ancho, diez puntos al Charro!»', dicho_en: '"With a wide sombrero, ten points in The Charro!"', color: '#a855f7' },
+    { id: 19, x: 625, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '🐸', name_es: 'La Rana', name_en: 'The Frog', dicho_es: '«¡Brincó la canica hasta La Rana, diez tantos!»', dicho_en: '"The marble hopped into The Frog, ten points!"', color: '#a855f7' },
+    { id: 20, x: 780, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '🎺', name_es: 'La Trompeta', name_en: 'The Trumpet', dicho_es: '«¡Al final del tablero pero nunca en cero: diez puntos!»', dicho_en: '"At the bottom of the board but never zero: ten points!"', color: '#a855f7' }
+  ];
+
+  function buildDefaultFeriaNails() {
+    const nails = [];
+    let idCounter = 1;
+    const guarded = [
+      [468, 235, 48], [255, 305, 46], [680, 305, 46],
+      [355, 440, 46], [580, 440, 46], [468, 565, 46]
+    ];
+    guarded.forEach(([cx, cy, r]) => {
+      [-145, -110, -70, -35].forEach((deg) => {
+        const rad = (deg * Math.PI) / 180;
+        nails.push({
+          id: idCounter++,
+          x: Math.round(cx + r * Math.cos(rad)),
+          y: Math.round(cy + r * Math.sin(rad)),
+          radius: 5.5
+        });
+      });
+    });
+    const rowYs = [175, 265, 370, 500, 630, 760, 890, 1015];
+    rowYs.forEach((ry, rowIdx) => {
+      const count = rowIdx % 2 === 0 ? 7 : 6;
+      const startX = rowIdx % 2 === 0 ? 145 : 195;
+      for (let i = 0; i < count; i++) {
+        const nx = startX + i * 108;
+        const tooCloseHole = DEFAULT_FERIA_HOLES.some(
+          (h) => Math.hypot(h.x - nx, h.y - ry) < h.radius + 18
+        );
+        const tooCloseNail = nails.some((n) => Math.hypot(n.x - nx, n.y - ry) < 22);
+        if (!tooCloseHole && !tooCloseNail) {
+          nails.push({ id: idCounter++, x: nx, y: ry, radius: 5.5 });
+        }
+      }
+    });
+    return nails;
+  }
 
   const I18N = {
     es: {
@@ -162,21 +234,25 @@
   };
 
   // State
-  let lang = localStorage.getItem('canicas_lang') || 'es';
-  let selectedAvatar = localStorage.getItem('canicas_avatar') || AVATARS[0];
-  let selectedColor = localStorage.getItem('canicas_color') || COLORS[0];
-  let skinIdx = Math.max(0, MARBLE_SKINS.findIndex((s) => s.id === (localStorage.getItem('canicas_skin') || 'aguita')));
-  let themeIdx = Math.max(0, ARENA_THEMES.findIndex((t) => t.id === (localStorage.getItem('canicas_theme') || 'feria')));
+  let lang = window.safeStorage.getItem('canicas_lang') || 'es';
+  let selectedAvatar = window.safeStorage.getItem('canicas_avatar') || AVATARS[0];
+  let selectedColor = window.safeStorage.getItem('canicas_color') || COLORS[0];
+  let skinIdx = Math.max(0, MARBLE_SKINS.findIndex((s) => s.id === (window.safeStorage.getItem('canicas_skin') || 'aguita')));
+  let themeIdx = Math.max(0, ARENA_THEMES.findIndex((t) => t.id === (window.safeStorage.getItem('canicas_theme') || 'feria')));
 
   let ws = null;
-  let myPlayerId = localStorage.getItem('canicas_player_id') || null;
+  let useOfflineEngine = false;
+  let myPlayerId = window.safeStorage.getItem('canicas_player_id') || null;
   let currentRoom = null;
-  let arenaMeta = { feria_holes: [], feria_nails: [] };
+  let arenaMeta = {
+    feria_holes: DEFAULT_FERIA_HOLES,
+    feria_nails: buildDefaultFeriaNails()
+  };
 
   // Shot control state
-  let aimAngle = 0.0; // -1.0 .. 1.0
-  let shotSpin = 0.0; // -1.0 .. 1.0
-  let shotPower = 0.72; // 0.10 .. 1.0
+  let aimAngle = 0.0;
+  let shotSpin = 0.0;
+  let shotPower = 0.72;
   let isCharging = false;
   let chargeInterval = null;
   let isAnimatingShot = false;
@@ -191,7 +267,6 @@
   let isDraggingCanvas = false;
   let dragStartPt = null;
 
-  // DOM Elements
   const screenHome = document.getElementById('screen-home');
   const screenLobby = document.getElementById('screen-lobby');
   const screenGame = document.getElementById('screen-game');
@@ -204,24 +279,830 @@
   const canvas = document.getElementById('canicas-canvas');
   const ctx = canvas.getContext('2d');
 
-  // Fetch Feria holes & nails metadata on startup
-  fetch('/api/arenas')
-    .then((r) => r.json())
-    .then((data) => {
-      if (data && data.arenas) {
-        arenaMeta = data.arenas;
+  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+    fetch('/api/arenas')
+      .then((r) => r.json())
+      .then((data) => {
+        if (data && data.arenas) {
+          arenaMeta = data.arenas;
+        }
+      })
+      .catch(() => {
+        useOfflineEngine = true;
+      });
+  } else {
+    useOfflineEngine = true;
+  }
+
+  // ==========================================================================
+  // BUILT-IN STANDALONE / OFFLINE PHYSICS & ROOM ENGINE
+  // ==========================================================================
+
+  function generatePatioMarblesLocal(isHoyita) {
+    const marbles = [];
+    let id = 1;
+    marbles.push({
+      id: id++,
+      x: 500,
+      y: isHoyita ? 428 : 500,
+      radius: 19,
+      points: 30,
+      kind: 'rey',
+      color: '#f59e0b',
+      active: true
+    });
+    const innerR = isHoyita ? 94 : 78;
+    ['#ec4899', '#06b6d4', '#10b981', '#ef4444'].forEach((col, i) => {
+      const rad = ((i * 90 + 45) * Math.PI) / 180;
+      marbles.push({
+        id: id++,
+        x: Math.round(500 + innerR * Math.cos(rad)),
+        y: Math.round(500 + innerR * Math.sin(rad)),
+        radius: 16,
+        points: 20,
+        kind: 'lechera',
+        color: col,
+        active: true
+      });
+    });
+    const outerR = 152;
+    ['#3b82f6', '#8b5cf6', '#f97316', '#14b8a6', '#eab308', '#ec4899', '#10b981', '#06b6d4'].forEach((col, i) => {
+      const rad = ((i * 45) * Math.PI) / 180;
+      marbles.push({
+        id: id++,
+        x: Math.round(500 + outerR * Math.cos(rad)),
+        y: Math.round(500 + outerR * Math.sin(rad)),
+        radius: 14.5,
+        points: 10,
+        kind: 'aguita',
+        color: col,
+        active: true
+      });
+    });
+    return marbles;
+  }
+
+  function stageForRoundLocal(gameMode, roundNumber) {
+    if (gameMode === 'feria' || gameMode === 'circulo' || gameMode === 'hoyita') {
+      return gameMode;
+    }
+    const idx = (Math.max(1, roundNumber) - 1) % 3;
+    return idx === 0 ? 'feria' : idx === 1 ? 'circulo' : 'hoyita';
+  }
+
+  function simulateFeriaShotLocal(rawPower, rawAngle, rawSpin, occupiedIds, isGolden, bonusRule) {
+    const power = Math.max(0.1, Math.min(1.0, rawPower));
+    const angle = Math.max(-1.0, Math.min(1.0, rawAngle));
+    const spin = Math.max(-1.0, Math.min(1.0, rawSpin));
+    const holes = arenaMeta.feria_holes;
+    const nails = arenaMeta.feria_nails;
+    const path = [];
+    const pinHits = [];
+
+    for (let i = 0; i < 8; i++) {
+      path.push({ x: 908, y: 1120 - (i / 7) * 900 });
+    }
+    const jitter = (Math.random() - 0.5) * 56;
+    const targetEntryX = Math.max(165, Math.min(775, 760 - power * 520 + angle * 135 + jitter));
+    for (let i = 1; i <= 6; i++) {
+      const frac = i / 6;
+      path.push({
+        x: 908 - (908 - targetEntryX) * frac,
+        y: 220 - Math.sin(frac * Math.PI) * 95 - frac * 65
+      });
+    }
+
+    let x = targetEntryX;
+    let y = 155;
+    let vx = angle * 3.8 - power * 1.4 + (Math.random() - 0.5) * 3.2;
+    let vy = 2.6 + power * 1.8;
+    let capturedHole = null;
+    let stepIdx = path.length;
+
+    for (let simStep = 0; simStep < 150; simStep++) {
+      vy += 0.34;
+      vx += spin * 0.085;
+      vx *= 0.985;
+      vy *= 0.988;
+      x += vx;
+      y += vy;
+
+      if (x < 115) {
+        x = 115;
+        vx = Math.abs(vx) * 0.78 + 0.8;
+      } else if (x > 820) {
+        x = 820;
+        vx = -Math.abs(vx) * 0.78 - 0.8;
       }
-    })
-    .catch(() => {});
+
+      for (const nail of nails) {
+        const dx = x - nail.x;
+        const dy = y - nail.y;
+        const dist = Math.hypot(dx, dy);
+        const minDist = 14 + nail.radius;
+        if (dist < minDist && dist > 0.001) {
+          const nx = dx / dist;
+          const ny = dy / dist;
+          x = nail.x + nx * (minDist + 1);
+          y = nail.y + ny * (minDist + 1);
+          const dot = vx * nx + vy * ny;
+          if (dot < 0) {
+            vx = (vx - 1.85 * dot * nx) * 0.76 + (Math.random() - 0.5) * 1.8;
+            vy = Math.max(1.6, (vy - 1.85 * dot * ny) * 0.72);
+            pinHits.push({
+              step: stepIdx,
+              nail_id: nail.id,
+              x: nail.x,
+              y: nail.y,
+              intensity: Math.min(1, Math.max(0.25, Math.abs(dot) / 8))
+            });
+          }
+        }
+      }
+
+      for (const hole of holes) {
+        const dx = hole.x - x;
+        const dy = hole.y - y;
+        const dist = Math.hypot(dx, dy);
+        const speed = Math.hypot(vx, vy);
+        if (dist < hole.radius + 12) {
+          vx += (dx / Math.max(1, dist)) * 0.55;
+          vy += (dy / Math.max(1, dist)) * 0.55;
+        }
+        const capR = simStep > 20 ? hole.radius * 0.78 : hole.radius * 0.65;
+        if (dist < capR && (speed < 9.2 || hole.y > 1000)) {
+          capturedHole = hole;
+          break;
+        }
+      }
+
+      if (simStep % 2 === 0) {
+        path.push({ x, y });
+        stepIdx++;
+      }
+      if (capturedHole || y >= 1110) break;
+    }
+
+    const finalHole =
+      capturedHole ||
+      holes
+        .filter((h) => h.y >= 900)
+        .reduce((best, h) =>
+          Math.hypot(h.x - x, h.y - y) < Math.hypot(best.x - x, best.y - y) ? h : best
+        );
+
+    const lastPt = path[path.length - 1] || { x: finalHole.x, y: finalHole.y };
+    for (let i = 1; i <= 4; i++) {
+      const f = i / 4;
+      path.push({
+        x: lastPt.x + (finalHole.x - lastPt.x) * f,
+        y: lastPt.y + (finalHole.y - lastPt.y) * f
+      });
+    }
+
+    let mult = 1;
+    const reasonsEs = [];
+    const reasonsEn = [];
+    if (isGolden) {
+      mult *= 2;
+      reasonsEs.push('🌟 Canica de Oro (Puntos x2)');
+      reasonsEn.push('🌟 Golden Marble (2x Points)');
+    }
+    if (occupiedIds.includes(finalHole.id)) {
+      mult *= 2;
+      reasonsEs.push('🔥 ¡Doble Canica en el Mismo Hoyito! (Combo x2)');
+      reasonsEn.push('🔥 Double Marble in the Same Hole! (2x Combo)');
+    }
+    const totalPoints = finalHole.points * mult;
+
+    return {
+      power,
+      angle,
+      spin,
+      tier: power < 0.42 ? 'suave' : power < 0.78 ? 'fuerte' : 'turbo',
+      hole: finalHole,
+      base_points: finalHole.points,
+      multiplier: mult,
+      total_points: totalPoints,
+      combo_reason_es: reasonsEs.length ? reasonsEs.join(' + ') : null,
+      combo_reason_en: reasonsEn.length ? reasonsEn.join(' + ') : null,
+      earned_bonus_shot: Boolean(bonusRule && finalHole.points >= 50 && !isGolden),
+      path,
+      pin_hits: pinHits
+    };
+  }
+
+  function simulatePatioShotLocal(
+    mode,
+    seatAngleDeg,
+    shooterColor,
+    isCazador,
+    rawPower,
+    rawAngle,
+    rawSpin,
+    targets,
+    rivals,
+    bonusRule
+  ) {
+    const isHoyita = mode === 'hoyita';
+    const power = Math.max(0.1, Math.min(1.0, rawPower));
+    const angle = Math.max(-1.0, Math.min(1.0, rawAngle));
+    const spin = Math.max(-1.0, Math.min(1.0, rawSpin));
+
+    const seatRad = (seatAngleDeg * Math.PI) / 180;
+    const startX = 500 + 415 * Math.cos(seatRad);
+    const startY = 500 + 415 * Math.sin(seatRad);
+    const inwardAngle = Math.atan2(500 - startY, 500 - startX);
+    const aimRad = inwardAngle + (angle * 36 * Math.PI) / 180 + (Math.random() - 0.5) * 0.04;
+    const initSpeed = 6.2 + power * 14.5;
+
+    const bodies = [
+      {
+        id_str: 'shooter',
+        target_id: null,
+        rival_id: null,
+        x: startX,
+        y: startY,
+        vx: Math.cos(aimRad) * initSpeed,
+        vy: Math.sin(aimRad) * initSpeed,
+        radius: 17.5,
+        mass: 1.35,
+        color: shooterColor,
+        kind: 'shooter',
+        points_val: 0,
+        captured: false,
+        encholada: false,
+        moved: true,
+        samples: [{ x: startX, y: startY }]
+      }
+    ];
+
+    targets.filter((t) => t.active).forEach((t) => {
+      bodies.push({
+        id_str: `target_${t.id}`,
+        target_id: t.id,
+        rival_id: null,
+        x: t.x,
+        y: t.y,
+        vx: 0,
+        vy: 0,
+        radius: t.radius,
+        mass: t.kind === 'rey' ? 1.25 : 1.0,
+        color: t.color,
+        kind: t.kind,
+        points_val: t.points,
+        captured: false,
+        encholada: false,
+        moved: false,
+        samples: [{ x: t.x, y: t.y }]
+      });
+    });
+
+    rivals.forEach((r) => {
+      if (Math.hypot(r.x - 500, r.y - 500) < 375) {
+        bodies.push({
+          id_str: `rival_${r.id}`,
+          target_id: null,
+          rival_id: r.id,
+          x: r.x,
+          y: r.y,
+          vx: 0,
+          vy: 0,
+          radius: 17,
+          mass: 1.3,
+          color: r.color,
+          kind: 'rival',
+          points_val: 25,
+          captured: false,
+          encholada: false,
+          moved: false,
+          samples: [{ x: r.x, y: r.y }]
+        });
+      }
+    });
+
+    const collisions = [];
+    const ponchadosIds = [];
+    let sampleStep = 0;
+
+    for (let step = 0; step < 120; step++) {
+      bodies.forEach((b, idx) => {
+        if (b.encholada) return;
+        const spd = Math.hypot(b.vx, b.vy);
+        if (spd > 0.08) {
+          b.moved = true;
+          if (idx === 0 && spd > 2.5) {
+            b.vx += (-b.vy / spd) * spin * 0.14;
+            b.vy += (b.vx / spd) * spin * 0.14;
+          }
+          b.x += b.vx;
+          b.y += b.vy;
+          b.vx *= 0.968;
+          b.vy *= 0.968;
+
+          const dxC = b.x - 500;
+          const dyC = b.y - 500;
+          const distC = Math.hypot(dxC, dyC);
+          if (distC > 455) {
+            b.x = 500 + (dxC / distC) * 455;
+            b.y = 500 + (dyC / distC) * 455;
+            b.vx *= -0.45;
+            b.vy *= -0.45;
+          }
+
+          if (isHoyita && distC < 58) {
+            const pull = distC < 38 ? 0.55 : 0.24;
+            if (distC > 1) {
+              b.vx -= (dxC / distC) * pull;
+              b.vy -= (dyC / distC) * pull;
+            }
+            b.vx *= 0.9;
+            b.vy *= 0.9;
+            if (distC < 27 && Math.hypot(b.vx, b.vy) < 4.8) {
+              b.encholada = true;
+              b.captured = true;
+              b.x = 500;
+              b.y = 500;
+              b.vx = 0;
+              b.vy = 0;
+              collisions.push({ step: sampleStep, x: 500, y: 500, intensity: 0.9, kind: 'hoyita' });
+            }
+          }
+        } else {
+          b.vx = 0;
+          b.vy = 0;
+        }
+      });
+
+      for (let i = 0; i < bodies.length; i++) {
+        for (let j = i + 1; j < bodies.length; j++) {
+          if (bodies[i].encholada || bodies[j].encholada) continue;
+          const dx = bodies[j].x - bodies[i].x;
+          const dy = bodies[j].y - bodies[i].y;
+          const dist = Math.hypot(dx, dy);
+          const minD = bodies[i].radius + bodies[j].radius;
+          if (dist < minD && dist > 0.0001) {
+            const nx = dx / dist;
+            const ny = dy / dist;
+            const overlap = minD - dist;
+            const tm = bodies[i].mass + bodies[j].mass;
+            bodies[i].x -= nx * overlap * (bodies[j].mass / tm);
+            bodies[i].y -= ny * overlap * (bodies[j].mass / tm);
+            bodies[j].x += nx * overlap * (bodies[i].mass / tm);
+            bodies[j].y += ny * overlap * (bodies[i].mass / tm);
+
+            const rvx = bodies[j].vx - bodies[i].vx;
+            const rvy = bodies[j].vy - bodies[i].vy;
+            const vn = rvx * nx + rvy * ny;
+            if (vn < 0) {
+              const imp = (-(1 + 0.92) * vn) / (1 / bodies[i].mass + 1 / bodies[j].mass);
+              bodies[i].vx -= (imp * nx) / bodies[i].mass;
+              bodies[i].vy -= (imp * ny) / bodies[i].mass;
+              bodies[j].vx += (imp * nx) / bodies[j].mass;
+              bodies[j].vy += (imp * ny) / bodies[j].mass;
+              bodies[i].moved = true;
+              bodies[j].moved = true;
+              if (i === 0 && bodies[j].rival_id && !ponchadosIds.includes(bodies[j].rival_id)) {
+                ponchadosIds.push(bodies[j].rival_id);
+              }
+              if (collisions.length < 18) {
+                collisions.push({
+                  step: sampleStep,
+                  x: Math.round((bodies[i].x + bodies[j].x) * 0.5),
+                  y: Math.round((bodies[i].y + bodies[j].y) * 0.5),
+                  intensity: Math.min(1, Math.max(0.2, Math.abs(vn) / 12)),
+                  kind: bodies[i].rival_id || bodies[j].rival_id ? 'rival' : 'target'
+                });
+              }
+            }
+          }
+        }
+      }
+
+      bodies.slice(1).forEach((b) => {
+        if (b.target_id && !b.captured && Math.hypot(b.x - 500, b.y - 500) > 230) {
+          b.captured = true;
+        }
+      });
+
+      if (step % 2 === 0) {
+        sampleStep++;
+        bodies.forEach((b) => b.samples.push({ x: b.x, y: b.y }));
+      }
+    }
+
+    const capturedIds = [];
+    let pointsScored = bodies[0].encholada ? 50 : 0;
+    bodies.slice(1).forEach((b) => {
+      if (b.target_id) {
+        const t = targets.find((m) => m.id === b.target_id);
+        if (t) {
+          t.x = b.x;
+          t.y = b.y;
+          if (b.captured) {
+            t.active = false;
+            capturedIds.push(t.id);
+            pointsScored += b.points_val * (b.encholada ? 2 : 1);
+          }
+        }
+      } else if (b.rival_id) {
+        const rv = rivals.find((r) => r.id === b.rival_id);
+        if (rv) {
+          rv.x = b.x;
+          rv.y = b.y;
+        }
+      }
+    });
+
+    if (ponchadosIds.length > 0) {
+      pointsScored += (isCazador ? 40 : 25) * ponchadosIds.length;
+    }
+
+    const earnedBonus = Boolean(
+      bonusRule && (capturedIds.length > 0 || bodies[0].encholada || ponchadosIds.length > 0)
+    );
+
+    const headlineEs = bodies[0].encholada
+      ? `🕳️ ¡ENCHOLADA EN LA HOYITA! (+${pointsScored} pts)`
+      : capturedIds.length > 0
+        ? `🎯 ¡CHIRAS PELAS! Sacaste ${capturedIds.length} canica(s) (+${pointsScored} pts)`
+        : ponchadosIds.length > 0
+          ? `💥 ¡PONCHADO! Quemaste al rival (+${pointsScored} pts)`
+          : '🔮 ¡Choquecito en la tierra!';
+
+    const headlineEn = bodies[0].encholada
+      ? `🕳️ SUNK IN LA HOYITA! (+${pointsScored} pts)`
+      : capturedIds.length > 0
+        ? `🎯 KNOCKOUT! Knocked out ${capturedIds.length} marble(s) (+${pointsScored} pts)`
+        : ponchadosIds.length > 0
+          ? `💥 RIVAL STRIKE! (+${pointsScored} pts)`
+          : '🔮 Glass clack in the dirt!';
+
+    return {
+      mode,
+      power,
+      angle,
+      spin,
+      tier: 'fuerte',
+      captured_ids: capturedIds,
+      encholada_hoyita: bodies[0].encholada,
+      ponchados_player_ids: ponchadosIds,
+      points_scored: pointsScored,
+      earned_bonus_shot: earnedBonus,
+      headline_es: headlineEs,
+      headline_en: headlineEn,
+      dicho_es: '«¡Con uñita y buen pulso en el ruedo mexicano!»',
+      dicho_en: '"With a sharp thumb flick in the Mexican ring!"',
+      shooter_final_x: bodies[0].x,
+      shooter_final_y: bodies[0].y,
+      paths: bodies
+        .filter((b) => b.moved || b.id_str === 'shooter')
+        .map((b) => ({
+          id: b.id_str,
+          color: b.color,
+          kind: b.kind,
+          radius: b.radius,
+          captured: b.captured,
+          encholada: b.encholada,
+          points: b.samples
+        })),
+      collisions
+    };
+  }
+
+  function handleOfflineCommand(payload) {
+    if (payload.type === 'create_room' || payload.type === 'join_room') {
+      const code = payload.roomCode || 'CANI26';
+      myPlayerId = 'p_local_1';
+      const settings = payload.settings || {
+        game_mode: 'torneo',
+        win_condition: 'rounds',
+        max_rounds: 5,
+        target_score: 250,
+        turn_timer_seconds: 0,
+        bonus_shot_rule: true,
+        combo_multiplier: true,
+        ponche_steal: true,
+        arena_theme: 'feria'
+      };
+      const initStage = stageForRoundLocal(settings.game_mode, 1);
+      currentRoom = {
+        code,
+        state: 'lobby',
+        settings,
+        players: [
+          {
+            id: myPlayerId,
+            name: payload.playerName || 'Jugador 1',
+            avatar: payload.avatar || selectedAvatar,
+            color: payload.color || selectedColor,
+            score: 0,
+            marbles_captured: 0,
+            is_cazador: false,
+            bonus_shot_pending: false,
+            shooter_x: 500,
+            shooter_y: 915,
+            connected: true,
+            is_host: true,
+            is_bot: false,
+            stats: { shots_taken: 0, best_shot_points: 0, marbles_knocked: 0, jackpots_hit: 0, ponches_dealt: 0, combos_hit: 0 }
+          }
+        ],
+        current_turn_idx: 0,
+        round_number: 1,
+        shot_counter: 0,
+        active_stage: initStage,
+        feria_occupied_holes: [],
+        patio_targets: generatePatioMarblesLocal(initStage === 'hoyita'),
+        history: [],
+        podium: [],
+        awards: []
+      };
+      // Automatically add 1 bot in standalone mode so the user can play immediately, or let them add more!
+      handleOfflineCommand({ type: 'add_bot' });
+      handleServerMessage({ type: 'room_joined', playerId: myPlayerId, room: currentRoom });
+      return;
+    }
+
+    if (!currentRoom) return;
+
+    if (payload.type === 'add_bot') {
+      if (currentRoom.players.length >= 10) return;
+      const used = currentRoom.players.map((p) => p.name);
+      const prof = BOT_PROFILES.find(([n]) => !used.includes(n)) || ['🤖 Bot Caniquero', '🔮'];
+      const col = COLORS[currentRoom.players.length % COLORS.length];
+      currentRoom.players.push({
+        id: `bot_${currentRoom.players.length + 1}`,
+        name: prof[0],
+        avatar: prof[1],
+        color: col,
+        score: 0,
+        marbles_captured: 0,
+        is_cazador: false,
+        bonus_shot_pending: false,
+        shooter_x: 500,
+        shooter_y: 85,
+        connected: true,
+        is_host: false,
+        is_bot: true,
+        stats: { shots_taken: 0, best_shot_points: 0, marbles_knocked: 0, jackpots_hit: 0, ponches_dealt: 0, combos_hit: 0 }
+      });
+      handleServerMessage({ type: 'room_updated', room: currentRoom });
+    } else if (payload.type === 'remove_bot') {
+      const idx = currentRoom.players.map((p) => p.is_bot).lastIndexOf(true);
+      if (idx !== -1) {
+        currentRoom.players.splice(idx, 1);
+        handleServerMessage({ type: 'room_updated', room: currentRoom });
+      }
+    } else if (payload.type === 'start_game') {
+      currentRoom.state = 'playing';
+      currentRoom.current_turn_idx = 0;
+      currentRoom.round_number = 1;
+      currentRoom.shot_counter = 0;
+      currentRoom.active_stage = stageForRoundLocal(currentRoom.settings.game_mode, 1);
+      currentRoom.feria_occupied_holes = [];
+      currentRoom.patio_targets = generatePatioMarblesLocal(currentRoom.active_stage === 'hoyita');
+      currentRoom.players.forEach((p, i) => {
+        p.score = 0;
+        p.marbles_captured = 0;
+        p.is_cazador = false;
+        p.bonus_shot_pending = false;
+        const rad = ((i * (360 / currentRoom.players.length) + 90) * Math.PI) / 180;
+        p.shooter_x = Math.round(500 + 415 * Math.cos(rad));
+        p.shooter_y = Math.round(500 + 415 * Math.sin(rad));
+      });
+      handleServerMessage({ type: 'game_started', room: currentRoom });
+    } else if (payload.type === 'switch_stage') {
+      currentRoom.active_stage = payload.stage;
+      if (payload.stage !== 'feria') {
+        currentRoom.patio_targets = generatePatioMarblesLocal(payload.stage === 'hoyita');
+      } else {
+        currentRoom.feria_occupied_holes = [];
+      }
+      handleServerMessage({ type: 'room_updated', room: currentRoom });
+    } else if (payload.type === 'shoot_marble') {
+      executeOfflineShot(payload.power ?? 0.72, payload.angle ?? 0, payload.spin ?? 0);
+    } else if (payload.type === 'nudge_arena') {
+      const me = currentRoom.players.find((p) => p.id === myPlayerId) || currentRoom.players[0];
+      handleServerMessage({
+        type: 'arena_nudged',
+        playerId: me.id,
+        playerName: me.name,
+        avatar: me.avatar,
+        kind: payload.kind
+      });
+    } else if (payload.type === 'send_banter') {
+      const me = currentRoom.players.find((p) => p.id === myPlayerId) || currentRoom.players[0];
+      handleServerMessage({
+        type: 'player_banter',
+        playerId: me.id,
+        playerName: me.name,
+        avatar: me.avatar,
+        text: payload.text
+      });
+    } else if (payload.type === 'play_again') {
+      currentRoom.state = 'lobby';
+      handleServerMessage({ type: 'room_reset', room: currentRoom });
+    }
+  }
+
+  function executeOfflineShot(power, angle, spin) {
+    if (!currentRoom || currentRoom.state !== 'playing') return;
+    const turnIdx = currentRoom.current_turn_idx;
+    const p = currentRoom.players[turnIdx];
+    if (!p) return;
+
+    currentRoom.shot_counter++;
+    const stage = currentRoom.active_stage;
+    const wasGolden = p.bonus_shot_pending;
+    let outcome;
+
+    if (stage === 'feria') {
+      const occIds = currentRoom.settings.combo_multiplier
+        ? currentRoom.feria_occupied_holes.map((h) => h.hole_id)
+        : [];
+      const sim = simulateFeriaShotLocal(
+        power,
+        angle,
+        spin,
+        occIds,
+        wasGolden && currentRoom.settings.combo_multiplier,
+        currentRoom.settings.bonus_shot_rule
+      );
+      currentRoom.feria_occupied_holes.push({
+        hole_id: sim.hole.id,
+        player_id: p.id,
+        player_name: p.name,
+        color: p.color,
+        points: sim.total_points
+      });
+      p.score += sim.total_points;
+      p.marbles_captured += 1;
+      p.bonus_shot_pending = sim.earned_bonus_shot;
+      p.stats.best_shot_points = Math.max(p.stats.best_shot_points, sim.total_points);
+
+      outcome = {
+        shot_number: currentRoom.shot_counter,
+        round_number: currentRoom.round_number,
+        stage,
+        player_id: p.id,
+        player_name: p.name,
+        player_avatar: p.avatar,
+        player_color: p.color,
+        points_scored: sim.total_points,
+        new_total_score: p.score,
+        earned_bonus_shot: sim.earned_bonus_shot,
+        was_golden_marble: wasGolden,
+        headline_es: `${sim.hole.icon} ¡${sim.hole.name_es}! +${sim.total_points} pts`,
+        headline_en: `${sim.hole.icon} ${sim.hole.name_en}! +${sim.total_points} pts`,
+        dicho_es: sim.hole.dicho_es,
+        dicho_en: sim.hole.dicho_en,
+        feria_sim: sim,
+        patio_sim: null
+      };
+    } else {
+      const seatDeg = turnIdx * (360 / currentRoom.players.length) + 90;
+      const rivals = currentRoom.players
+        .filter((_, idx) => idx !== turnIdx)
+        .map((rp) => ({ id: rp.id, x: rp.shooter_x, y: rp.shooter_y, color: rp.color }));
+      const sim = simulatePatioShotLocal(
+        stage,
+        seatDeg,
+        p.color,
+        p.is_cazador,
+        power,
+        angle,
+        spin,
+        currentRoom.patio_targets,
+        rivals,
+        currentRoom.settings.bonus_shot_rule && !wasGolden
+      );
+      rivals.forEach((rv) => {
+        const rp = currentRoom.players.find((pl) => pl.id === rv.id);
+        if (rp) {
+          rp.shooter_x = rv.x;
+          rp.shooter_y = rv.y;
+        }
+      });
+      p.shooter_x = sim.shooter_final_x;
+      p.shooter_y = sim.shooter_final_y;
+      if (sim.encholada_hoyita) p.is_cazador = true;
+      p.score += sim.points_scored;
+      p.marbles_captured += sim.captured_ids.length + (sim.encholada_hoyita ? 1 : 0);
+      p.bonus_shot_pending = sim.earned_bonus_shot;
+      p.stats.best_shot_points = Math.max(p.stats.best_shot_points, sim.points_scored);
+
+      if (currentRoom.patio_targets.filter((m) => m.active).length === 0) {
+        currentRoom.patio_targets = generatePatioMarblesLocal(stage === 'hoyita');
+      }
+
+      outcome = {
+        shot_number: currentRoom.shot_counter,
+        round_number: currentRoom.round_number,
+        stage,
+        player_id: p.id,
+        player_name: p.name,
+        player_avatar: p.avatar,
+        player_color: p.color,
+        points_scored: sim.points_scored,
+        new_total_score: p.score,
+        earned_bonus_shot: sim.earned_bonus_shot,
+        was_golden_marble: wasGolden,
+        headline_es: sim.headline_es,
+        headline_en: sim.headline_en,
+        dicho_es: sim.dicho_es,
+        dicho_en: sim.dicho_en,
+        feria_sim: null,
+        patio_sim: sim
+      };
+    }
+
+    currentRoom.history.unshift({
+      shot_number: outcome.shot_number,
+      round_number: outcome.round_number,
+      stage: outcome.stage,
+      player_name: p.name,
+      player_avatar: p.avatar,
+      player_color: p.color,
+      points_scored: outcome.points_scored,
+      summary_es: outcome.headline_es,
+      summary_en: outcome.headline_en
+    });
+
+    if (!outcome.earned_bonus_shot) {
+      const nextIdx = (currentRoom.current_turn_idx + 1) % currentRoom.players.length;
+      if (nextIdx === 0) {
+        if (
+          currentRoom.settings.win_condition === 'rounds' &&
+          currentRoom.round_number >= currentRoom.settings.max_rounds
+        ) {
+          currentRoom.state = 'finished';
+          const ranked = [...currentRoom.players].sort((a, b) => b.score - a.score);
+          currentRoom.podium = ranked.slice(0, 3).map((pl, idx) => ({
+            place: idx + 1,
+            player_id: pl.id,
+            name: pl.name,
+            avatar: pl.avatar,
+            color: pl.color,
+            score: pl.score,
+            marbles_captured: pl.marbles_captured
+          }));
+          currentRoom.victory_reason_es = `¡Campeón tras ${currentRoom.settings.max_rounds} rondas con ${ranked[0].score} puntos!`;
+          currentRoom.victory_reason_en = `Champion after ${currentRoom.settings.max_rounds} rounds with ${ranked[0].score} points!`;
+          currentRoom.awards = [
+            {
+              id: 'sniper',
+              icon: '🎯',
+              title_es: 'Mano Santa (Mejor Tiro)',
+              title_en: 'Golden Thumb (Best Shot)',
+              winner_name: ranked[0].name,
+              winner_avatar: ranked[0].avatar,
+              detail_es: `${ranked[0].stats.best_shot_points} pts en un tiro`,
+              detail_en: `${ranked[0].stats.best_shot_points} pts in a single shot`
+            }
+          ];
+        } else {
+          currentRoom.round_number++;
+          const nextStage = stageForRoundLocal(
+            currentRoom.settings.game_mode,
+            currentRoom.round_number
+          );
+          if (nextStage !== currentRoom.active_stage) {
+            currentRoom.active_stage = nextStage;
+            currentRoom.patio_targets = generatePatioMarblesLocal(nextStage === 'hoyita');
+          }
+          currentRoom.feria_occupied_holes = [];
+        }
+      }
+      currentRoom.current_turn_idx = nextIdx;
+    }
+
+    handleServerMessage({ type: 'shot_result', outcome, room: currentRoom });
+
+    if (currentRoom.state === 'playing') {
+      const nextP = currentRoom.players[currentRoom.current_turn_idx];
+      if (nextP && nextP.is_bot) {
+        setTimeout(() => {
+          if (currentRoom && currentRoom.state === 'playing') {
+            executeOfflineShot(
+              0.5 + Math.random() * 0.42,
+              (Math.random() - 0.5) * 0.5,
+              (Math.random() - 0.5) * 0.5
+            );
+          }
+        }, 2500);
+      }
+    }
+  }
 
   // ==========================================================================
   // 1. INITIALIZATION & PROFILE PICKERS
   // ==========================================================================
 
   function initProfileUI() {
-    inputName.value = localStorage.getItem('canicas_name') || '';
+    inputName.value = window.safeStorage.getItem('canicas_name') || '';
     inputName.addEventListener('input', () => {
-      localStorage.setItem('canicas_name', inputName.value.trim());
+      window.safeStorage.setItem('canicas_name', inputName.value.trim());
     });
 
     avatarPicker.innerHTML = '';
@@ -232,7 +1113,7 @@
       btn.textContent = av;
       btn.addEventListener('click', () => {
         selectedAvatar = av;
-        localStorage.setItem('canicas_avatar', av);
+        window.safeStorage.setItem('canicas_avatar', av);
         initProfileUI();
       });
       avatarPicker.appendChild(btn);
@@ -246,7 +1127,7 @@
       btn.style.background = col;
       btn.addEventListener('click', () => {
         selectedColor = col;
-        localStorage.setItem('canicas_color', col);
+        window.safeStorage.setItem('canicas_color', col);
         initProfileUI();
       });
       colorPicker.appendChild(btn);
@@ -260,8 +1141,8 @@
     document.documentElement.setAttribute('data-theme', theme.id);
     document.getElementById('skin-label').textContent = lang === 'en' ? skin.labelEn : skin.labelEs;
     document.getElementById('theme-label').textContent = lang === 'en' ? theme.labelEn : theme.labelEs;
-    localStorage.setItem('canicas_skin', skin.id);
-    localStorage.setItem('canicas_theme', theme.id);
+    window.safeStorage.setItem('canicas_skin', skin.id);
+    window.safeStorage.setItem('canicas_theme', theme.id);
   }
 
   function applyTranslations() {
@@ -298,10 +1179,14 @@
   }
 
   // ==========================================================================
-  // 2. WEBSOCKET CONNECTION & PROTOCOL
+  // 2. WEBSOCKET CONNECTION & PROTOCOL (WITH AUTOMATIC STANDALONE FALLBACK)
   // ==========================================================================
 
   function connectWebSocket(onOpenCallback) {
+    if (useOfflineEngine) {
+      if (onOpenCallback) onOpenCallback();
+      return;
+    }
     if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
       if (ws.readyState === WebSocket.OPEN && onOpenCallback) {
         onOpenCallback();
@@ -309,44 +1194,48 @@
       return;
     }
 
-    const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    ws = new WebSocket(`${proto}//${window.location.host}/ws`);
+    try {
+      const proto = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${proto}//${window.location.host}/ws`);
 
-    ws.addEventListener('open', () => {
+      ws.addEventListener('open', () => {
+        if (onOpenCallback) onOpenCallback();
+      });
+
+      ws.addEventListener('message', (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          handleServerMessage(msg);
+        } catch (_) {}
+      });
+
+      ws.addEventListener('error', () => {
+        useOfflineEngine = true;
+        if (onOpenCallback) onOpenCallback();
+      });
+    } catch (_) {
+      useOfflineEngine = true;
       if (onOpenCallback) onOpenCallback();
-    });
-
-    ws.addEventListener('message', (ev) => {
-      try {
-        const msg = JSON.parse(ev.data);
-        handleServerMessage(msg);
-      } catch (_) {}
-    });
-
-    ws.addEventListener('close', () => {
-      setTimeout(() => {
-        if (currentRoom && currentRoom.code) {
-          connectWebSocket(() => {
-            sendWs({
-              type: 'join_room',
-              roomCode: currentRoom.code,
-              playerName: getPlayerName(),
-              avatar: selectedAvatar,
-              color: selectedColor,
-              playerId: myPlayerId
-            });
-          });
-        }
-      }, 2000);
-    });
+    }
   }
 
   function sendWs(payload) {
+    if (useOfflineEngine) {
+      handleOfflineCommand(payload);
+      return;
+    }
     if (ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify(payload));
     } else {
       connectWebSocket(() => {
-        ws.send(JSON.stringify(payload));
+        if (useOfflineEngine) {
+          handleOfflineCommand(payload);
+        } else if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify(payload));
+        } else {
+          useOfflineEngine = true;
+          handleOfflineCommand(payload);
+        }
       });
     }
   }
@@ -362,8 +1251,8 @@
       case 'room_joined': {
         myPlayerId = msg.playerId;
         currentRoom = msg.room;
-        localStorage.setItem('canicas_player_id', myPlayerId);
-        localStorage.setItem('canicas_room_code', currentRoom.code);
+        window.safeStorage.setItem('canicas_player_id', myPlayerId);
+        window.safeStorage.setItem('canicas_room_code', currentRoom.code);
         renderRoomState();
         break;
       }
@@ -522,7 +1411,6 @@
     document.getElementById('game-stage-badge').textContent =
       stageLabels[currentRoom.active_stage] || stageLabels.feria;
 
-    // Update stage switcher buttons
     const me = currentRoom.players.find((p) => p.id === myPlayerId);
     const isHost = Boolean(me && me.is_host);
     const switcher = document.getElementById('host-stage-switcher');
@@ -531,7 +1419,6 @@
       btn.classList.toggle('active', btn.dataset.stage === currentRoom.active_stage);
     });
 
-    // Seats strip
     const seatsRing = document.getElementById('seats-ring');
     seatsRing.innerHTML = currentRoom.players
       .map((p, idx) => {
@@ -548,7 +1435,6 @@
       })
       .join('');
 
-    // Turn indicator & shoot button state
     const activePlayer = currentRoom.players[currentRoom.current_turn_idx];
     const isMyTurn = Boolean(
       activePlayer && activePlayer.id === myPlayerId && currentRoom.state === 'playing'
@@ -587,7 +1473,7 @@
         outcome,
         sim,
         stepFloat: 0,
-        speed: 0.72, // ~1.4 seconds for ~60 waypoints at 60fps
+        speed: 0.72,
         playedHits
       };
     } else if (outcome.patio_sim) {
@@ -613,7 +1499,6 @@
     isAnimatingShot = false;
     activeAnim = null;
 
-    // Update Outcome Banner & Play Landing Sound + Voice Dicho
     const headline = lang === 'en' ? outcome.headline_en : outcome.headline_es;
     const dicho = lang === 'en' ? outcome.dicho_en : outcome.dicho_es;
     document.getElementById('outcome-headline').textContent = headline;
@@ -661,13 +1546,11 @@
   ) {
     g.save();
 
-    // 1. Drop shadow
     g.beginPath();
     g.arc(x + radius * 0.16, y + radius * 0.22, radius * 0.98, 0, Math.PI * 2);
     g.fillStyle = 'rgba(0, 0, 0, 0.42)';
     g.fill();
 
-    // 2. Special Aura Rings (Canica de Oro or Cazador)
     if (isGolden) {
       g.beginPath();
       g.arc(x, y, radius + 4.5, 0, Math.PI * 2);
@@ -682,7 +1565,6 @@
       g.stroke();
     }
 
-    // 3. Outer Glass Sphere Gradient
     const grad = g.createRadialGradient(
       x - radius * 0.32,
       y - radius * 0.32,
@@ -708,7 +1590,6 @@
       grad.addColorStop(0.78, '#1e1b4b');
       grad.addColorStop(1, '#09071a');
     } else {
-      // 'aguita' translucent glass
       grad.addColorStop(0, '#e0f2fe');
       grad.addColorStop(0.35, baseColor);
       grad.addColorStop(0.82, '#0f172a');
@@ -720,7 +1601,6 @@
     g.fillStyle = grad;
     g.fill();
 
-    // 4. Inner Swirl Ribbon (Cat's Eye / Trebol / Gold Vein)
     g.save();
     g.beginPath();
     g.arc(x, y, radius * 0.92, 0, Math.PI * 2);
@@ -762,7 +1642,6 @@
     }
     g.restore();
 
-    // 5. Crystalline Specular Highlights
     g.beginPath();
     g.ellipse(
       x - radius * 0.3,
@@ -781,7 +1660,6 @@
     g.fillStyle = 'rgba(255, 255, 255, 0.32)';
     g.fill();
 
-    // Outer glass rim
     g.beginPath();
     g.arc(x, y, radius, 0, Math.PI * 2);
     g.strokeStyle = isGolden ? '#fde047' : 'rgba(255, 255, 255, 0.35)';
@@ -817,21 +1695,15 @@
       drawPatioCourtyard(stage);
     }
 
-    // Draw sparks & floating popups
     drawEffectsLayer();
-
     requestAnimationFrame(renderArenaCanvas);
   }
 
-  // --------------------------------------------------------------------------
-  // FERIA DE CLAVOS PINBOARD RENDERER (1000x1300 mapped to 1000x1150 canvas)
-  // --------------------------------------------------------------------------
   function drawFeriaPinboard() {
     const scaleY = 1150 / 1300;
     ctx.save();
     ctx.scale(1, scaleY);
 
-    // 1. Artisanal Wooden Cabinet Background
     const woodGrad = ctx.createLinearGradient(0, 0, 1000, 1300);
     const theme = ARENA_THEMES[themeIdx].id;
     if (theme === 'talavera') {
@@ -849,7 +1721,6 @@
     ctx.fillStyle = woodGrad;
     ctx.fillRect(40, 30, 920, 1230);
 
-    // Outer Brass & Painted Wood Frame
     ctx.lineWidth = 14;
     ctx.strokeStyle = '#d97706';
     ctx.strokeRect(46, 36, 908, 1218);
@@ -858,7 +1729,6 @@
     ctx.strokeStyle = '#fde047';
     ctx.strokeRect(56, 46, 888, 1198);
 
-    // Top Festive Arch Header
     ctx.save();
     ctx.beginPath();
     ctx.arc(500, 220, 420, Math.PI, 0, false);
@@ -876,7 +1746,6 @@
     );
     ctx.restore();
 
-    // Right-Side Plunger Launch Channel (x = 865..945)
     ctx.fillStyle = 'rgba(0, 0, 0, 0.36)';
     ctx.fillRect(868, 195, 74, 1020);
     ctx.strokeStyle = '#f59e0b';
@@ -886,7 +1755,6 @@
     ctx.lineTo(868, 1215);
     ctx.stroke();
 
-    // Aim trajectory preview arc when it's player's turn & not animating
     const activePlayer = currentRoom.players[currentRoom.current_turn_idx];
     const isMyTurn = Boolean(
       activePlayer && activePlayer.id === myPlayerId && !isAnimatingShot && currentRoom.state === 'playing'
@@ -909,7 +1777,6 @@
       ctx.restore();
     }
 
-    // 2. Render 20 Numbered Feria Holes (Hoyitos)
     const occupiedMap = new Map();
     if (currentRoom.feria_occupied_holes) {
       currentRoom.feria_occupied_holes.forEach((oh) => {
@@ -918,13 +1785,11 @@
     }
 
     arenaMeta.feria_holes.forEach((h) => {
-      // Outer painted carnival ring
       ctx.beginPath();
       ctx.arc(h.x, h.y, h.radius + 7, 0, Math.PI * 2);
       ctx.fillStyle = h.color;
       ctx.fill();
 
-      // Inner dark wooden well
       ctx.beginPath();
       ctx.arc(h.x, h.y, h.radius, 0, Math.PI * 2);
       ctx.fillStyle = '#090d16';
@@ -933,7 +1798,6 @@
       ctx.strokeStyle = '#fde047';
       ctx.stroke();
 
-      // Check if occupied by an earlier marble this round
       const occ = occupiedMap.get(h.id);
       if (occ && (!activeAnim || activeAnim.sim.hole.id !== h.id || activeAnim.stepFloat < activeAnim.sim.path.length - 3)) {
         drawGlassMarble(
@@ -954,7 +1818,6 @@
           ctx.fillText('x2', h.x, h.y - h.radius - 10);
         }
       } else {
-        // Icon + Points inside hole
         ctx.font = '18px system-ui, sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(h.icon, h.x, h.y - 3);
@@ -963,14 +1826,12 @@
         ctx.fillText(`${h.points}`, h.x, h.y + 16);
       }
 
-      // Hole title ribbon below
       ctx.fillStyle = 'rgba(255, 255, 255, 0.86)';
       ctx.font = '700 12px system-ui, sans-serif';
       ctx.textAlign = 'center';
       ctx.fillText(lang === 'en' ? h.name_en : h.name_es, h.x, h.y + h.radius + 20);
     });
 
-    // 3. Render 56 Brass Nails (Clavos de Latón)
     arenaMeta.feria_nails.forEach((n) => {
       ctx.beginPath();
       ctx.arc(n.x + 2, n.y + 3, n.radius, 0, Math.PI * 2);
@@ -987,11 +1848,9 @@
       ctx.fill();
     });
 
-    // 4. Render Spring Plunger (Resorte) & Active Marble
     const compression = isAnimatingShot ? 0.1 : shotPower * 70;
     const plungerY = 1135 + compression;
 
-    // Coiled brass spring
     ctx.strokeStyle = '#fbbf24';
     ctx.lineWidth = 4;
     for (let i = 0; i < 6; i++) {
@@ -1018,7 +1877,6 @@
       const mx = p0.x + (p1.x - p0.x) * frac;
       const my = p0.y + (p1.y - p0.y) * frac;
 
-      // Trigger pin hit sounds & sparks at matching step
       sim.pin_hits.forEach((hit, hIdx) => {
         if (!activeAnim.playedHits.has(hIdx) && idx >= hit.step) {
           activeAnim.playedHits.add(hIdx);
@@ -1043,7 +1901,6 @@
         finishShotAnimation(activeAnim.outcome);
       }
     } else if (activePlayer) {
-      // Resting marble on plunger ready to launch
       drawGlassMarble(
         ctx,
         906,
@@ -1060,15 +1917,11 @@
     ctx.restore();
   }
 
-  // --------------------------------------------------------------------------
-  // PATIO COURTYARD RENDERER (EL CÍRCULO / LA RUEDA & LA HOYITA)
-  // --------------------------------------------------------------------------
   function drawPatioCourtyard(stage) {
     const isHoyita = stage === 'hoyita';
-    const offsetY = 75; // Center 1000x1000 courtyard nicely inside 1000x1150 canvas
+    const offsetY = 75;
 
     ctx.save();
-    // 1. Packed Terracotta Dirt Background
     const dirtGrad = ctx.createRadialGradient(500, 500 + offsetY, 60, 500, 500 + offsetY, 540);
     dirtGrad.addColorStop(0, '#5c3a21');
     dirtGrad.addColorStop(0.65, '#3d2414');
@@ -1076,30 +1929,23 @@
     ctx.fillStyle = dirtGrad;
     ctx.fillRect(25, 25, 950, 1100);
 
-    // Courtyard Adobe Border
     ctx.lineWidth = 10;
     ctx.strokeStyle = '#b45309';
     ctx.strokeRect(30, 30, 940, 1090);
 
-    // Header Banner
     ctx.fillStyle = '#fde047';
     ctx.font = '900 25px system-ui, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(
       isHoyita
-        ? lang === 'en'
-          ? '🕳️ PATIO DE TIERRA • LA HOYITA (EL POCHITO)'
-          : '🕳️ PATIO DE TIERRA • LA HOYITA (EL POCHITO)'
-        : lang === 'en'
-          ? '⭕ PATIO DE TIERRA • EL CÍRCULO (LA RUEDA)'
-          : '⭕ PATIO DE TIERRA • EL CÍRCULO (LA RUEDA)',
+        ? '🕳️ PATIO DE TIERRA • LA HOYITA (EL POCHITO)'
+        : '⭕ PATIO DE TIERRA • EL CÍRCULO (LA RUEDA)',
       500,
       72
     );
 
     ctx.translate(0, offsetY);
 
-    // 2. Outer Shooting Line Circle (La Raya, R = 415)
     ctx.save();
     ctx.beginPath();
     ctx.arc(500, 500, 415, 0, Math.PI * 2);
@@ -1109,7 +1955,6 @@
     ctx.stroke();
     ctx.restore();
 
-    // 3. Inner Knockout Circle (El Círculo / La Rueda, R = 230)
     ctx.beginPath();
     ctx.arc(500, 500, 230, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
@@ -1118,7 +1963,6 @@
     ctx.strokeStyle = '#fef3c7';
     ctx.stroke();
 
-    // 4. Center Pit (La Hoyita at 500,500, R = 38) when in 'hoyita' mode
     if (isHoyita) {
       const pitGrad = ctx.createRadialGradient(500, 500, 4, 500, 500, 40);
       pitGrad.addColorStop(0, '#090503');
@@ -1144,12 +1988,10 @@
     const activePlayer = currentRoom.players[turnIdx];
 
     if (activeAnim && activeAnim.kind === 'patio') {
-      // Animate multi-body marble paths
       const sim = activeAnim.sim;
       activeAnim.stepFloat += activeAnim.speed;
       const stepIdx = Math.floor(activeAnim.stepFloat);
 
-      // Trigger glass collision sounds & dust sparks
       sim.collisions.forEach((col, cIdx) => {
         if (!activeAnim.playedCollisions.has(cIdx) && stepIdx >= col.step) {
           activeAnim.playedCollisions.add(cIdx);
@@ -1170,7 +2012,6 @@
 
       const movingIds = new Set(sim.paths.map((p) => p.id));
 
-      // Draw stationary target marbles not in sim.paths
       if (currentRoom.patio_targets) {
         currentRoom.patio_targets.forEach((t) => {
           if (t.active && !movingIds.has(`target_${t.id}`)) {
@@ -1189,7 +2030,6 @@
         });
       }
 
-      // Draw all animated marble paths
       sim.paths.forEach((mp) => {
         const idx = Math.min(mp.points.length - 1, stepIdx);
         const nextIdx = Math.min(mp.points.length - 1, idx + 1);
@@ -1216,7 +2056,6 @@
         finishShotAnimation(activeAnim.outcome);
       }
     } else {
-      // Static state: draw all active target marbles inside the circle
       if (currentRoom.patio_targets) {
         currentRoom.patio_targets.forEach((t) => {
           if (!t.active) return;
@@ -1240,7 +2079,6 @@
         });
       }
 
-      // Draw rival players' shooters resting on the courtyard
       currentRoom.players.forEach((p, idx) => {
         if (idx === turnIdx) return;
         drawGlassMarble(
@@ -1260,7 +2098,6 @@
         ctx.fillText(`${p.avatar} ${p.name}`, p.shooter_x, p.shooter_y + 30);
       });
 
-      // Draw active player's shooter on outer perimeter + dotted aim trajectory
       if (activePlayer) {
         const seatDeg = turnIdx * (360 / totalPlayers) + 90;
         const seatRad = (seatDeg * Math.PI) / 180;
@@ -1405,7 +2242,6 @@
     });
   }
 
-  // Direct Canvas Drag-to-Aim & Release
   function getCanvasCoords(ev) {
     const rect = canvas.getBoundingClientRect();
     const clientX = ev.touches ? ev.touches[0].clientX : ev.clientX;
@@ -1448,7 +2284,6 @@
     dragStartPt = null;
   });
 
-  // Angle slider & buttons
   document.getElementById('input-angle').addEventListener('input', (ev) => {
     aimAngle = Number(ev.target.value) / 100;
     updateAngleLabel();
@@ -1466,7 +2301,6 @@
     updateAngleLabel();
   });
 
-  // Spin presets
   document.querySelectorAll('.spin-preset-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.spin-preset-btn').forEach((b) => b.classList.remove('active'));
@@ -1475,7 +2309,6 @@
     });
   });
 
-  // Power presets
   document.querySelectorAll('.power-preset-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.power-preset-btn').forEach((b) => b.classList.remove('active'));
@@ -1484,7 +2317,6 @@
     });
   });
 
-  // Shoot button (tap or hold-to-charge)
   const btnShoot = document.getElementById('btn-shoot');
   let holdTriggered = false;
 
@@ -1521,7 +2353,6 @@
 
   btnShoot.addEventListener('pointerup', stopChargeAndFire);
 
-  // Header controls
   document.getElementById('btn-marble-skin').addEventListener('click', () => {
     skinIdx = (skinIdx + 1) % MARBLE_SKINS.length;
     applyThemeAndSkin();
@@ -1544,11 +2375,10 @@
 
   document.getElementById('btn-lang').addEventListener('click', () => {
     lang = lang === 'es' ? 'en' : 'es';
-    localStorage.setItem('canicas_lang', lang);
+    window.safeStorage.setItem('canicas_lang', lang);
     applyTranslations();
   });
 
-  // Home tabs & win condition toggle
   document.getElementById('tab-create').addEventListener('click', () => {
     document.getElementById('tab-create').classList.add('active');
     document.getElementById('tab-join').classList.remove('active');
@@ -1569,7 +2399,6 @@
     document.getElementById('group-max-rounds').classList.toggle('hidden', isTarget);
   });
 
-  // Create & Join Room buttons
   document.getElementById('btn-create-room').addEventListener('click', () => {
     window.canicasAudio.ensureContext();
     const settings = {
@@ -1609,7 +2438,6 @@
     });
   });
 
-  // Lobby actions
   document.getElementById('btn-add-bot').addEventListener('click', () => {
     if (currentRoom) sendWs({ type: 'add_bot', roomCode: currentRoom.code });
   });
@@ -1647,10 +2475,10 @@
   });
 
   function leaveCurrentRoom() {
-    if (currentRoom) {
+    if (currentRoom && !useOfflineEngine) {
       sendWs({ type: 'leave_room', roomCode: currentRoom.code });
     }
-    localStorage.removeItem('canicas_room_code');
+    window.safeStorage.removeItem('canicas_room_code');
     currentRoom = null;
     switchScreen(screenHome);
   }
@@ -1658,7 +2486,6 @@
   document.getElementById('btn-leave-lobby').addEventListener('click', leaveCurrentRoom);
   document.getElementById('btn-leave-game').addEventListener('click', leaveCurrentRoom);
 
-  // Host live stage switcher buttons
   document.querySelectorAll('.stage-switch-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (!currentRoom) return;
@@ -1670,7 +2497,6 @@
     });
   });
 
-  // Nudge buttons
   document.getElementById('btn-blow').addEventListener('click', () => {
     if (currentRoom) sendWs({ type: 'nudge_arena', roomCode: currentRoom.code, kind: 'blow' });
   });
@@ -1679,7 +2505,6 @@
     if (currentRoom) sendWs({ type: 'nudge_arena', roomCode: currentRoom.code, kind: 'tap' });
   });
 
-  // Banter chips
   document.querySelectorAll('.banter-chip').forEach((chip) => {
     chip.addEventListener('click', () => {
       if (!currentRoom) return;
@@ -1691,7 +2516,6 @@
     });
   });
 
-  // Modals: Rules & History
   document.getElementById('btn-rules').addEventListener('click', () => {
     document.getElementById('modal-rules').classList.remove('hidden');
   });
@@ -1855,7 +2679,6 @@
       .replace(/"/g, '&quot;');
   }
 
-  // Check URL `?room=CODE` or saved session
   function checkAutoJoinOrResume() {
     const params = new URLSearchParams(window.location.search);
     const urlRoom = params.get('room');
@@ -1865,7 +2688,7 @@
       return;
     }
 
-    const savedRoom = localStorage.getItem('canicas_room_code');
+    const savedRoom = window.safeStorage.getItem('canicas_room_code');
     if (savedRoom && myPlayerId) {
       const banner = document.getElementById('resume-banner');
       document.getElementById('resume-code').textContent = savedRoom;
@@ -1884,14 +2707,13 @@
       };
 
       document.getElementById('btn-dismiss-session').onclick = () => {
-        localStorage.removeItem('canicas_room_code');
+        window.safeStorage.removeItem('canicas_room_code');
         banner.classList.add('hidden');
       };
     }
   }
 
-  // Register Service Worker
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
     navigator.serviceWorker.register('/sw.js').catch(() => {});
   }
 

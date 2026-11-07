@@ -2,11 +2,29 @@
 // CANICAS MEXICANAS • WEB AUDIO SYNTHESIZER & VOICE LOCUTION (ZERO EXTERNAL FILES)
 // ============================================================================
 
+const safeStorage = (() => {
+  const mem = {};
+  return {
+    getItem(k) {
+      try { return window.localStorage.getItem(k); } catch (_) { return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; }
+    },
+    setItem(k, v) {
+      mem[k] = String(v);
+      try { window.localStorage.setItem(k, String(v)); } catch (_) {}
+    },
+    removeItem(k) {
+      delete mem[k];
+      try { window.localStorage.removeItem(k); } catch (_) {}
+    },
+  };
+})();
+window.safeStorage = safeStorage;
+
 class CanicasAudio {
   constructor() {
     this.ctx = null;
-    this.muted = localStorage.getItem('canicas_muted') === 'true';
-    this.voiceEnabled = localStorage.getItem('canicas_voice') !== 'false';
+    this.muted = safeStorage.getItem('canicas_muted') === 'true';
+    this.voiceEnabled = safeStorage.getItem('canicas_voice') !== 'false';
   }
 
   ensureContext() {
@@ -25,7 +43,7 @@ class CanicasAudio {
 
   toggleMute() {
     this.muted = !this.muted;
-    localStorage.setItem('canicas_muted', String(this.muted));
+    safeStorage.setItem('canicas_muted', String(this.muted));
     if (this.muted && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }
@@ -34,7 +52,7 @@ class CanicasAudio {
 
   toggleVoice() {
     this.voiceEnabled = !this.voiceEnabled;
-    localStorage.setItem('canicas_voice', String(this.voiceEnabled));
+    safeStorage.setItem('canicas_voice', String(this.voiceEnabled));
     if (!this.voiceEnabled && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     }

@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="feria" data-marble-skin="aguita">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0d1b2a" />
+  <meta name="description" content="Juego multijugador online de Canicas Mexicanas en Rust y WebSockets: incluye Canicas de la Feria (Tablero de Clavos y Hoyitos) y Canicas de Patio (El Círculo y La Hoyita)." />
+  <title>Canicas Mexicanas 3D • Feria de Clavos, El Círculo y La Hoyita</title>
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+  <!-- Festive Mexican Fairground & Barrio Top Ribbon -->
+  <div class="feria-stripe" aria-hidden="true"></div>
+
+  <!-- Top Navigation Header -->
+  <header class="top-header">
+    <div class="brand-wrap">
+      <span class="brand-icon" aria-hidden="true">🔮</span>
+      <div class="brand-titles">
+        <h1 id="header-title">CANICAS MEXICANAS</h1>
+        <span id="header-subtitle" class="brand-sub">FERIA DE CLAVOS • EL CÍRCULO • LA HOYITA</span>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button id="btn-install-pwa" type="button" class="icon-btn hidden" title="Instalar App / Install App">📲</button>
+      <button id="btn-marble-skin" type="button" class="icon-btn" title="Estilo de Canica / Marble Glass Skin">
+        🔮 <span id="skin-label" class="btn-chip-text">Agüita</span>
+      </button>
+      <button id="btn-theme" type="button" class="icon-btn" title="Tema Visual / Arena Theme">
+        🎨 <span id="theme-label" class="btn-chip-text">Feria</span>
+      </button>
+      <button id="btn-voice" type="button" class="icon-btn" title="Voz del Gritón / Voice">🗣️</button>
+      <button id="btn-mute" type="button" class="icon-btn" title="Sonido / Sound">🔊</button>
+      <button id="btn-rules" type="button" class="icon-btn" title="Reglas / Rules">📖</button>
+      <button id="btn-lang" type="button" class="icon-btn lang-btn" title="Switch Language">🌐 EN</button>
+    </div>
+  </header>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ==================================================================== -->
+  <!-- SCREEN 1: HOME (CREATE OR JOIN ROOM)                                 -->
+  <!-- ==================================================================== -->
+  <main id="screen-home" class="screen active">
+    <!-- Active Session Resume Banner -->
+    <div id="resume-banner" class="resume-banner hidden">
+      <div class="resume-text">
+        <span>🔮 <strong data-i18n="resume_label">Partida activa en sala:</strong> <span id="resume-code" class="resume-code">------</span></span>
+      </div>
+      <div class="resume-actions">
+        <button id="btn-resume-session" type="button" class="primary-btn resume-btn" data-i18n="btn_resume">Reconectar</button>
+        <button id="btn-dismiss-session" type="button" class="secondary-btn resume-btn">✖</button>
+      </div>
+    </div>
+
+    <div class="home-grid">
+      <!-- Player Profile Card -->
+      <section class="card profile-card">
+        <div class="profile-header-row">
+          <h2 data-i18n="profile_title">🎭 Tu Perfil Caniquero</h2>
+          <canvas id="profile-marble-preview" width="56" height="56" class="marble-preview-canvas" title="Tu Canica Tiradora"></canvas>
+        </div>
+
+        <div class="form-group">
+          <label for="input-name" data-i18n="your_name_label">Tu Nombre o Apodo</label>
+          <input id="input-name" type="text" maxlength="18" placeholder="Ej. El Chavo" autocomplete="off" />
+        </div>
+
+        <div class="form-group">
+          <label data-i18n="choose_avatar_label">Elige tu Avatar</label>
+          <div id="avatar-picker" class="picker-grid"></div>
+        </div>
+
+        <div class="form-group">
+          <label data-i18n="choose_color_label">Color de tu Canica Tiradora (Bolón)</label>
+          <div id="color-picker" class="picker-grid color-grid"></div>
+        </div>
+      </section>
+
+      <!-- Create / Join Room Card -->
+      <section class="card room-action-card">
+        <div class="tabs-bar">
+          <button id="tab-create" type="button" class="tab-btn active" data-i18n="tab_create">🔮 Crear Sala</button>
+          <button id="tab-join" type="button" class="tab-btn" data-i18n="tab_join">🔑 Unirse a Sala</button>
+        </div>
+
+        <!-- Create Room Panel -->
+        <div id="panel-create" class="tab-panel active">
+          <div class="settings-grid">
+            <div class="form-group">
+              <label for="select-mode" data-i18n="mode_label">🎪 Estilo de Juego de Canicas</label>
+              <select id="select-mode">
+                <option value="torneo" selected data-i18n="mode_torneo">🏆 Torneo Mixto (Feria + El Círculo + La Hoyita)</option>
+                <option value="feria" data-i18n="mode_feria">🎡 Canicas de la Feria (Tablero de Clavos y Hoyitos)</option>
+                <option value="circulo" data-i18n="mode_circulo">⭕ Canicas de Patio: El Círculo (La Rueda)</option>
+                <option value="hoyita" data-i18n="mode_hoyita">🕳️ Canicas de Patio: La Hoyita (El Pochito)</option>
+              </select>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="select-win-cond" data-i18n="win_cond_label">🏁 Meta de la Partida</label>
+                <select id="select-win-cond">
+                  <option value="rounds" selected data-i18n="win_rounds">Por Rondas (Tiradas)</option>
+                  <option value="target" data-i18n="win_target">Carrera de Puntos</option>
+                </select>
+              </div>
+
+              <div id="group-max-rounds" class="form-group">
+                <label for="select-max-rounds" data-i18n="max_rounds_label">🔄 Número de Rondas</label>
+                <select id="select-max-rounds">
+                  <option value="3">3 rondas (Express)</option>
+                  <option value="5" selected>5 rondas (Clásico)</option>
+                  <option value="8">8 rondas (Feria Larga)</option>
+                  <option value="10">10 rondas (Campeonato)</option>
+                </select>
+              </div>
+
+              <div id="group-target-score" class="form-group hidden">
+                <label for="select-target-score" data-i18n="target_score_label">🎯 Puntos para Ganar</label>
+                <select id="select-target-score">
+                  <option value="150">150 puntos (Rápido)</option>
+                  <option value="250" selected>250 puntos (Clásico)</option>
+                  <option value="400">400 puntos (Gran Feria)</option>
+                  <option value="600">600 puntos (Maestro)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="select-timer" data-i18n="turn_timer_label">⏱️ Tiempo por Turno</label>
+                <select id="select-timer">
+                  <option value="0" selected data-i18n="timer_none">Sin límite (Manual)</option>
+                  <option value="15">15 seg (Rápido)</option>
+                  <option value="25">25 seg (Normal)</option>
+                  <option value="40">40 seg (Relajado)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="select-arena-theme" data-i18n="arena_theme_label">🎨 Escenario Inicial</label>
+                <select id="select-arena-theme">
+                  <option value="feria" selected>🎪 Feria de Pueblo</option>
+                  <option value="patio">🏜️ Patio de Tierra</option>
+                  <option value="talavera">🏺 Talavera Poblana</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Barrio & Feria Special Rules -->
+            <div class="toggles-box">
+              <div class="toggles-title" data-i18n="special_rules_title">🎪 Reglas Especiales del Barrio y la Feria</div>
+              <label class="toggle-row">
+                <input type="checkbox" id="chk-bonus-shot" checked />
+                <span data-i18n="toggle_bonus_shot">🔥 <strong>Tiro Seguido y Canica de Oro:</strong> Hoyito de 50+ pts o sacar canica del ruedo da 1 tiro extra</span>
+              </label>
+              <label class="toggle-row">
+                <input type="checkbox" id="chk-combo-mult" checked />
+                <span data-i18n="toggle_combo_mult">✨ <strong>Combos Dobles (x2):</strong> Doble canica en el mismo hoyito o encholar en La Hoyita multiplica puntos</span>
+              </label>
+              <label class="toggle-row">
+                <input type="checkbox" id="chk-ponche-steal" checked />
+                <span data-i18n="toggle_ponche_steal">💥 <strong>¡Chiras Pelas y Quema!:</strong> Ponchar el bolón de un rival en el patio le roba 10 pts + bono</span>
+              </label>
+            </div>
+          </div>
+
+          <button id="btn-create-room" type="button" class="primary-btn big-btn" data-i18n="btn_create_room">
+            🔮 ¡Crear Sala y Jugar!
+          </button>
+        </div>
+
+        <!-- Join Room Panel -->
+        <div id="panel-join" class="tab-panel">
+          <div class="form-group">
+            <label for="input-room-code" data-i18n="room_code_label">Código de la Sala (6 letras)</label>
+            <input id="input-room-code" class="code-input" type="text" maxlength="6" placeholder="CANI26" autocomplete="off" />
+          </div>
+          <button id="btn-join-room" type="button" class="primary-btn big-btn" data-i18n="btn_join_room">
+            🚀 Entrar al Ruedo
+          </button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- ==================================================================== -->
+  <!-- SCREEN 2: WAITING LOBBY                                              -->
+  <!-- ==================================================================== -->
+  <main id="screen-lobby" class="screen">
+    <section class="card lobby-card">
+      <div class="lobby-header">
+        <div>
+          <span class="lobby-label" data-i18n="lobby_code_title">CÓDIGO DE SALA</span>
+          <div class="code-badge-row">
+            <span id="lobby-code" class="room-code-big">------</span>
+            <button id="btn-copy-link" type="button" class="secondary-btn" data-i18n="btn_copy_link">🔗 Copiar</button>
+            <button id="btn-qr" type="button" class="secondary-btn">📱 QR</button>
+          </div>
+        </div>
+        <button id="btn-leave-lobby" type="button" class="danger-btn" data-i18n="btn_leave">🚪 Salir</button>
+      </div>
+
+      <div id="lobby-rules-pills" class="rules-pills"></div>
+
+      <div class="lobby-players-header">
+        <h3 id="lobby-players-count">Jugadores en la Sala (1/10)</h3>
+        <div id="host-bot-controls" class="bot-controls">
+          <button id="btn-add-bot" type="button" class="secondary-btn" data-i18n="btn_add_bot">🤖 +Bot</button>
+          <button id="btn-remove-bot" type="button" class="secondary-btn" data-i18n="btn_remove_bot">➖ Bot</button>
+        </div>
+      </div>
+
+      <div id="lobby-players-list" class="lobby-players-grid"></div>
+
+      <div class="lobby-footer">
+        <p id="lobby-wait-msg" class="wait-hint" data-i18n="waiting_host_msg">
+          Esperando a que el anfitrión inicie la partida...
+        </p>
+        <button id="btn-start-game" type="button" class="primary-btn big-btn" data-i18n="btn_start_game">
+          🔮 ¡ABRIR EL RUEDO Y JUGAR!
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================================================================== -->
+  <!-- SCREEN 3: INTERACTIVE CANICAS ARENA (FERIA & PATIO)                  -->
+  <!-- ==================================================================== -->
+  <main id="screen-game" class="screen">
+    <div class="game-layout">
+      <!-- Compact Status Bar -->
+      <div class="game-topbar">
+        <div class="topbar-left">
+          <span id="game-room-badge" class="pill-badge">------</span>
+          <span id="game-round-badge" class="pill-badge accent">RONDA 1/5</span>
+          <span id="game-stage-badge" class="pill-badge stage-pill">🎡 FERIA DE CLAVOS</span>
+        </div>
+
+        <!-- Host Live Stage Switcher (Allows switching between Feria, Círculo, and Hoyita) -->
+        <div id="host-stage-switcher" class="stage-switcher">
+          <button type="button" class="stage-switch-btn active" data-stage="feria" title="Tablero de Clavos de la Feria">🎡 Feria</button>
+          <button type="button" class="stage-switch-btn" data-stage="circulo" title="Patio: El Círculo (La Rueda)">⭕ Círculo</button>
+          <button type="button" class="stage-switch-btn" data-stage="hoyita" title="Patio: La Hoyita (El Pochito)">🕳️ Hoyita</button>
+        </div>
+
+        <div class="topbar-right">
+          <span id="timer-badge" class="pill-badge">⏱️ <span id="timer-display">∞</span></span>
+          <button id="btn-open-history" type="button" class="pill-btn" title="Crónica de Tiros">📜 <span class="hide-mobile" data-i18n="history_short">Historial</span></button>
+          <button id="btn-leave-game" type="button" class="pill-btn danger" title="Salir">🚪</button>
+        </div>
+      </div>
+
+      <!-- Scoreboard & Players Bar -->
+      <div id="seats-ring" class="seats-strip"></div>
+
+      <!-- Main Arena Grid: Interactive Canvas + Outcome / Controls -->
+      <div class="arena-main-wrap">
+        <div id="canicas-stage-box" class="canicas-stage-box">
+          <!-- Floating Banter Bubbles Layer -->
+          <div id="banter-layer" class="banter-layer"></div>
+
+          <!-- High-DPI HTML5 Canvas for both Feria Pinball Board & Patio Dirt Ring -->
+          <canvas id="canicas-canvas" width="1000" height="1150"></canvas>
+
+          <div id="canvas-drag-hint" class="canvas-drag-hint">
+            👆 <span data-i18n="drag_hint">Arrastra en el tablero para apuntar o usa los controles abajo</span>
+          </div>
+        </div>
+
+        <!-- Side / Bottom Control Column -->
+        <div class="arena-side-panel">
+          <!-- Outcome & Traditional Dicho Banner -->
+          <div id="outcome-banner" class="outcome-banner">
+            <div id="outcome-headline" class="outcome-headline">🔮 ¡Apunta tu canica y lanza!</div>
+            <div id="outcome-dicho" class="outcome-dicho">Usa el resorte en la Feria o tira de uñita en el Patio.</div>
+          </div>
+
+          <!-- Interactive Nudges: "¡Sóplale!" & "👊 ¡Golpecito!" -->
+          <div class="nudge-actions">
+            <button id="btn-blow" type="button" class="nudge-btn" title="¡Sóplale a la Canica!">
+              💨 <span data-i18n="btn_blow">¡Sóplale!</span>
+            </button>
+            <button id="btn-table-tap" type="button" class="nudge-btn" title="¡Golpecito al Tablero / Tierra!">
+              👊 <span data-i18n="btn_tap">¡Golpecito!</span>
+            </button>
+          </div>
+
+          <!-- Precision Aim, Chanfle & Power Control Dock -->
+          <div id="shoot-dock" class="shoot-dock">
+            <div class="turn-header-row">
+              <div id="turn-indicator" class="turn-indicator">Turno de: ---</div>
+              <span id="bonus-shot-pill" class="bonus-pill hidden">🌟 ¡TIRO EXTRA!</span>
+            </div>
+
+            <!-- Aim Angle Control -->
+            <div class="control-row">
+              <div class="control-label-row">
+                <span data-i18n="aim_label">🎯 Dirección / Apunte</span>
+                <span id="angle-val-label" class="control-val">Centro (0°)</span>
+              </div>
+              <div class="angle-controls">
+                <button id="btn-angle-left" type="button" class="mini-ctrl-btn">◀ Izq</button>
+                <input id="input-angle" type="range" min="-100" max="100" value="0" />
+                <button id="btn-angle-right" type="button" class="mini-ctrl-btn">Der ▶</button>
+              </div>
+            </div>
+
+            <!-- Spin / Chanfle Selector -->
+            <div class="control-row">
+              <div class="control-label-row">
+                <span data-i18n="spin_label">🌪️ Efecto (Chanfle)</span>
+              </div>
+              <div class="spin-presets">
+                <button type="button" class="spin-preset-btn" data-spin="-0.65" data-i18n="spin_left">↩️ Curva Izq</button>
+                <button type="button" class="spin-preset-btn active" data-spin="0.0" data-i18n="spin_straight">⬆️ Recto</button>
+                <button type="button" class="spin-preset-btn" data-spin="0.65" data-i18n="spin_right">↪️ Curva Der</button>
+              </div>
+            </div>
+
+            <!-- Power Presets & Meter -->
+            <div class="control-row">
+              <div class="control-label-row">
+                <span data-i18n="power_label">⚡ Fuerza del Tiro</span>
+                <span id="power-val-label" class="control-val">72%</span>
+              </div>
+              <div class="power-presets">
+                <button type="button" class="power-preset-btn" data-power="0.38" data-i18n="power_soft">Suave</button>
+                <button type="button" class="power-preset-btn active" data-power="0.72" data-i18n="power_strong">Fuerte</button>
+                <button type="button" class="power-preset-btn" data-power="0.96" data-i18n="power_turbo">¡Turbo!</button>
+              </div>
+              <div class="power-track">
+                <div id="power-meter-fill" class="power-fill" style="width: 72%"></div>
+              </div>
+            </div>
+
+            <button id="btn-shoot" type="button" class="shoot-btn">
+              <span class="shoot-btn-icon">🔮</span>
+              <div class="shoot-btn-texts">
+                <span id="shoot-btn-main" data-i18n="btn_shoot_main">¡TIRAR CANICA!</span>
+                <span id="shoot-btn-sub" class="shoot-btn-sub" data-i18n="btn_shoot_sub">Toca o mantén para cargar fuerza</span>
+              </div>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banter Bar ("Gritos del Barrio y la Feria") -->
+      <div id="banter-bar" class="banter-bar">
+        <button type="button" class="banter-chip" data-banter="chiras">🔮 <span data-i18n="banter_chiras">¡Chiras pelas!</span></button>
+        <button type="button" class="banter-chip" data-banter="gallo">👑 <span data-i18n="banter_gallo">¡Al Gallo de Cien!</span></button>
+        <button type="button" class="banter-chip" data-banter="hoyita">🕳️ <span data-i18n="banter_hoyita">¡Directo a la hoyita!</span></button>
+        <button type="button" class="banter-chip" data-banter="unita">👌 <span data-i18n="banter_unita">¡Huesito y sin raya!</span></button>
+        <button type="button" class="banter-chip" data-banter="quema">💥 <span data-i18n="banter_quema">¡Una cuarta y quema!</span></button>
+        <button type="button" class="banter-chip" data-banter="suerte">🍀 <span data-i18n="banter_suerte">¡Canica bendita!</span></button>
+        <button type="button" class="banter-chip" data-banter="hurry">⏰ <span data-i18n="banter_hurry">¡Ándale, tírale!</span></button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 1: VICTORY PODIUM, AWARDS & SHAREABLE CANVAS CARD              -->
+  <!-- ==================================================================== -->
+  <div id="modal-victory" class="modal-overlay hidden">
+    <div class="modal-card victory-modal">
+      <div class="victory-header">
+        <span class="victory-crown">👑</span>
+        <h2 id="victory-title">¡CAMPEÓN DE LAS CANICAS!</h2>
+        <p id="victory-reason" class="victory-reason"></p>
+      </div>
+
+      <!-- 1st / 2nd / 3rd Place Podium -->
+      <div id="victory-podium" class="podium-row"></div>
+
+      <!-- 4 Post-Match Telemetry Awards -->
+      <h3 class="awards-heading" data-i18n="awards_heading">🏅 Reconocimientos del Ruedo y la Feria</h3>
+      <div id="victory-awards" class="awards-grid"></div>
+
+      <!-- Hidden Canvas for Shareable Trophy Certificate -->
+      <canvas id="victory-canvas" width="800" height="1000" class="hidden"></canvas>
+
+      <div class="victory-actions">
+        <button id="btn-share-card" type="button" class="secondary-btn" data-i18n="btn_share_card">📸 Descargar / Compartir Trofeo</button>
+        <button id="btn-play-again" type="button" class="primary-btn" data-i18n="btn_play_again">🔄 Volver a la Sala</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 2: QR CODE PARTY INVITE                                        -->
+  <!-- ==================================================================== -->
+  <div id="modal-qr" class="modal-overlay hidden">
+    <div class="modal-card qr-modal">
+      <h3 data-i18n="qr_modal_title">📱 Escanea para Entrar al Ruedo</h3>
+      <div id="qr-container" class="qr-box"></div>
+      <p id="qr-room-label" class="qr-code-text"></p>
+      <button id="btn-close-qr" type="button" class="primary-btn" data-i18n="btn_close">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 3: SHOT CHRONICLE HISTORY                                      -->
+  <!-- ==================================================================== -->
+  <div id="modal-history" class="modal-overlay hidden">
+    <div class="modal-card">
+      <div class="modal-top">
+        <h3 data-i18n="history_modal_title">📜 Crónica de Tiros</h3>
+        <button id="btn-close-history" type="button" class="icon-btn">✖</button>
+      </div>
+      <div id="history-list" class="history-list"></div>
+    </div>
+  </div>
+
+  <!-- ==================================================================== -->
+  <!-- MODAL 4: TRADITIONAL CANICAS RULES (FERIA & PATIO GUIDE)             -->
+  <!-- ==================================================================== -->
+  <div id="modal-rules" class="modal-overlay hidden">
+    <div class="modal-card rules-modal">
+      <div class="modal-top">
+        <h3 data-i18n="rules_modal_title">📖 Cómo Jugar a las Canicas Mexicanas (Feria y Patio)</h3>
+        <button id="btn-close-rules" type="button" class="icon-btn">✖</button>
+      </div>
+      <div class="rules-body">
+        <p data-i18n="rules_intro">
+          ¡Disfruta los <strong>dos estilos tradicionales de Canicas en México</strong>! Puedes jugarlos por separado o combinados en el <strong>🏆 Torneo Mixto</strong>:
+        </p>
+        <div class="faces-guide-grid">
+          <div class="face-guide-item">
+            <span class="fg-badge todo">🎡 1. CANICAS DE LA FERIA (TABLERO DE CLAVOS)</span>
+            <p data-i18n="rule_feria">
+              Lanza tu canica con el resorte de latón por el carril derecho. La canica rebota entre los <strong>56 clavos</strong> hasta caer en uno de los <strong>20 hoyitos numerados</strong> (desde 10 pts hasta <strong>👑 El Gallo de Oro de 100 pts</strong>). ¡Caer en un hoyito ocupado duplica tus puntos (Combo x2)!
+            </p>
+          </div>
+          <div class="face-guide-item">
+            <span class="fg-badge toma">⭕ 2. PATIO DE TIERRA: EL CÍRCULO (LA RUEDA)</span>
+            <p data-i18n="rule_circulo">
+              En el centro del círculo de cal hay <strong>13 canicas apostadas</strong>: 8 <em>Agüitas</em> (10 pts), 4 <em>Lecheras</em> (20 pts) y el <strong>👑 Bolón Rey</strong> (30 pts). Tira de <em>uñita</em> desde la raya exterior: ¡toda canica que saques del círculo (<strong>¡Chiras Pelas!</strong>) suma a tu marcador y te da tiro extra!
+            </p>
+          </div>
+          <div class="face-guide-item">
+            <span class="fg-badge todos">🕳️ 3. PATIO DE TIERRA: LA HOYITA (EL POCHITO)</span>
+            <p data-i18n="rule_hoyita">
+              En el centro de la tierra está cavada <strong>La Hoyita</strong>. Si logras <strong>¡Encholar!</strong> tu tiro en el pocito central ganas <strong>+50 puntos</strong>, obtienes tiro extra y te coronas <strong>🔥 Cazador</strong> (ponchar el bolón de un rival vale +40 pts).
+            </p>
+          </div>
+          <div class="face-guide-item">
+            <span class="fg-badge pon">🌪️ 4. CHANFLE, SOPLIDO Y CANICA DE ORO</span>
+            <p data-i18n="rule_twists">
+              Aplica <strong>Chanfle</strong> (curva izquierda o derecha), arrastra directamente sobre el tablero como resortera, y usa <strong>💨 ¡Sóplale!</strong> o <strong>👊 ¡Golpecito!</strong> para animar la mesa en vivo.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/qrcode.min.js"></script>
+  <script src="/audio.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

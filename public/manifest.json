@@ -1,0 +1,18 @@
+{
+  "name": "Canicas Mexicanas • Feria y Patio",
+  "short_name": "Canicas 3D",
+  "description": "Juego multijugador en tiempo real de Canicas de la Feria (Tablero de Clavos) y Canicas de Patio (El Círculo y La Hoyita)",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1b2a",
+  "theme_color": "#0d1b2a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

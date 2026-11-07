@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <radialGradient id="marbleGlass" cx="38%" cy="32%" r="65%">
+      <stop offset="0%" stop-color="#a5f3fc" />
+      <stop offset="35%" stop-color="#06b6d4" />
+      <stop offset="78%" stop-color="#0e7490" />
+      <stop offset="100%" stop-color="#083344" />
+    </radialGradient>
+    <linearGradient id="catEye1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#f97316" />
+      <stop offset="100%" stop-color="#ef4444" />
+    </linearGradient>
+    <linearGradient id="catEye2" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ec4899" />
+      <stop offset="50%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#3b82f6" />
+    </linearGradient>
+  </defs>
+  <circle cx="64" cy="64" r="58" fill="url(#marbleGlass)" stroke="#fbbf24" stroke-width="3" />
+  <path d="M 38 26 C 72 44, 52 84, 88 102 C 62 96, 44 64, 38 26 Z" fill="url(#catEye1)" opacity="0.88" />
+  <path d="M 90 32 C 58 48, 68 82, 36 98 C 66 86, 82 58, 90 32 Z" fill="url(#catEye2)" opacity="0.82" />
+  <ellipse cx="44" cy="36" rx="18" ry="10" transform="rotate(-28 44 36)" fill="#ffffff" opacity="0.72" />
+  <circle cx="34" cy="48" r="4.5" fill="#ffffff" opacity="0.55" />
+</svg>

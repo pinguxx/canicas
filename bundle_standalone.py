@@ -10,6 +10,8 @@ def bundle():
     qrcode_js = (public_dir / 'qrcode.min.js').read_text(encoding='utf-8')
     audio_js = (public_dir / 'audio.js').read_text(encoding='utf-8')
     app_js = (public_dir / 'app.js').read_text(encoding='utf-8')
+    # Standalone HTML artifact always defaults to offline self-contained engine
+    app_js = app_js.replace('let useOfflineEngine = false;', 'let useOfflineEngine = true;')
 
     # Replace style
     html = re.sub(

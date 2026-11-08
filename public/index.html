@@ -87,6 +87,28 @@
       </div>
     </div>
 
+    <!-- 1-Click Quick Play Direct Launcher -->
+    <div class="quick-play-header-box">
+      <div class="quick-play-header-title">
+        <span class="qph-badge">⚡ JUGAR DIRECTO</span>
+        <span class="qph-desc" data-i18n="quick_play_desc">Elige juego y empieza a tirar canicas en 1 clic (con Bot IA):</span>
+      </div>
+      <div class="quick-play-buttons">
+        <button id="btn-quick-feria" type="button" class="quick-play-btn qp-feria" title="Entrar directo a Canicas de la Feria">
+          <span class="qp-icon">🎡</span>
+          <span class="qp-text">Feria de Clavos</span>
+        </button>
+        <button id="btn-quick-circulo" type="button" class="quick-play-btn qp-circulo" title="Entrar directo a Patio: El Círculo">
+          <span class="qp-icon">⭕</span>
+          <span class="qp-text">Patio: El Círculo</span>
+        </button>
+        <button id="btn-quick-hoyita" type="button" class="quick-play-btn qp-hoyita" title="Entrar directo a Patio: La Hoyita">
+          <span class="qp-icon">🕳️</span>
+          <span class="qp-text">Patio: La Hoyita</span>
+        </button>
+      </div>
+    </div>
+
     <div class="home-grid">
       <!-- Player Profile Card -->
       <section class="card profile-card">
@@ -281,8 +303,8 @@
           <span id="game-stage-badge" class="pill-badge stage-pill">🎡 FERIA DE CLAVOS</span>
         </div>
 
-        <!-- Host Stage Switcher hidden during gameplay so match stays in creator's chosen mode -->
-        <div id="host-stage-switcher" class="stage-switcher hidden">
+        <!-- Interactive Game Mode Switcher (Always visible for testing all 3 games) -->
+        <div id="host-stage-switcher" class="stage-switcher">
           <button type="button" class="stage-switch-btn active" data-stage="feria" title="Tablero de Clavos de la Feria">🎡 Feria</button>
           <button type="button" class="stage-switch-btn" data-stage="circulo" title="Patio: El Círculo (La Rueda)">⭕ Círculo</button>
           <button type="button" class="stage-switch-btn" data-stage="hoyita" title="Patio: La Hoyita (El Pochito)">🕳️ Hoyita</button>

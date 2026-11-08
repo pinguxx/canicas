@@ -1989,7 +1989,10 @@
 
     const switcher = document.getElementById('host-stage-switcher');
     if (switcher) {
-      switcher.classList.add('hidden');
+      switcher.classList.remove('hidden');
+      switcher.querySelectorAll('.stage-switch-btn').forEach((b) => {
+        b.classList.toggle('active', b.dataset.stage === currentRoom.active_stage);
+      });
     }
 
     const me = currentRoom.players.find((p) => p.id === myPlayerId);
@@ -3539,6 +3542,45 @@
     });
   });
 
+  function launchQuickPlay(mode) {
+    window.canicasAudio.ensureContext();
+    const settings = {
+      game_mode: mode,
+      win_condition: 'rounds',
+      max_rounds: 5,
+      target_score: 250,
+      turn_timer_seconds: 0,
+      bonus_shot_rule: true,
+      combo_multiplier: true,
+      ponche_steal: true,
+      arena_theme: mode === 'feria' ? 'feria' : 'patio'
+    };
+    useOfflineEngine = true;
+    handleOfflineCommand({
+      type: 'create_room',
+      roomCode: 'CANICAS',
+      playerName: getPlayerName(),
+      avatar: selectedAvatar,
+      color: selectedColor,
+      settings
+    });
+    handleOfflineCommand({ type: 'start_game' });
+    showToast(
+      mode === 'feria'
+        ? (lang === 'en' ? '🎡 Gran Feria de Canicas loaded!' : '🎡 ¡Gran Feria de Canicas lista!')
+        : mode === 'circulo'
+        ? (lang === 'en' ? '⭕ El Círculo loaded!' : '⭕ ¡El Círculo listo!')
+        : (lang === 'en' ? '🕳️ La Hoyita loaded!' : '🕳️ ¡La Hoyita lista!')
+    );
+  }
+
+  const bqFeria = document.getElementById('btn-quick-feria');
+  if (bqFeria) bqFeria.addEventListener('click', () => launchQuickPlay('feria'));
+  const bqCirculo = document.getElementById('btn-quick-circulo');
+  if (bqCirculo) bqCirculo.addEventListener('click', () => launchQuickPlay('circulo'));
+  const bqHoyita = document.getElementById('btn-quick-hoyita');
+  if (bqHoyita) bqHoyita.addEventListener('click', () => launchQuickPlay('hoyita'));
+
   document.getElementById('btn-join-room').addEventListener('click', () => {
     window.canicasAudio.ensureContext();
     const code = document.getElementById('input-room-code').value.trim().toUpperCase();
@@ -3730,11 +3772,27 @@
   document.querySelectorAll('.stage-switch-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (!currentRoom) return;
-      sendWs({
-        type: 'switch_stage',
-        roomCode: currentRoom.code,
-        stage: btn.dataset.stage
-      });
+      const targetStage = btn.dataset.stage;
+      if (useOfflineEngine) {
+        handleOfflineCommand({
+          type: 'switch_stage',
+          roomCode: currentRoom.code,
+          stage: targetStage
+        });
+      } else {
+        sendWs({
+          type: 'switch_stage',
+          roomCode: currentRoom.code,
+          stage: targetStage
+        });
+      }
+      showToast(
+        targetStage === 'feria'
+          ? (lang === 'en' ? '🎡 Switched to Fairground Board' : '🎡 Cambiado a Feria de Clavos')
+          : targetStage === 'circulo'
+          ? (lang === 'en' ? '⭕ Switched to El Círculo' : '⭕ Cambiado a Patio: El Círculo')
+          : (lang === 'en' ? '🕳️ Switched to La Hoyita' : '🕳️ Cambiado a Patio: La Hoyita')
+      );
     });
   });
 

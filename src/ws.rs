@@ -1087,7 +1087,12 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 };
 
                 // Fallback: If only 1 human player was in this room, resolve to their ID
-                if resolved_pid.is_none() || !room.players.iter().any(|p| resolved_pid.as_ref() == Some(&p.id)) {
+                if resolved_pid.is_none()
+                    || !room
+                        .players
+                        .iter()
+                        .any(|p| resolved_pid.as_ref() == Some(&p.id))
+                {
                     if let Some(single_human) = room.players.iter().find(|p| !p.is_bot) {
                         resolved_pid = Some(single_human.id.clone());
                     }
@@ -1179,7 +1184,8 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                                 }
                             }
                         }
-                        let any_connected_human = room.players.iter().any(|p| !p.is_bot && p.connected);
+                        let any_connected_human =
+                            room.players.iter().any(|p| !p.is_bot && p.connected);
                         if !any_connected_human {
                             rooms_guard.remove(&code);
                         } else {

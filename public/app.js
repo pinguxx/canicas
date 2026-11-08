@@ -3673,45 +3673,6 @@
     });
   });
 
-  function launchQuickPlay(mode) {
-    window.canicasAudio.ensureContext();
-    const settings = {
-      game_mode: mode,
-      win_condition: 'rounds',
-      max_rounds: 5,
-      target_score: 250,
-      turn_timer_seconds: 0,
-      bonus_shot_rule: true,
-      combo_multiplier: true,
-      ponche_steal: true,
-      arena_theme: mode === 'feria' ? 'feria' : 'patio'
-    };
-    useOfflineEngine = true;
-    handleOfflineCommand({
-      type: 'create_room',
-      roomCode: 'CANICAS',
-      playerName: getPlayerName(),
-      avatar: selectedAvatar,
-      color: selectedColor,
-      settings
-    });
-    handleOfflineCommand({ type: 'start_game' });
-    showToast(
-      mode === 'feria'
-        ? (lang === 'en' ? '🎡 Gran Feria de Canicas loaded!' : '🎡 ¡Gran Feria de Canicas lista!')
-        : mode === 'circulo'
-        ? (lang === 'en' ? '⭕ El Círculo loaded!' : '⭕ ¡El Círculo listo!')
-        : (lang === 'en' ? '🕳️ La Hoyita loaded!' : '🕳️ ¡La Hoyita lista!')
-    );
-  }
-
-  const bqFeria = document.getElementById('btn-quick-feria');
-  if (bqFeria) bqFeria.addEventListener('click', () => launchQuickPlay('feria'));
-  const bqCirculo = document.getElementById('btn-quick-circulo');
-  if (bqCirculo) bqCirculo.addEventListener('click', () => launchQuickPlay('circulo'));
-  const bqHoyita = document.getElementById('btn-quick-hoyita');
-  if (bqHoyita) bqHoyita.addEventListener('click', () => launchQuickPlay('hoyita'));
-
   document.getElementById('btn-join-room').addEventListener('click', () => {
     window.canicasAudio.ensureContext();
     const code = document.getElementById('input-room-code').value.trim().toUpperCase();

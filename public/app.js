@@ -1810,9 +1810,9 @@
       msg.room.active_stage = stageForRoundLocal(msg.room.settings.game_mode, msg.room.round_number || 1);
     }
 
-    // Ignore room-specific broadcasts if user has already left the room or is on the main page
+    // Ignore room-specific broadcasts if user has already left the room
     if (msg.type !== 'room_joined' && msg.type !== 'error') {
-      if (!currentRoom || screenHome.classList.contains('active')) {
+      if (!currentRoom) {
         return;
       }
     }
@@ -1990,7 +1990,7 @@
   // ==========================================================================
 
   function renderRoomState() {
-    if (!currentRoom || screenHome.classList.contains('active')) return;
+    if (!currentRoom) return;
 
     if (currentRoom.state === 'lobby') {
       switchScreen(screenLobby);
@@ -4004,7 +4004,7 @@
   // ==========================================================================
 
   function showVictoryModal() {
-    if (!currentRoom || screenHome.classList.contains('active')) return;
+    if (!currentRoom || currentRoom.state !== 'finished' || screenHome.classList.contains('active')) return;
     window.canicasAudio.playVictoryFanfare();
     const winner = currentRoom.players.find((p) => p.id === currentRoom.winner_id);
     const winnerName = winner ? winner.name : '';

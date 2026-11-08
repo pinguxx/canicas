@@ -411,4 +411,63 @@ mod tests {
         assert_eq!(players_after4[0]["connected"], true);
         assert_eq!(players_after4[0]["is_host"], true);
     }
+
+    #[tokio::test]
+    async fn test_websocket_invalid_room_and_play_again_error_handling() {
+        let state = AppState::new();
+        let app = create_app(state);
+
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+
+        tokio::spawn(async move {
+            axum::serve(listener, app).await.unwrap();
+        });
+
+        let ws_url = format!("ws://127.0.0.1:{}/ws", addr.port());
+        let (mut ws, _) = connect_async(&ws_url).await.unwrap();
+
+        // 1. Attempt to join a room that does not exist
+        ws.send(WsMsg::Text(
+            json!({
+                "type": "join_room",
+                "roomCode": "NOEXIS",
+                "playerName": "Caniquero",
+                "avatar": "🤠",
+                "color": "#f59e0b"
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+        .unwrap();
+
+        let msg_err = ws.next().await.unwrap().unwrap();
+        let parsed_err: Value = serde_json::from_str(msg_err.to_text().unwrap()).unwrap();
+        assert_eq!(parsed_err["type"], "error");
+        assert!(parsed_err["message"]
+            .as_str()
+            .unwrap()
+            .contains("No se encontró la sala"));
+
+        // 2. Attempt to play again on a non-existent room
+        ws.send(WsMsg::Text(
+            json!({
+                "type": "play_again",
+                "roomCode": "NOEXIS"
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+        .unwrap();
+
+        let msg_err2 = ws.next().await.unwrap().unwrap();
+        let parsed_err2: Value = serde_json::from_str(msg_err2.to_text().unwrap()).unwrap();
+        assert_eq!(parsed_err2["type"], "error");
+        assert!(parsed_err2["message"]
+            .as_str()
+            .unwrap()
+            .contains("No se encontró la sesión del jugador"));
+    }
 }

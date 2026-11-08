@@ -14,7 +14,7 @@
         var raw = localStorage.getItem('canicas_offline_room') || sessionStorage.getItem('canicas_offline_room');
         if (raw) {
           var p = JSON.parse(raw);
-          if (p && p.state) {
+          if (p && p.state && p.state !== 'finished') {
             document.documentElement.setAttribute('data-pre-state', p.state);
             document.addEventListener('DOMContentLoaded', function() {
               var sHome = document.getElementById('screen-home');
@@ -24,6 +24,13 @@
                 sTarget.classList.add('active');
               }
             });
+          } else if (p && p.state === 'finished') {
+            try {
+              localStorage.removeItem('canicas_offline_room');
+              sessionStorage.removeItem('canicas_offline_room');
+              localStorage.removeItem('canicas_room_code');
+              sessionStorage.removeItem('canicas_room_code');
+            } catch(_) {}
           }
         }
       } catch(_) {}
@@ -41,6 +48,7 @@
       <div class="reconnecting-spinner">🔮</div>
       <h3 id="reconnecting-title">Reconectando a la sala...</h3>
       <p id="reconnecting-sub">Manteniendo tu turno y tus canicas en el ruedo</p>
+      <button id="btn-cancel-reconnect" type="button" class="secondary-btn" style="margin-top:0.85rem;" data-i18n="btn_cancel_reconnect">🏠 Cancelar y volver al inicio</button>
     </div>
   </div>
 
@@ -322,6 +330,7 @@
               <option value="40">40s</option>
             </select>
           </div>
+          <button id="btn-reopen-podium" type="button" class="pill-btn highlight hidden" title="Ver Podio y Trofeos">👑 <span data-i18n="podium_short">Podio</span></button>
           <button id="btn-back-to-sala" type="button" class="pill-btn sala-btn" title="Volver a la Sala para cambiar el modo de juego">🏠 <span data-i18n="sala_short">Sala</span></button>
           <button id="btn-open-history" type="button" class="pill-btn" title="Crónica de Tiros">📜 <span class="hide-mobile" data-i18n="history_short">Historial</span></button>
           <button id="btn-leave-game" type="button" class="pill-btn danger" title="Salir">🚪</button>
@@ -468,8 +477,9 @@
   <!-- ==================================================================== -->
   <!-- MODAL 1: VICTORY PODIUM, AWARDS & SHAREABLE CANVAS CARD              -->
   <!-- ==================================================================== -->
-  <div id="modal-victory" class="modal-overlay hidden">
+  <div id="modal-victory" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="victory-title">
     <div class="modal-card victory-modal">
+      <button id="btn-close-victory" type="button" class="modal-close-corner" title="Cerrar modal" aria-label="Cerrar">✖</button>
       <div class="victory-header">
         <span class="victory-crown">👑</span>
         <h2 id="victory-title">¡CAMPEÓN DE LAS CANICAS!</h2>
@@ -487,8 +497,9 @@
       <canvas id="victory-canvas" width="800" height="1000" class="hidden"></canvas>
 
       <div class="victory-actions">
-        <button id="btn-share-card" type="button" class="secondary-btn" data-i18n="btn_share_card">📸 Descargar / Compartir Trofeo</button>
         <button id="btn-play-again" type="button" class="primary-btn" data-i18n="btn_play_again">🔄 Volver a la Sala</button>
+        <button id="btn-victory-home" type="button" class="secondary-btn home-btn" data-i18n="btn_victory_home">🏠 Volver al Inicio</button>
+        <button id="btn-share-card" type="button" class="secondary-btn" data-i18n="btn_share_card">📸 Descargar / Compartir Trofeo</button>
       </div>
     </div>
   </div>

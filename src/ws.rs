@@ -1067,10 +1067,26 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
             ClientMessage::PlayAgain { room_code } => {
                 let code = room_code.trim().to_uppercase();
                 let Some(ref pid) = active_player_id else {
+                    let _ = tx.send(Message::Text(
+                        json!({
+                            "type": "error",
+                            "message": "No se encontró la sesión del jugador."
+                        })
+                        .to_string()
+                        .into(),
+                    ));
                     continue;
                 };
                 let mut rooms_guard = state.rooms.write().await;
                 let Some(room) = rooms_guard.get_mut(&code) else {
+                    let _ = tx.send(Message::Text(
+                        json!({
+                            "type": "error",
+                            "message": "No se encontró la sala. Verifica el código."
+                        })
+                        .to_string()
+                        .into(),
+                    ));
                     continue;
                 };
                 let is_host = room.players.iter().any(|p| p.id == *pid && p.is_host);

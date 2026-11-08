@@ -179,6 +179,9 @@
       awards_heading: '🏅 Reconocimientos del Ruedo y la Feria',
       btn_share_card: '📸 Descargar / Compartir Trofeo',
       btn_play_again: '🔄 Volver a la Sala',
+      btn_victory_home: '🏠 Volver al Inicio',
+      btn_cancel_reconnect: '🏠 Cancelar y volver al inicio',
+      podium_short: 'Podio',
       qr_modal_title: '📱 Escanea para Entrar al Ruedo',
       btn_close: 'Cerrar',
       history_modal_title: '📜 Crónica de Tiros',
@@ -256,6 +259,9 @@
       awards_heading: '🏅 Arena & Fairground Awards',
       btn_share_card: '📸 Download / Share Trophy',
       btn_play_again: '🔄 Back to Lobby',
+      btn_victory_home: '🏠 Back to Home',
+      btn_cancel_reconnect: '🏠 Cancel and return to home',
+      podium_short: 'Podium',
       qr_modal_title: '📱 Scan to Join the Arena',
       btn_close: 'Close',
       history_modal_title: '📜 Shot Chronicle',
@@ -1726,8 +1732,8 @@
       });
 
       ws.addEventListener('close', () => {
-        // If we are in an active room, try reconnecting automatically after a brief delay
-        if (currentRoom && myPlayerId && !useOfflineEngine) {
+        // If we are in an active (non-finished) room, try reconnecting automatically after a brief delay
+        if (currentRoom && currentRoom.state !== 'finished' && myPlayerId && !useOfflineEngine) {
           setTimeout(() => {
             if (currentRoom && myPlayerId) {
               connectWebSocket(() => {
@@ -1804,6 +1810,10 @@
 
     switch (msg.type) {
       case 'room_joined': {
+        if (reconnectTimeoutTimer) {
+          clearTimeout(reconnectTimeoutTimer);
+          reconnectTimeoutTimer = null;
+        }
         isAutoReconnecting = false;
         hideReconnectingOverlay();
         myPlayerId = msg.playerId;
@@ -1906,13 +1916,41 @@
 
       case 'error': {
         hideReconnectingOverlay();
-        if (isAutoReconnecting && currentRoom) {
+        if (reconnectTimeoutTimer) {
+          clearTimeout(reconnectTimeoutTimer);
+          reconnectTimeoutTimer = null;
+        }
+        const errText = (msg.message || '').toLowerCase();
+        const isInvalidRoom =
+          errText.includes('no se encontró la sala') ||
+          errText.includes('no existe') ||
+          errText.includes('sala no encontrada') ||
+          errText.includes('not found') ||
+          errText.includes('ya comenzó') ||
+          errText.includes('llena') ||
+          errText.includes('cerrada') ||
+          errText.includes('expir');
+
+        // If trying to join/resume an invalid room, or room is finished, or room no longer exists on server:
+        if (isInvalidRoom || (isAutoReconnecting && (!currentRoom || currentRoom.state === 'finished'))) {
+          isAutoReconnecting = false;
+          leaveCurrentRoom();
+          showToast(
+            lang === 'en'
+              ? `⚠️ ${msg.message || 'Room is no longer valid or has expired. Returned to main page.'}`
+              : `⚠️ ${msg.message || 'La sala ya no es válida o ha expirado. Volviste a la página principal.'}`
+          );
+          break;
+        }
+
+        if (isAutoReconnecting && currentRoom && currentRoom.state === 'playing') {
           useOfflineEngine = true;
           isAutoReconnecting = false;
           renderRoomState();
           showToast(lang === 'en' ? '🎮 Continuing match offline' : '🎮 Continuando partida en modo local');
           break;
         }
+
         showToast(`⚠️ ${msg.message}`);
         isAutoReconnecting = false;
         break;
@@ -2042,9 +2080,14 @@
 
     const me = currentRoom.players.find((p) => p.id === myPlayerId);
     const isHost = Boolean(me && me.is_host);
+    const isFinished = currentRoom.state === 'finished';
     const backToSalaBtn = document.getElementById('btn-back-to-sala');
     if (backToSalaBtn) {
-      backToSalaBtn.classList.toggle('hidden', !isHost && !useOfflineEngine);
+      backToSalaBtn.classList.toggle('hidden', !isHost && !useOfflineEngine && !isFinished);
+    }
+    const reopenPodiumBtn = document.getElementById('btn-reopen-podium');
+    if (reopenPodiumBtn) {
+      reopenPodiumBtn.classList.toggle('hidden', !isFinished);
     }
 
     const activeTimer = Number(s.turn_timer_seconds) || 0;
@@ -3725,8 +3768,17 @@
   function leaveCurrentRoom() {
     isAutoReconnecting = false;
     hideReconnectingOverlay();
+    if (reconnectTimeoutTimer) {
+      clearTimeout(reconnectTimeoutTimer);
+      reconnectTimeoutTimer = null;
+    }
+    // Close any active modal dialogs (victory, qr, history, rules)
+    document.querySelectorAll('.modal-overlay').forEach((m) => m.classList.add('hidden'));
+
     if (currentRoom && !useOfflineEngine) {
-      sendWs({ type: 'leave_room', roomCode: currentRoom.code });
+      try {
+        sendWs({ type: 'leave_room', roomCode: currentRoom.code });
+      } catch (_) {}
     }
     window.safeStorage.removeItem('canicas_room_code');
     window.safeStorage.removeItem('canicas_offline_room');
@@ -3993,7 +4045,79 @@
   }
 
   document.getElementById('btn-play-again').addEventListener('click', () => {
-    if (currentRoom) sendWs({ type: 'play_again', roomCode: currentRoom.code });
+    document.getElementById('modal-victory').classList.add('hidden');
+    if (!currentRoom) {
+      leaveCurrentRoom();
+      return;
+    }
+    if (useOfflineEngine) {
+      handleOfflineCommand({ type: 'play_again' });
+      showToast(
+        lang === 'en'
+          ? '🏠 Returned to the Sala. Pick a game mode to start!'
+          : '🏠 De vuelta en la Sala. Elige el tipo de juego para comenzar.'
+      );
+    } else if (ws && ws.readyState === WebSocket.OPEN) {
+      sendWs({ type: 'play_again', roomCode: currentRoom.code });
+    } else {
+      if (currentRoom.code && currentRoom.code.startsWith('OFF-')) {
+        useOfflineEngine = true;
+        handleOfflineCommand({ type: 'play_again' });
+      } else {
+        leaveCurrentRoom();
+        showToast(
+          lang === 'en'
+            ? '⚠️ Room disconnected. Returned to main page.'
+            : '⚠️ Sala desconectada. Volviste a la página principal.'
+        );
+      }
+    }
+  });
+
+  const btnCloseVictory = document.getElementById('btn-close-victory');
+  if (btnCloseVictory) {
+    btnCloseVictory.addEventListener('click', () => {
+      document.getElementById('modal-victory').classList.add('hidden');
+    });
+  }
+
+  const btnVictoryHome = document.getElementById('btn-victory-home');
+  if (btnVictoryHome) {
+    btnVictoryHome.addEventListener('click', () => {
+      leaveCurrentRoom();
+    });
+  }
+
+  const btnReopenPodium = document.getElementById('btn-reopen-podium');
+  if (btnReopenPodium) {
+    btnReopenPodium.addEventListener('click', () => {
+      showVictoryModal();
+    });
+  }
+
+  const btnCancelReconnect = document.getElementById('btn-cancel-reconnect');
+  if (btnCancelReconnect) {
+    btnCancelReconnect.addEventListener('click', () => {
+      leaveCurrentRoom();
+    });
+  }
+
+  // Dismiss any open modal by clicking on dark overlay backdrop outside card
+  document.querySelectorAll('.modal-overlay').forEach((overlay) => {
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        overlay.classList.add('hidden');
+      }
+    });
+  });
+
+  // Dismiss open modals with Escape key
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay:not(.hidden)').forEach((modal) => {
+        modal.classList.add('hidden');
+      });
+    }
   });
 
   document.getElementById('btn-share-card').addEventListener('click', () => {
@@ -4117,6 +4241,7 @@
   }
 
   let isAutoReconnecting = false;
+  let reconnectTimeoutTimer = null;
 
   function showReconnectingOverlay(roomCode) {
     const el = document.getElementById('reconnecting-overlay');
@@ -4165,13 +4290,29 @@
     const targetRoom = urlRoom || hashRoom || savedRoom;
     const targetPid = myPlayerId || hashPid || window.safeStorage.getItem('canicas_player_id');
 
-    // 1. Instantly restore saved room so page refresh NEVER kicks the player out!
+    // 1. Instantly restore saved room so page refresh NEVER kicks the player out during active gameplay!
     const savedOffline = window.safeStorage.getItem('canicas_offline_room');
     let restoredFromSaved = false;
     if (savedOffline) {
       try {
         const parsed = JSON.parse(savedOffline);
         if (parsed && parsed.code && (!targetRoom || parsed.code.toUpperCase() === targetRoom.toUpperCase())) {
+          // If the match was already finished, clean it up so user isn't trapped in victory screen!
+          if (parsed.state === 'finished') {
+            window.safeStorage.removeItem('canicas_offline_room');
+            window.safeStorage.removeItem('canicas_room_code');
+            try {
+              if (window.history && window.history.replaceState) {
+                window.history.replaceState({}, '', window.location.pathname);
+              } else {
+                window.location.hash = '';
+              }
+            } catch (_) {}
+            currentRoom = null;
+            switchScreen(screenHome);
+            return;
+          }
+
           currentRoom = parsed;
           myPlayerId = myPlayerId || targetPid || (currentRoom.players[0] && currentRoom.players[0].id) || 'p_local_1';
           renderRoomState();
@@ -4205,6 +4346,19 @@
         isAutoReconnecting = true;
         showReconnectingOverlay(targetRoom);
       }
+      if (reconnectTimeoutTimer) clearTimeout(reconnectTimeoutTimer);
+      reconnectTimeoutTimer = setTimeout(() => {
+        if (isAutoReconnecting) {
+          isAutoReconnecting = false;
+          leaveCurrentRoom();
+          showToast(
+            lang === 'en'
+              ? '⚠️ Reconnection timed out. Returned to main page.'
+              : '⚠️ Tiempo de espera agotado al conectar a la sala. Volviste al inicio.'
+          );
+        }
+      }, 5500);
+
       sendWs({
         type: 'join_room',
         roomCode: targetRoom,

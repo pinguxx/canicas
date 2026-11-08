@@ -1318,6 +1318,7 @@
         currentRoom.shot_counter || 0,
         90,
         currentRoom.patio_targets
+      );
       refreshOfflineTurnDeadline(currentRoom);
       saveCurrentRoomLocally();
       handleServerMessage({ type: 'room_updated', room: currentRoom });
@@ -1352,6 +1353,13 @@
     nextRoom.active_stage = stage;
     const wasGolden = p.bonus_shot_pending;
     let outcome;
+    const defaultSeatDeg = (p.seat_angle != null && Number.isFinite(p.seat_angle))
+      ? p.seat_angle
+      : turnIdx * (360 / Math.max(1, nextRoom.players.length)) + 90;
+    let seatDeg =
+      typeof customSeatAngle === 'number' && Number.isFinite(customSeatAngle)
+        ? ((customSeatAngle % 360) + 360) % 360
+        : (p.id === myPlayerId ? patioSeatAngle : defaultSeatDeg);
 
     if (stage === 'feria') {
       const occIds = nextRoom.feria_occupied_holes.map((h) => h.hole_id);
@@ -1395,13 +1403,6 @@
         patio_sim: null
       };
     } else {
-      const defaultSeatDeg = (p.seat_angle != null && Number.isFinite(p.seat_angle))
-        ? p.seat_angle
-        : turnIdx * (360 / nextRoom.players.length) + 90;
-      const seatDeg =
-        typeof customSeatAngle === 'number' && Number.isFinite(customSeatAngle)
-          ? ((customSeatAngle % 360) + 360) % 360
-          : (p.id === myPlayerId ? patioSeatAngle : defaultSeatDeg);
       p.seat_angle = seatDeg;
       const rivals = nextRoom.players
         .filter((_, idx) => idx !== turnIdx)

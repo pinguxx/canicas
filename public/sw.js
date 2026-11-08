@@ -1,18 +1,19 @@
-const CACHE_NAME = 'canicas-mexicanas-v1';
+const CACHE_NAME = 'canicas-mexicanas-v17';
 const ASSETS = [
   '/',
   '/index.html',
-  '/style.css',
-  '/audio.js',
-  '/app.js',
-  '/qrcode.min.js',
+  '/style.css?v=17',
+  '/audio.js?v=17',
+  '/app.js?v=17',
+  '/qrcode.min.js?v=17',
   '/icon.svg',
   '/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)).catch(() => {})
   );
 });
 
@@ -29,6 +30,6 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   event.respondWith(
-    fetch(event.request).catch(() => caches.match(event.request))
+    fetch(event.request, { cache: 'no-store' }).catch(() => caches.match(event.request))
   );
 });

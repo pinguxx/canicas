@@ -34,58 +34,73 @@
 
   // Built-in Feria Holes & Brass Nails (so standalone HTML artifact works with zero network requests)
   const DEFAULT_FERIA_HOLES = [
-    { id: 1, x: 468, y: 235, radius: 31, points: 100, tier: 'oro', icon: '👑', name_es: 'El Gallo de Oro', name_en: 'The Golden Rooster', dicho_es: '«¡Cien puntos al Gallo de Oro, te llevaste el premio mayor de la feria!»', dicho_en: '"100 points in the Golden Rooster, you won the grand carnival prize!"', color: '#f59e0b' },
-    { id: 2, x: 255, y: 305, radius: 30, points: 75, tier: 'diamante', icon: '💎', name_es: 'La Corona Real', name_en: 'The Royal Crown', dicho_es: '«¡Tiro de maestro directo a la Corona Real!»', dicho_en: '"Master shot straight into the Royal Crown!"', color: '#06b6d4' },
-    { id: 3, x: 680, y: 305, radius: 30, points: 75, tier: 'diamante', icon: '🌟', name_es: 'Estrella Azteca', name_en: 'Aztec Star', dicho_es: '«¡Brilló la Estrella Azteca con setenta y cinco tantos!»', dicho_en: '"The Aztec Star shone bright for 75 points!"', color: '#06b6d4' },
-    { id: 4, x: 355, y: 440, radius: 30, points: 50, tier: 'fuego', icon: '☀️', name_es: 'El Sol', name_en: 'The Sun', dicho_es: '«¡Como el sol de mediodía, cincuenta puntos al bolsillo!»', dicho_en: '"Like the midday sun, fifty points in your pocket!"', color: '#ef4444' },
-    { id: 5, x: 580, y: 440, radius: 30, points: 50, tier: 'fuego', icon: '🔥', name_es: 'El Diablo', name_en: 'The Fire Devil', dicho_es: '«¡Canica encendida, cayó en el hoyito de cincuenta!»', dicho_en: '"Blazing marble, right into the 50-point hole!"', color: '#ef4444' },
-    { id: 6, x: 468, y: 565, radius: 30, points: 50, tier: 'fuego', icon: '🌙', name_es: 'La Luna', name_en: 'The Moon', dicho_es: '«¡Por el centro del tablero, La Luna te da cincuenta!»', dicho_en: '"Right down the center, The Moon grants you fifty!"', color: '#ec4899' },
-    { id: 7, x: 185, y: 565, radius: 29, points: 30, tier: 'esmeralda', icon: '🔔', name_es: 'La Campana', name_en: 'The Bell', dicho_es: '«¡Suena la campana de la kermés con treinta puntos!»', dicho_en: '"The fairground bell rings for thirty points!"', color: '#10b981' },
-    { id: 8, x: 750, y: 565, radius: 29, points: 30, tier: 'esmeralda', icon: '❤️', name_es: 'El Corazón', name_en: 'The Heart', dicho_es: '«¡Directo al Corazón, treinta buenos tantos!»', dicho_en: '"Straight to the Heart, thirty solid points!"', color: '#10b981' },
-    { id: 9, x: 310, y: 695, radius: 29, points: 30, tier: 'esmeralda', icon: '🦜', name_es: 'El Perico', name_en: 'The Parrot', dicho_es: '«¡Cantó el perico verde, treinta puntos seguros!»', dicho_en: '"The green parrot sang, thirty safe points!"', color: '#10b981' },
-    { id: 10, x: 625, y: 695, radius: 29, points: 30, tier: 'esmeralda', icon: '🎸', name_es: 'El Mariachi', name_en: 'The Mariachi', dicho_es: '«¡Con música de mariachi sumas treinta al marcador!»', dicho_en: '"With mariachi music you add thirty to the scoreboard!"', color: '#10b981' },
-    { id: 11, x: 170, y: 825, radius: 29, points: 20, tier: 'barrio', icon: '🍉', name_es: 'La Sandía', name_en: 'The Watermelon', dicho_es: '«¡Fresca la sandía, veinte puntos bien ganados!»', dicho_en: '"Fresh watermelon, twenty points well earned!"', color: '#3b82f6' },
-    { id: 12, x: 368, y: 825, radius: 29, points: 20, tier: 'barrio', icon: '🌵', name_es: 'El Nopal', name_en: 'The Cactus', dicho_es: '«¡Sin espinarse en los clavos, veinte puntos al Nopal!»', dicho_en: '"Dodging the brass nails, twenty points in The Cactus!"', color: '#3b82f6' },
-    { id: 13, x: 568, y: 825, radius: 29, points: 20, tier: 'barrio', icon: '🌶️', name_es: 'El Chile', name_en: 'The Chili Pepper', dicho_es: '«¡Picosito pero sabroso, veinte tantos más!»', dicho_en: '"Spicy and sweet, twenty more points!"', color: '#3b82f6' },
-    { id: 14, x: 765, y: 825, radius: 29, points: 20, tier: 'barrio', icon: '🏺', name_es: 'El Jarrito', name_en: 'The Clay Pitcher', dicho_es: '«¡Adentro del Jarrito de barro, veinte puntos!»', dicho_en: '"Inside the clay pitcher, twenty points!"', color: '#3b82f6' },
-    { id: 15, x: 468, y: 955, radius: 29, points: 20, tier: 'barrio', icon: '🌺', name_es: 'La Dalia', name_en: 'The Dahlia', dicho_es: '«¡En la flor nacional, veinte puntos para tu cuenta!»', dicho_en: '"In the national flower, twenty points for your tally!"', color: '#3b82f6' },
-    { id: 16, x: 155, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '🪙', name_es: 'El Quinto', name_en: 'The Nickel', dicho_es: '«¡De diez en diez se llena el jarrito!»', dicho_en: '"Ten by ten fills the pitcher!"', color: '#a855f7' },
-    { id: 17, x: 312, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '💀', name_es: 'La Calavera', name_en: 'The Sugar Skull', dicho_es: '«¡La Calaverita de azúcar te regala diez puntos!»', dicho_en: '"The sugar skull treats you to ten points!"', color: '#a855f7' },
-    { id: 18, x: 468, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '🤠', name_es: 'El Charro', name_en: 'The Charro', dicho_es: '«¡Con sombrero ancho, diez puntos al Charro!»', dicho_en: '"With a wide sombrero, ten points in The Charro!"', color: '#a855f7' },
-    { id: 19, x: 625, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '🐸', name_es: 'La Rana', name_en: 'The Frog', dicho_es: '«¡Brincó la canica hasta La Rana, diez tantos!»', dicho_en: '"The marble hopped into The Frog, ten points!"', color: '#a855f7' },
-    { id: 20, x: 780, y: 1085, radius: 29, points: 10, tier: 'madera', icon: '🎺', name_es: 'La Trompeta', name_en: 'The Trumpet', dicho_es: '«¡Al final del tablero pero nunca en cero: diez puntos!»', dicho_en: '"At the bottom of the board but never zero: ten points!"', color: '#a855f7' }
+    { id: 1, x: 468, y: 1085, radius: 29, points: 100, tier: 'oro', icon: '👑', name_es: 'El Gallo de Oro', name_en: 'The Golden Rooster', dicho_es: '«¡Cien puntos al Gallo de Oro hasta el fondo del tablero, te llevaste el premio mayor!»', dicho_en: '"100 points in the Golden Rooster at the very bottom, you won the grand prize!"', color: '#f59e0b' },
+    { id: 2, x: 312, y: 1085, radius: 29, points: 75, tier: 'diamante', icon: '💎', name_es: 'La Corona Real', name_en: 'The Royal Crown', dicho_es: '«¡Tiro de maestro hasta abajo directo a la Corona Real!»', dicho_en: '"Master shot all the way down into the Royal Crown!"', color: '#06b6d4' },
+    { id: 3, x: 625, y: 1085, radius: 29, points: 75, tier: 'diamante', icon: '🌟', name_es: 'Estrella Azteca', name_en: 'Aztec Star', dicho_es: '«¡Brilló la Estrella Azteca en el fondo con setenta y cinco tantos!»', dicho_en: '"The Aztec Star shone bright at the bottom for 75 points!"', color: '#06b6d4' },
+    { id: 4, x: 155, y: 1085, radius: 29, points: 50, tier: 'fuego', icon: '☀️', name_es: 'El Sol', name_en: 'The Sun', dicho_es: '«¡Como el sol de mediodía, cincuenta puntos al bolsillo!»', dicho_en: '"Like the midday sun, fifty points in your pocket!"', color: '#ef4444' },
+    { id: 5, x: 780, y: 1085, radius: 29, points: 50, tier: 'fuego', icon: '🔥', name_es: 'El Diablo', name_en: 'The Fire Devil', dicho_es: '«¡Canica encendida hasta abajo, cayó en el hoyito de cincuenta!»', dicho_en: '"Blazing marble all the way down into the 50-point hole!"', color: '#ef4444' },
+    { id: 6, x: 468, y: 955, radius: 27, points: 50, tier: 'fuego', icon: '🌙', name_es: 'La Luna', name_en: 'The Moon', dicho_es: '«¡Cruzaste todo el tablero hasta La Luna por cincuenta puntos!»', dicho_en: '"Crossed the board down to The Moon for fifty points!"', color: '#ec4899' },
+    { id: 7, x: 170, y: 825, radius: 29, points: 30, tier: 'esmeralda', icon: '🔔', name_es: 'La Campana', name_en: 'The Bell', dicho_es: '«¡Suena la campana de la kermés con treinta puntos!»', dicho_en: '"The fairground bell rings for thirty points!"', color: '#10b981' },
+    { id: 8, x: 765, y: 825, radius: 29, points: 30, tier: 'esmeralda', icon: '❤️', name_es: 'El Corazón', name_en: 'The Heart', dicho_es: '«¡Directo al Corazón, treinta buenos tantos!»', dicho_en: '"Straight to the Heart, thirty solid points!"', color: '#10b981' },
+    { id: 9, x: 368, y: 825, radius: 29, points: 30, tier: 'esmeralda', icon: '🦜', name_es: 'El Perico', name_en: 'The Parrot', dicho_es: '«¡Cantó el perico verde, treinta puntos seguros!»', dicho_en: '"The green parrot sang, thirty safe points!"', color: '#10b981' },
+    { id: 10, x: 568, y: 825, radius: 29, points: 30, tier: 'esmeralda', icon: '🎸', name_es: 'El Mariachi', name_en: 'The Mariachi', dicho_es: '«¡Con música de mariachi sumas treinta al marcador!»', dicho_en: '"With mariachi music you add thirty to the scoreboard!"', color: '#10b981' },
+    { id: 11, x: 185, y: 565, radius: 30, points: 20, tier: 'barrio', icon: '🍉', name_es: 'La Sandía', name_en: 'The Watermelon', dicho_es: '«¡Fresca la sandía, veinte puntos bien ganados!»', dicho_en: '"Fresh watermelon, twenty points well earned!"', color: '#3b82f6' },
+    { id: 12, x: 310, y: 695, radius: 30, points: 20, tier: 'barrio', icon: '🌵', name_es: 'El Nopal', name_en: 'The Cactus', dicho_es: '«¡Sin espinarse en los clavos, veinte puntos al Nopal!»', dicho_en: '"Dodging the brass nails, twenty points in The Cactus!"', color: '#3b82f6' },
+    { id: 13, x: 625, y: 695, radius: 30, points: 20, tier: 'barrio', icon: '🌶️', name_es: 'El Chile', name_en: 'The Chili Pepper', dicho_es: '«¡Picosito pero sabroso, veinte tantos más!»', dicho_en: '"Spicy and sweet, twenty more points!"', color: '#3b82f6' },
+    { id: 14, x: 750, y: 565, radius: 30, points: 20, tier: 'barrio', icon: '🏺', name_es: 'El Jarrito', name_en: 'The Clay Pitcher', dicho_es: '«¡Adentro del Jarrito de barro, veinte puntos!»', dicho_en: '"Inside the clay pitcher, twenty points!"', color: '#3b82f6' },
+    { id: 15, x: 468, y: 565, radius: 30, points: 20, tier: 'barrio', icon: '🌺', name_es: 'La Dalia', name_en: 'The Dahlia', dicho_es: '«¡En la flor nacional, veinte puntos para tu cuenta!»', dicho_en: '"In the national flower, twenty points for your tally!"', color: '#3b82f6' },
+    { id: 16, x: 468, y: 235, radius: 31, points: 10, tier: 'madera', icon: '🪙', name_es: 'El Quinto', name_en: 'The Nickel', dicho_es: '«¡De diez en diez se llena el jarrito!»', dicho_en: '"Ten by ten fills the pitcher!"', color: '#a855f7' },
+    { id: 17, x: 255, y: 305, radius: 30, points: 10, tier: 'madera', icon: '💀', name_es: 'La Calavera', name_en: 'The Sugar Skull', dicho_es: '«¡La Calaverita de azúcar te regala diez puntos!»', dicho_en: '"The sugar skull treats you to ten points!"', color: '#a855f7' },
+    { id: 18, x: 680, y: 305, radius: 30, points: 10, tier: 'madera', icon: '🤠', name_es: 'El Charro', name_en: 'The Charro', dicho_es: '«¡Con sombrero ancho, diez puntos al Charro!»', dicho_en: '"With a wide sombrero, ten points in The Charro!"', color: '#a855f7' },
+    { id: 19, x: 355, y: 440, radius: 30, points: 10, tier: 'madera', icon: '🐸', name_es: 'La Rana', name_en: 'The Frog', dicho_es: '«¡Brincó la canica hasta La Rana, diez tantos!»', dicho_en: '"The marble hopped into The Frog, ten points!"', color: '#a855f7' },
+    { id: 20, x: 580, y: 440, radius: 30, points: 10, tier: 'madera', icon: '🎺', name_es: 'La Trompeta', name_en: 'The Trumpet', dicho_es: '«¡Suena la trompeta de la feria con diez puntos!»', dicho_en: '"The fairground trumpet sounds for ten points!"', color: '#a855f7' }
   ];
 
   function buildDefaultFeriaNails() {
     const nails = [];
     let idCounter = 1;
+    const canPlace = (nx, ny) => {
+      const tooCloseHole = DEFAULT_FERIA_HOLES.some(
+        (h) => Math.hypot(h.x - nx, h.y - ny) < h.radius + 17.5
+      );
+      const tooCloseNail = nails.some((n) => Math.hypot(n.x - nx, n.y - ny) < 41.5);
+      return !tooCloseHole && !tooCloseNail;
+    };
     const guarded = [
-      [468, 235, 48], [255, 305, 46], [680, 305, 46],
-      [355, 440, 46], [580, 440, 46], [468, 565, 46]
+      [468, 955, 52, [-116, -64]],
+      [170, 825, 52, [-162, -114, -66, -18]],
+      [368, 825, 52, [-162, -114, -66, -18]],
+      [568, 825, 52, [-162, -114, -66, -18]],
+      [765, 825, 52, [-162, -114, -66, -18]],
+      [185, 565, 52, [-162, -114, -66, -18]],
+      [468, 565, 54, [-162, -114, -66, -18]],
+      [750, 565, 52, [-162, -114, -66, -18]],
+      [310, 695, 52, [-162, -114, -66, -18]],
+      [625, 695, 52, [-162, -114, -66, -18]],
+      [468, 235, 54, [-162, -124, -56, -18]],
+      [255, 305, 54, [-162, -124, -56, -18]],
+      [680, 305, 54, [-162, -124, -56, -18]],
+      [355, 440, 54, [-162, -124, -56, -18]],
+      [580, 440, 54, [-162, -124, -56, -18]]
     ];
-    guarded.forEach(([cx, cy, r]) => {
-      [-145, -110, -70, -35].forEach((deg) => {
+    guarded.forEach(([cx, cy, r, degs]) => {
+      degs.forEach((deg) => {
         const rad = (deg * Math.PI) / 180;
-        nails.push({
-          id: idCounter++,
-          x: Math.round(cx + r * Math.cos(rad)),
-          y: Math.round(cy + r * Math.sin(rad)),
-          radius: 5.5
-        });
+        const nx = Math.round(cx + r * Math.cos(rad));
+        const ny = Math.round(cy + r * Math.sin(rad));
+        if (nx >= 138 && nx <= 798 && canPlace(nx, ny)) {
+          nails.push({ id: idCounter++, x: nx, y: ny, radius: 4.5 });
+        }
       });
     });
-    const rowYs = [175, 265, 370, 500, 630, 760, 890, 1015];
+    const rowYs = [168, 232, 298, 366, 434, 502, 570, 638, 706, 774, 842, 910];
     rowYs.forEach((ry, rowIdx) => {
-      const count = rowIdx % 2 === 0 ? 7 : 6;
-      const startX = rowIdx % 2 === 0 ? 145 : 195;
+      const count = rowIdx % 2 === 0 ? 10 : 9;
+      const startX = rowIdx % 2 === 0 ? 138 : 174.5;
       for (let i = 0; i < count; i++) {
-        const nx = startX + i * 108;
-        const tooCloseHole = DEFAULT_FERIA_HOLES.some(
-          (h) => Math.hypot(h.x - nx, h.y - ry) < h.radius + 18
-        );
-        const tooCloseNail = nails.some((n) => Math.hypot(n.x - nx, n.y - ry) < 22);
-        if (!tooCloseHole && !tooCloseNail) {
-          nails.push({ id: idCounter++, x: nx, y: ry, radius: 5.5 });
+        const nx = Math.round(startX + i * 73);
+        if (nx >= 138 && nx <= 798 && canPlace(nx, ry)) {
+          nails.push({ id: idCounter++, x: nx, y: ry, radius: 4.5 });
         }
       }
     });
@@ -125,6 +140,14 @@
       room_code_label: 'Código de la Sala (6 letras)',
       btn_join_room: '🚀 Entrar al Ruedo',
       lobby_code_title: 'CÓDIGO DE SALA',
+      lobby_mode_label: '🎪 Cambiar Tipo de Juego (Anfitrión):',
+      lobby_mode_feria: '🎡 Canicas de la Feria',
+      lobby_mode_circulo: '⭕ Patio: El Círculo',
+      lobby_mode_hoyita: '🕳️ Patio: La Hoyita',
+      lobby_change_mode_label: '🎪 Cambiar Tipo de Juego en esta Sala (Anfitrión):',
+      lobby_change_timer_label: '⏱️ Tiempo por Turno (cámbialo cuando quieras):',
+      back_to_sala_short: 'Sala',
+      sala_short: 'Sala',
       btn_copy_link: '🔗 Copiar',
       btn_leave: '🚪 Salir',
       btn_add_bot: '🤖 +Bot',
@@ -160,7 +183,7 @@
       btn_close: 'Cerrar',
       history_modal_title: '📜 Crónica de Tiros',
       rules_modal_title: '📖 Cómo Jugar a las Canicas Mexicanas (Feria y Patio)',
-      rules_intro: '¡Disfruta los <strong>dos estilos tradicionales de Canicas en México</strong>! Puedes jugarlos por separado o combinados en el <strong>🏆 Torneo Mixto</strong>:'
+      rules_intro: '¡Disfruta los <strong>dos estilos tradicionales de Canicas en México</strong>! Puedes cambiar el estilo en la Sala cuando quieras:'
     },
     en: {
       header_title: 'MEXICAN MARBLES 3D',
@@ -194,6 +217,14 @@
       room_code_label: 'Room Code (6 letters)',
       btn_join_room: '🚀 Join the Arena',
       lobby_code_title: 'ROOM CODE',
+      lobby_mode_label: '🎪 Change Game Type (Host):',
+      lobby_change_mode_label: '🎪 Change Game Mode in this Room (Host):',
+      lobby_change_timer_label: '⏱️ Turn Timer (change anytime):',
+      lobby_mode_feria: '🎡 Fairground Board',
+      lobby_mode_circulo: '⭕ Courtyard: El Círculo',
+      lobby_mode_hoyita: '🕳️ Courtyard: La Hoyita',
+      back_to_sala_short: 'Lobby',
+      sala_short: 'Lobby',
       btn_copy_link: '🔗 Copy Link',
       btn_leave: '🚪 Leave',
       btn_add_bot: '🤖 +Bot',
@@ -253,6 +284,8 @@
   let aimAngle = 0.0;
   let shotSpin = 0.0;
   let shotPower = 0.72;
+  let patioSeatAngle = 90.0;
+  let reyAngleToggle = false;
   let isCharging = false;
   let chargeInterval = null;
   let isAnimatingShot = false;
@@ -265,6 +298,7 @@
 
   // Canvas drag state
   let isDraggingCanvas = false;
+  let isDraggingRingPos = false;
   let dragStartPt = null;
 
   const screenHome = document.getElementById('screen-home');
@@ -298,22 +332,23 @@
   // BUILT-IN STANDALONE / OFFLINE PHYSICS & ROOM ENGINE
   // ==========================================================================
 
-  function generatePatioMarblesLocal(isHoyita) {
+  function generatePatioMarblesLocal(isHoyita, phaseDeg = 0) {
     const marbles = [];
     let id = 1;
+    const reyRad = ((phaseDeg - 90) * Math.PI) / 180;
     marbles.push({
       id: id++,
-      x: 500,
-      y: isHoyita ? 428 : 500,
+      x: isHoyita ? Math.round(500 + 76 * Math.cos(reyRad)) : 500,
+      y: isHoyita ? Math.round(500 + 76 * Math.sin(reyRad)) : 500,
       radius: 19,
       points: 30,
       kind: 'rey',
       color: '#f59e0b',
       active: true
     });
-    const innerR = isHoyita ? 94 : 78;
+    const innerR = isHoyita ? 104 : 78;
     ['#ec4899', '#06b6d4', '#10b981', '#ef4444'].forEach((col, i) => {
-      const rad = ((i * 90 + 45) * Math.PI) / 180;
+      const rad = ((i * 90 + 45 + phaseDeg) * Math.PI) / 180;
       marbles.push({
         id: id++,
         x: Math.round(500 + innerR * Math.cos(rad)),
@@ -325,9 +360,9 @@
         active: true
       });
     });
-    const outerR = 152;
+    const outerR = 154;
     ['#3b82f6', '#8b5cf6', '#f97316', '#14b8a6', '#eab308', '#ec4899', '#10b981', '#06b6d4'].forEach((col, i) => {
-      const rad = ((i * 45) * Math.PI) / 180;
+      const rad = ((i * 45 + phaseDeg * 0.5) * Math.PI) / 180;
       marbles.push({
         id: id++,
         x: Math.round(500 + outerR * Math.cos(rad)),
@@ -340,6 +375,97 @@
       });
     });
     return marbles;
+  }
+
+  function generatePatioStonesLocal(isHoyita, shotCounter = 0, blockedSeatDeg = 90, targets = []) {
+    const stones = [];
+    const minCenterD = isHoyita ? 52 : 38;
+    const isClear = (sx, sy, sr) => {
+      const dc = Math.hypot(sx - 500, sy - 500);
+      if (dc < minCenterD || dc > 214) return false;
+      const hitsMarble = (targets || []).some(
+        (m) => m.active && Math.hypot(m.x - sx, m.y - sy) < m.radius + sr + 3
+      );
+      if (hitsMarble) return false;
+      const hitsStone = stones.some((s) => Math.hypot(s.x - sx, s.y - sy) < s.r + sr + 5);
+      return !hitsStone;
+    };
+
+    const placeRayBlocker = (rayDeg, sr) => {
+      const candidateRadii = isHoyita
+        ? [74, 96, 120, 146, 172, 196]
+        : [84, 110, 136, 162, 188];
+      for (const degOff of [0, 4, -4, 8, -8, 12, -12]) {
+        const rad = ((rayDeg + degOff) * Math.PI) / 180;
+        for (const distR of candidateRadii) {
+          const sx = Math.round(500 + distR * Math.cos(rad));
+          const sy = Math.round(500 + distR * Math.sin(rad));
+          if (isClear(sx, sy, sr)) {
+            stones.push({ x: sx, y: sy, r: sr });
+            return;
+          }
+        }
+      }
+    };
+
+    // 1. Primary blocker rock directly on the active shooter's straight ray!
+    placeRayBlocker(blockedSeatDeg, 15.0);
+
+    // Dynamic progression: rocks appear progressively as marbles disappear!
+    const totalExpected = isHoyita ? 12 : 13;
+    const activeMarbles = (targets || []).filter((m) => m.active).length;
+    const missingMarbles = Math.max(0, totalExpected - activeMarbles);
+
+    // 2. Cardinal entry blockers (90° South, 270° North, 180° West, 0° East)
+    // 0 at start! Unlock 1 cardinal every 3 missing marbles (scales up to 4 when missing >= 12)
+    const cardinalCount = Math.min(4, Math.floor(missingMarbles / 3));
+    const cardinals = [90, 270, 180, 0];
+    for (let c = 0; c < cardinalCount; c++) {
+      const cardinalDeg = cardinals[c];
+      const diff = (((cardinalDeg - blockedSeatDeg + 540) % 360) + 360) % 360 - 180;
+      if (Math.abs(diff) > 16) {
+        placeRayBlocker(cardinalDeg, 14.5);
+      }
+    }
+
+    // 3. Center pit guardian rocks in Hoyita mode (only 1 at start, up to 4 when cleared)
+    if (isHoyita) {
+      const guardianCount = missingMarbles === 0 ? 1 : Math.min(4, 1 + Math.floor(missingMarbles / 4));
+      const rotJitter = (((shotCounter * 37) % 90) * Math.PI) / 180;
+      for (let i = 0; i < guardianCount; i++) {
+        const baseAng = i * (Math.PI / 2) + rotJitter;
+        const distR = 66 + ((shotCounter + i * 5) % 9);
+        const sx = Math.round(500 + distR * Math.cos(baseAng));
+        const sy = Math.round(500 + distR * Math.sin(baseAng));
+        if (isClear(sx, sy, 13.5)) {
+          stones.push({ x: sx, y: sy, r: 13.5 });
+        }
+      }
+    }
+
+    // 4. Scattered courtyard rocks: 0 at start! Scales up to 11 as marbles disappear.
+    const scatteredGoal = Math.floor((missingMarbles * 11) / 13);
+    for (let k = 0; k < scatteredGoal; k++) {
+      const seed =
+        (Math.imul((shotCounter + 1) >>> 0, 2654435761) +
+          Math.imul((k + 1) >>> 0, 1013904223)) >>>
+        0;
+      const baseDeg = (seed % 360) + k * 37;
+      const distR = 85 + ((seed >>> 8) % 120);
+      const sr = 13.5 + ((seed >>> 16) % 3);
+
+      for (let step = 0; step < 24; step++) {
+        const rad = ((baseDeg + step * 15) * Math.PI) / 180;
+        const sx = Math.round(500 + distR * Math.cos(rad));
+        const sy = Math.round(500 + distR * Math.sin(rad));
+        if (isClear(sx, sy, sr)) {
+          stones.push({ x: sx, y: sy, r: sr });
+          break;
+        }
+      }
+    }
+
+    return stones;
   }
 
   function stageForRoundLocal(gameMode, _roundNumber) {
@@ -355,13 +481,14 @@
     const spin = Math.max(-1.0, Math.min(1.0, rawSpin));
     const holes = arenaMeta.feria_holes;
     const nails = arenaMeta.feria_nails;
+    const bottomDividers = [233.5, 390.0, 546.5, 702.5];
     const path = [];
     const pinHits = [];
 
     for (let i = 0; i < 16; i++) {
       path.push({ x: 908, y: Math.round((1120 - (i / 15) * 900) * 10) / 10 });
     }
-    const jitter = (Math.random() - 0.5) * 44;
+    const jitter = (Math.random() - 0.5) * 40;
     const targetEntryX = Math.max(165, Math.min(775, 760 - power * 520 + angle * 135 + jitter));
     for (let i = 1; i <= 14; i++) {
       const frac = i / 14;
@@ -374,93 +501,211 @@
 
     let x = targetEntryX;
     let y = 152;
-    let vx = angle * 3.4 - power * 1.1 + (Math.random() - 0.5) * 2.4;
-    let vy = 3.2 + power * 1.4;
+    let vx = angle * 3.0 - power * 0.9 + (Math.random() - 0.5) * 1.8;
+    let vy = 3.0 + power * 1.4;
     const marbleR = 13.5;
     let capturedHole = null;
-    let stepIdx = path.length;
+    let lastHitNailId = 0;
+    let lastHitStep = 0;
+    let lastOccupiedDeflectId = 0;
+    let lastOccupiedDeflectStep = 0;
 
-    for (let simStep = 0; simStep < 320; simStep++) {
-      vy = Math.max(2.2, Math.min(7.2, vy + 0.24));
-      vx = Math.max(-5.8, Math.min(5.8, (vx + spin * 0.08) * 0.96));
-      x += vx;
-      y += vy;
+    for (let frame = 0; frame < 360; frame++) {
+      const stepIdx = path.length;
 
-      if (x < 118) {
-        x = 118;
-        vx = Math.abs(vx) * 0.75 + 1.4;
-      } else if (x > 818) {
-        x = 818;
-        vx = -Math.abs(vx) * 0.75 - 1.4;
-      }
+      for (let sub = 0; sub < 4; sub++) {
+        vy += 0.095;
+        vx += spin * 0.018;
+        vx *= 0.995;
+        vy *= 0.995;
 
-      for (const nail of nails) {
-        const dx = x - nail.x;
-        const dy = y - nail.y;
-        const dist = Math.hypot(dx, dy);
-        const minDist = marbleR + nail.radius;
-        if (dist < minDist) {
-          const side =
-            Math.abs(dx) > 0.5
-              ? Math.sign(dx)
-              : Math.abs(spin) > 0.05
-                ? Math.sign(spin)
-                : Math.random() < 0.5
-                  ? 1
-                  : -1;
-          const curAng = Math.atan2(dy, dx);
-          const newAng =
-            side > 0
-              ? Math.min(0.45, curAng + 0.34)
-              : Math.max(-Math.PI - 0.45, curAng - 0.34);
-          const safeR = minDist + 0.8;
-          x = Math.max(118, Math.min(818, nail.x + safeR * Math.cos(newAng)));
-          y = Math.max(y + 1.4, nail.y + safeR * Math.sin(newAng));
-          vx = side * (2.6 + Math.random() * 1.2);
-          vy = Math.max(2.2, Math.min(5.2, vy * 0.82));
-          pinHits.push({
-            step: stepIdx,
-            nail_id: nail.id,
-            x: nail.x,
-            y: nail.y,
-            intensity: Math.min(1, Math.max(0.3, (Math.abs(vx) + vy) / 8.5))
-          });
+        const spd = Math.hypot(vx, vy);
+        if (spd > 8.2) {
+          vx = (vx / spd) * 8.2;
+          vy = (vy / spd) * 8.2;
         }
-      }
 
-      if (y >= 995) {
-        const bottomHole = holes
-          .filter((h) => h.y >= 1050)
-          .reduce((best, h) => (Math.abs(h.x - x) < Math.abs(best.x - x) ? h : best));
-        if (bottomHole) {
-          const bdx = bottomHole.x - x;
-          const bdy = Math.max(1.5, bottomHole.y - y);
-          const bdist = Math.max(1, Math.hypot(bdx, bdy));
-          vx = vx * 0.55 + (bdx / bdist) * 3.4;
-          vy = Math.max(1.8, Math.min(4.8, vy * 0.65 + (bdy / bdist) * 2.2));
+        x += vx * 0.25;
+        y += vy * 0.25;
+
+        const cornerInset = y > 1005 ? Math.min(1, Math.max(0, (y - 1005) / 80)) * 22 : 0;
+        const minX = 118 + cornerInset;
+        const maxX = 818 - cornerInset;
+        if (x < minX) {
+          x = minX;
+          vx = Math.abs(vx) * 0.65 + 0.9;
+        } else if (x > maxX) {
+          x = maxX;
+          vx = -Math.abs(vx) * 0.65 - 0.9;
         }
-        if (y > 1088) y = 1088;
-      }
 
-      for (const hole of holes) {
-        const dx = hole.x - x;
-        const dy = hole.y - y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < hole.radius + 14) {
-          const pull = hole.y >= 1050 ? 1.65 : 0.95;
-          vx = vx * 0.74 + (dx / Math.max(1, dist)) * pull;
-          if (dy > 0) {
-            vy = Math.max(1.8, Math.min(5.2, vy * 0.78 + (dy / Math.max(1, dist)) * pull));
+        if (y > 1088) {
+          y = 1088;
+          vy = 0;
+        }
+
+        for (const nail of nails) {
+          const dx = x - nail.x;
+          const dy = y - nail.y;
+          const dist = Math.hypot(dx, dy);
+          const minDist = marbleR + nail.radius;
+          if (dist < minDist && dist > 0.0001) {
+            const nx = dx / dist;
+            const ny = dy / dist;
+            x = nail.x + nx * (minDist + 0.3);
+            y = nail.y + ny * (minDist + 0.3);
+
+            const vn = vx * nx + vy * ny;
+            if (vn < 0) {
+              vx -= 1.42 * vn * nx;
+              vy -= 1.42 * vn * ny;
+              if (ny < -0.15 && Math.abs(vx) < 2.4) {
+                const side =
+                  Math.abs(nx) > 0.04
+                    ? Math.sign(nx)
+                    : Math.abs(spin) > 0.05
+                      ? Math.sign(spin)
+                      : Math.random() < 0.5
+                        ? 1
+                        : -1;
+                vx = side * (2.3 + Math.random() * 0.9);
+              }
+              if (vy < 1.25) {
+                vy = 1.25;
+              }
+              if (nail.id !== lastHitNailId || stepIdx > lastHitStep + 3) {
+                pinHits.push({
+                  step: stepIdx,
+                  nail_id: nail.id,
+                  x: nail.x,
+                  y: nail.y,
+                  intensity: Math.min(1, Math.max(0.25, Math.abs(vn) / 6.0))
+                });
+                lastHitNailId = nail.id;
+                lastHitStep = stepIdx;
+              }
+            }
           }
         }
-        if (dist < hole.radius * 0.74) {
-          capturedHole = hole;
-          break;
+
+        if (y >= 1005) {
+          const rampT = Math.min(1, Math.max(0, (y - 1005) / 80));
+          const wedgeReach = 2.0 + rampT * 50.0;
+          for (const divX of bottomDividers) {
+            const dx = x - divX;
+            if (Math.abs(dx) < wedgeReach) {
+              const side =
+                Math.abs(dx) > 0.05
+                  ? Math.sign(dx)
+                  : Math.abs(vx) > 0.05
+                    ? Math.sign(vx)
+                    : 1;
+              x = divX + side * (wedgeReach + 0.25);
+              vx = vx * 0.55 + side * 1.8;
+              vy = Math.max(vy, 2.2);
+            }
+          }
+        }
+
+        for (const hole of holes) {
+          const dx = hole.x - x;
+          const dy = hole.y - y;
+          const dist = Math.hypot(dx, dy);
+          const speed = Math.hypot(vx, vy);
+          const isOccupied = occupiedIds.includes(hole.id);
+
+          if (isOccupied && dist < hole.radius + 10.0 && hole.y < 1050) {
+            if (dist < 6.8 && speed < 3.1) {
+              x = hole.x;
+              y = hole.y;
+              capturedHole = hole;
+              break;
+            } else if (
+              hole.id !== lastOccupiedDeflectId ||
+              stepIdx > lastOccupiedDeflectStep + 4
+            ) {
+              const outNx = -dx / Math.max(1, dist);
+              const outNy = -dy / Math.max(1, dist);
+              const side =
+                Math.abs(outNx) > 0.06
+                  ? Math.sign(outNx)
+                  : Math.abs(vx) > 0.1
+                    ? Math.sign(vx)
+                    : Math.random() < 0.5
+                      ? 1
+                      : -1;
+              if (dist < hole.radius - 2.0) {
+                x = hole.x + outNx * (hole.radius - 1.5);
+                y = hole.y + outNy * (hole.radius - 1.5);
+              }
+              vx = vx * 0.35 + outNx * 1.9 + side * (2.4 + Math.random() * 1.1);
+              vy = Math.max(1.85, vy * 0.82 + Math.max(0.25, outNy) * 1.35);
+              pinHits.push({
+                step: stepIdx,
+                nail_id: 1000 + hole.id,
+                x: hole.x,
+                y: hole.y,
+                intensity: 0.9
+              });
+              lastOccupiedDeflectId = hole.id;
+              lastOccupiedDeflectStep = stepIdx;
+            }
+          } else if (dist < hole.radius - 3.0) {
+            if (
+              isOccupied &&
+              (hole.id !== lastOccupiedDeflectId || stepIdx > lastOccupiedDeflectStep + 6)
+            ) {
+              pinHits.push({
+                step: stepIdx,
+                nail_id: 1000 + hole.id,
+                x: hole.x,
+                y: hole.y,
+                intensity: 0.8
+              });
+              lastOccupiedDeflectId = hole.id;
+              lastOccupiedDeflectStep = stepIdx;
+            }
+            const pull = hole.y >= 1050 ? 2.65 : 2.45;
+            vx = vx * 0.46 + (dx / Math.max(1, dist)) * pull;
+            vy = vy * 0.46 + (dy / Math.max(1, dist)) * pull;
+            if (dist < 7.5) {
+              x = hole.x;
+              y = hole.y;
+              capturedHole = hole;
+              break;
+            }
+          } else if (dist < hole.radius + (hole.points <= 20 ? 11.0 : 8.5) && hole.y < 1050) {
+            const alignRatio = hole.points <= 20 ? 0.80 : 0.58;
+            const tipSpeed = hole.points <= 20 ? 5.2 : 4.3;
+            if ((Math.abs(dx) < hole.radius * alignRatio && dy > -2.5) || speed < tipSpeed) {
+              vx = vx * 0.62 + (dx / Math.max(1, dist)) * 1.85;
+              vy = vy * 0.74 + (dy / Math.max(1, dist)) * 1.70;
+            } else {
+              const outNx = -dx / Math.max(1, dist);
+              const side =
+                Math.abs(outNx) > 0.05
+                  ? Math.sign(outNx)
+                  : Math.abs(vx) > 0.05
+                    ? Math.sign(vx)
+                    : 1;
+              vx = vx * 0.52 + outNx * 1.35 + side * 1.35;
+              vy = Math.max(1.75, vy * 0.94);
+            }
+          }
+        }
+
+        if (capturedHole) break;
+      }
+
+      if (path.length >= 36) {
+        const prev4 = path[path.length - 4];
+        if (Math.hypot(x - prev4.x, y - prev4.y) < 5.0) {
+          vx += (Math.random() < 0.5 ? 1 : -1) * 2.8;
+          vy = Math.max(vy, 2.6);
         }
       }
 
       path.push({ x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10 });
-      stepIdx++;
       if (capturedHole) break;
     }
 
@@ -470,14 +715,7 @@
         Math.hypot(h.x - x, h.y - y) < Math.hypot(best.x - x, best.y - y) ? h : best
       );
 
-    const lastPt = path[path.length - 1] || { x: finalHole.x, y: finalHole.y };
-    for (let i = 1; i <= 6; i++) {
-      const f = i / 6;
-      path.push({
-        x: Math.round((lastPt.x + (finalHole.x - lastPt.x) * f) * 10) / 10,
-        y: Math.round((lastPt.y + (finalHole.y - lastPt.y) * f) * 10) / 10
-      });
-    }
+    path.push({ x: finalHole.x, y: finalHole.y });
 
     let mult = 1;
     const reasonsEs = [];
@@ -521,7 +759,8 @@
     rawSpin,
     targets,
     rivals,
-    bonusRule
+    bonusRule,
+    customStones
   ) {
     const isHoyita = mode === 'hoyita';
     const power = Math.max(0.1, Math.min(1.0, rawPower));
@@ -532,7 +771,7 @@
     const startX = 500 + 415 * Math.cos(seatRad);
     const startY = 500 + 415 * Math.sin(seatRad);
     const inwardAngle = Math.atan2(500 - startY, 500 - startX);
-    const aimRad = inwardAngle + (angle * 36 * Math.PI) / 180 + (Math.random() - 0.5) * 0.04;
+    const aimRad = inwardAngle + (angle * 42 * Math.PI) / 180 + (Math.random() - 0.5) * 0.04;
     const initSpeed = 6.2 + power * 14.5;
 
     const bodies = [
@@ -600,6 +839,10 @@
       }
     });
 
+    const stones =
+      customStones && customStones.length
+        ? customStones
+        : generatePatioStonesLocal(isHoyita, 0, seatAngleDeg, targets);
     const collisions = [];
     const ponchadosIds = [];
     let sampleStep = 0;
@@ -618,6 +861,33 @@
           b.y += b.vy;
           b.vx *= 0.968;
           b.vy *= 0.968;
+
+          stones.forEach((st) => {
+            const dxS = b.x - st.x;
+            const dyS = b.y - st.y;
+            const distS = Math.hypot(dxS, dyS);
+            const minS = b.radius + st.r;
+            if (distS < minS && distS > 0.001) {
+              const nx = dxS / distS;
+              const ny = dyS / distS;
+              b.x = st.x + nx * minS;
+              b.y = st.y + ny * minS;
+              const vn = b.vx * nx + b.vy * ny;
+              if (vn < 0) {
+                b.vx -= 1.82 * vn * nx;
+                b.vy -= 1.82 * vn * ny;
+                if (collisions.length < 18) {
+                  collisions.push({
+                    step: sampleStep,
+                    x: st.x,
+                    y: st.y,
+                    intensity: Math.min(0.95, Math.max(0.25, Math.abs(vn) / 11)),
+                    kind: 'stone'
+                  });
+                }
+              }
+            }
+          });
 
           const dxC = b.x - 500;
           const dyC = b.y - 500;
@@ -711,7 +981,9 @@
     }
 
     const capturedIds = [];
-    let pointsScored = bodies[0].encholada ? 50 : 0;
+    let pointsScored = 0;
+    const hitMarble = collisions.some((c) => c.kind === 'target' || c.kind === 'rival');
+
     bodies.slice(1).forEach((b) => {
       if (b.target_id) {
         const t = targets.find((m) => m.id === b.target_id);
@@ -721,7 +993,7 @@
           if (b.captured) {
             t.active = false;
             capturedIds.push(t.id);
-            pointsScored += b.points_val * (b.encholada ? 2 : 1);
+            pointsScored += b.points_val * (b.encholada || isCazador ? 2 : 1);
           }
         }
       } else if (b.rival_id) {
@@ -733,29 +1005,49 @@
       }
     });
 
+    const repeatEmptyHoyita =
+      bodies[0].encholada && isCazador && !hitMarble && capturedIds.length === 0 && ponchadosIds.length === 0;
+
+    if (bodies[0].encholada) {
+      if (repeatEmptyHoyita) {
+        pointsScored += 10;
+      } else if (hitMarble) {
+        pointsScored += 60;
+      } else {
+        pointsScored += 45;
+      }
+    }
+
     if (ponchadosIds.length > 0) {
       pointsScored += (isCazador ? 40 : 25) * ponchadosIds.length;
     }
 
     const earnedBonus = Boolean(
-      bonusRule && (capturedIds.length > 0 || bodies[0].encholada || ponchadosIds.length > 0)
+      bonusRule &&
+        (capturedIds.length > 0 ||
+          (bodies[0].encholada && !repeatEmptyHoyita) ||
+          ponchadosIds.length > 0)
     );
 
-    const headlineEs = bodies[0].encholada
-      ? `🕳️ ¡ENCHOLADA EN LA HOYITA! (+${pointsScored} pts)`
-      : capturedIds.length > 0
-        ? `🎯 ¡CHIRAS PELAS! Sacaste ${capturedIds.length} canica(s) (+${pointsScored} pts)`
-        : ponchadosIds.length > 0
-          ? `💥 ¡PONCHADO! Quemaste al rival (+${pointsScored} pts)`
-          : '🔮 ¡Choquecito en la tierra!';
+    const headlineEs = repeatEmptyHoyita
+      ? '🔮 ¡Ya eres Cazador! (+10 pts) • ¡Saca canicas para Puntos x2!'
+      : bodies[0].encholada
+        ? `🕳️ ¡ENCHOLADA EN LA HOYITA! (+${pointsScored} pts)`
+        : capturedIds.length > 0
+          ? `🎯 ¡CHIRAS PELAS! Sacaste ${capturedIds.length} canica(s) (+${pointsScored} pts)`
+          : ponchadosIds.length > 0
+            ? `💥 ¡PONCHADO! Quemaste al rival (+${pointsScored} pts)`
+            : '🔮 ¡Choquecito en la tierra!';
 
-    const headlineEn = bodies[0].encholada
-      ? `🕳️ SUNK IN LA HOYITA! (+${pointsScored} pts)`
-      : capturedIds.length > 0
-        ? `🎯 KNOCKOUT! Knocked out ${capturedIds.length} marble(s) (+${pointsScored} pts)`
-        : ponchadosIds.length > 0
-          ? `💥 RIVAL STRIKE! (+${pointsScored} pts)`
-          : '🔮 Glass clack in the dirt!';
+    const headlineEn = repeatEmptyHoyita
+      ? '🔮 Already Hunter! (+10 pts) • Knock out marbles for 2x Points!'
+      : bodies[0].encholada
+        ? `🕳️ SUNK IN LA HOYITA! (+${pointsScored} pts)`
+        : capturedIds.length > 0
+          ? `🎯 KNOCKOUT! Knocked out ${capturedIds.length} marble(s) (+${pointsScored} pts)`
+          : ponchadosIds.length > 0
+            ? `💥 RIVAL STRIKE! (+${pointsScored} pts)`
+            : '🔮 Glass clack in the dirt!';
 
     return {
       mode,
@@ -770,8 +1062,12 @@
       earned_bonus_shot: earnedBonus,
       headline_es: headlineEs,
       headline_en: headlineEn,
-      dicho_es: '«¡Con uñita y buen pulso en el ruedo mexicano!»',
-      dicho_en: '"With a sharp thumb flick in the Mexican ring!"',
+      dicho_es: repeatEmptyHoyita
+        ? '«Como ya eres Cazador, apunta a las canicas del ruedo (valen doble) o haz carambola.»'
+        : '«¡Con uñita y buen pulso en el ruedo mexicano!»',
+      dicho_en: repeatEmptyHoyita
+        ? '"Since you are already Hunter, aim at the ring marbles (worth 2x) or bank off a marble!"'
+        : '"With a sharp thumb flick in the Mexican ring!"',
       shooter_final_x: bodies[0].x,
       shooter_final_y: bodies[0].y,
       paths: bodies
@@ -791,10 +1087,24 @@
 
   function handleOfflineCommand(payload) {
     if (payload.type === 'create_room' || payload.type === 'join_room') {
-      const code = payload.roomCode || 'CANI26';
-      myPlayerId = 'p_local_1';
+      const code = (payload.roomCode || 'CANI26').trim().toUpperCase();
+      myPlayerId = payload.playerId || myPlayerId || 'p_local_1';
+
+      // Check if reconnecting to an existing saved offline room!
+      const savedOffline = window.safeStorage.getItem('canicas_offline_room');
+      if (payload.type === 'join_room' && savedOffline) {
+        try {
+          const parsed = JSON.parse(savedOffline);
+          if (parsed && parsed.code && parsed.code.toUpperCase() === code) {
+            currentRoom = parsed;
+            handleServerMessage({ type: 'room_joined', playerId: myPlayerId, room: currentRoom });
+            return;
+          }
+        } catch (_) {}
+      }
+
       const settings = payload.settings || {
-        game_mode: 'torneo',
+        game_mode: 'feria',
         win_condition: 'rounds',
         max_rounds: 5,
         target_score: 250,
@@ -833,11 +1143,16 @@
         active_stage: initStage,
         feria_occupied_holes: [],
         patio_targets: generatePatioMarblesLocal(initStage === 'hoyita'),
+        patio_stones: generatePatioStonesLocal(
+          initStage === 'hoyita',
+          0,
+          90,
+          generatePatioMarblesLocal(initStage === 'hoyita')
+        ),
         history: [],
         podium: [],
         awards: []
       };
-      // Automatically add 1 bot in standalone mode so the user can play immediately, or let them add more!
       handleOfflineCommand({ type: 'add_bot' });
       handleServerMessage({ type: 'room_joined', playerId: myPlayerId, room: currentRoom });
       return;
@@ -881,6 +1196,12 @@
       currentRoom.active_stage = stageForRoundLocal(currentRoom.settings.game_mode, 1);
       currentRoom.feria_occupied_holes = [];
       currentRoom.patio_targets = generatePatioMarblesLocal(currentRoom.active_stage === 'hoyita');
+      currentRoom.patio_stones = generatePatioStonesLocal(
+        currentRoom.active_stage === 'hoyita',
+        0,
+        90,
+        currentRoom.patio_targets
+      );
       currentRoom.players.forEach((p, i) => {
         p.score = 0;
         p.marbles_captured = 0;
@@ -890,17 +1211,15 @@
         p.shooter_x = Math.round(500 + 415 * Math.cos(rad));
         p.shooter_y = Math.round(500 + 415 * Math.sin(rad));
       });
+      refreshOfflineTurnDeadline(currentRoom);
       handleServerMessage({ type: 'game_started', room: currentRoom });
-    } else if (payload.type === 'switch_stage') {
-      currentRoom.active_stage = payload.stage;
-      if (payload.stage !== 'feria') {
-        currentRoom.patio_targets = generatePatioMarblesLocal(payload.stage === 'hoyita');
-      } else {
-        currentRoom.feria_occupied_holes = [];
-      }
-      handleServerMessage({ type: 'room_updated', room: currentRoom });
     } else if (payload.type === 'shoot_marble') {
-      executeOfflineShot(payload.power ?? 0.72, payload.angle ?? 0, payload.spin ?? 0);
+      executeOfflineShot(
+        payload.power ?? 0.72,
+        payload.angle ?? 0,
+        payload.spin ?? 0,
+        payload.seatAngle
+      );
     } else if (payload.type === 'nudge_arena') {
       const me = currentRoom.players.find((p) => p.id === myPlayerId) || currentRoom.players[0];
       handleServerMessage({
@@ -919,36 +1238,75 @@
         avatar: me.avatar,
         text: payload.text
       });
+    } else if (payload.type === 'update_settings' && payload.settings) {
+      currentRoom.settings = Object.assign({}, currentRoom.settings, payload.settings);
+      if (currentRoom.state === 'lobby') {
+        currentRoom.active_stage = stageForRoundLocal(currentRoom.settings.game_mode, 1);
+        currentRoom.feria_occupied_holes = [];
+        currentRoom.patio_targets = generatePatioMarblesLocal(currentRoom.active_stage === 'hoyita');
+        currentRoom.patio_stones = generatePatioStonesLocal(
+          currentRoom.active_stage === 'hoyita',
+          0,
+          90,
+          currentRoom.patio_targets
+        );
+      }
+      refreshOfflineTurnDeadline(currentRoom);
+      handleServerMessage({ type: 'room_updated', room: currentRoom });
+    } else if (payload.type === 'switch_stage' && payload.stage) {
+      currentRoom.settings.game_mode = payload.stage;
+      currentRoom.active_stage = payload.stage;
+      currentRoom.feria_occupied_holes = [];
+      currentRoom.patio_targets = generatePatioMarblesLocal(payload.stage === 'hoyita');
+      currentRoom.patio_stones = generatePatioStonesLocal(
+        payload.stage === 'hoyita',
+        currentRoom.shot_counter || 0,
+        90,
+        currentRoom.patio_targets
+      );
+      handleServerMessage({ type: 'room_updated', room: currentRoom });
     } else if (payload.type === 'play_again') {
       currentRoom.state = 'lobby';
+      currentRoom.turn_deadline_epoch = null;
       handleServerMessage({ type: 'room_reset', room: currentRoom });
     }
   }
 
-  function executeOfflineShot(power, angle, spin) {
-    if (!currentRoom || currentRoom.state !== 'playing') return;
-    const turnIdx = currentRoom.current_turn_idx;
-    const p = currentRoom.players[turnIdx];
+  function refreshOfflineTurnDeadline(room) {
+    if (!room) return;
+    const secs = Number(room.settings && room.settings.turn_timer_seconds) || 0;
+    if (room.state === 'playing' && secs > 0) {
+      room.turn_deadline_epoch = Math.floor(Date.now() / 1000) + secs;
+    } else {
+      room.turn_deadline_epoch = null;
+    }
+  }
+
+  function executeOfflineShot(power, angle, spin, customSeatAngle) {
+    const baseRoom = pendingRoomAfterAnim || currentRoom;
+    if (!baseRoom || baseRoom.state !== 'playing') return;
+    const nextRoom = JSON.parse(JSON.stringify(baseRoom));
+    const turnIdx = nextRoom.current_turn_idx;
+    const p = nextRoom.players[turnIdx];
     if (!p) return;
 
-    currentRoom.shot_counter++;
-    const stage = currentRoom.active_stage;
+    nextRoom.shot_counter++;
+    const stage = stageForRoundLocal(nextRoom.settings.game_mode, nextRoom.round_number);
+    nextRoom.active_stage = stage;
     const wasGolden = p.bonus_shot_pending;
     let outcome;
 
     if (stage === 'feria') {
-      const occIds = currentRoom.settings.combo_multiplier
-        ? currentRoom.feria_occupied_holes.map((h) => h.hole_id)
-        : [];
+      const occIds = nextRoom.feria_occupied_holes.map((h) => h.hole_id);
       const sim = simulateFeriaShotLocal(
         power,
         angle,
         spin,
         occIds,
-        wasGolden && currentRoom.settings.combo_multiplier,
-        currentRoom.settings.bonus_shot_rule
+        wasGolden && nextRoom.settings.combo_multiplier,
+        nextRoom.settings.bonus_shot_rule
       );
-      currentRoom.feria_occupied_holes.push({
+      nextRoom.feria_occupied_holes.push({
         hole_id: sim.hole.id,
         player_id: p.id,
         player_name: p.name,
@@ -961,8 +1319,8 @@
       p.stats.best_shot_points = Math.max(p.stats.best_shot_points, sim.total_points);
 
       outcome = {
-        shot_number: currentRoom.shot_counter,
-        round_number: currentRoom.round_number,
+        shot_number: nextRoom.shot_counter,
+        round_number: nextRoom.round_number,
         stage,
         player_id: p.id,
         player_name: p.name,
@@ -980,8 +1338,12 @@
         patio_sim: null
       };
     } else {
-      const seatDeg = turnIdx * (360 / currentRoom.players.length) + 90;
-      const rivals = currentRoom.players
+      const defaultSeatDeg = turnIdx * (360 / nextRoom.players.length) + 90;
+      const seatDeg =
+        typeof customSeatAngle === 'number' && Number.isFinite(customSeatAngle)
+          ? ((customSeatAngle % 360) + 360) % 360
+          : defaultSeatDeg;
+      const rivals = nextRoom.players
         .filter((_, idx) => idx !== turnIdx)
         .map((rp) => ({ id: rp.id, x: rp.shooter_x, y: rp.shooter_y, color: rp.color }));
       const sim = simulatePatioShotLocal(
@@ -992,12 +1354,13 @@
         power,
         angle,
         spin,
-        currentRoom.patio_targets,
+        nextRoom.patio_targets,
         rivals,
-        currentRoom.settings.bonus_shot_rule && !wasGolden
+        nextRoom.settings.bonus_shot_rule && !wasGolden,
+        nextRoom.patio_stones
       );
       rivals.forEach((rv) => {
-        const rp = currentRoom.players.find((pl) => pl.id === rv.id);
+        const rp = nextRoom.players.find((pl) => pl.id === rv.id);
         if (rp) {
           rp.shooter_x = rv.x;
           rp.shooter_y = rv.y;
@@ -1006,29 +1369,41 @@
       p.shooter_x = sim.shooter_final_x;
       p.shooter_y = sim.shooter_final_y;
       if (sim.encholada_hoyita) p.is_cazador = true;
-      p.score += sim.points_scored;
-      p.marbles_captured += sim.captured_ids.length + (sim.encholada_hoyita ? 1 : 0);
-      p.bonus_shot_pending = sim.earned_bonus_shot;
-      p.stats.best_shot_points = Math.max(p.stats.best_shot_points, sim.points_scored);
 
-      if (currentRoom.patio_targets.filter((m) => m.active).length === 0) {
-        currentRoom.patio_targets = generatePatioMarblesLocal(stage === 'hoyita');
+      let totalPts = sim.points_scored;
+      let headlineEs = sim.headline_es;
+      let headlineEn = sim.headline_en;
+
+      const remainingActive = nextRoom.patio_targets.filter((m) => m.active).length;
+      if (remainingActive <= 4) {
+        const phase = nextRoom.shot_counter * 53;
+        nextRoom.patio_targets = generatePatioMarblesLocal(stage === 'hoyita', phase);
+        if (sim.captured_ids.length > 0) {
+          totalPts += 15;
+          headlineEs += ' • 🌊 ¡Nueva tanda (+15)!';
+          headlineEn += ' • 🌊 New wave (+15)!';
+        }
       }
 
+      p.score += totalPts;
+      p.marbles_captured += sim.captured_ids.length + (sim.encholada_hoyita ? 1 : 0);
+      p.bonus_shot_pending = sim.earned_bonus_shot;
+      p.stats.best_shot_points = Math.max(p.stats.best_shot_points, totalPts);
+
       outcome = {
-        shot_number: currentRoom.shot_counter,
-        round_number: currentRoom.round_number,
+        shot_number: nextRoom.shot_counter,
+        round_number: nextRoom.round_number,
         stage,
         player_id: p.id,
         player_name: p.name,
         player_avatar: p.avatar,
         player_color: p.color,
-        points_scored: sim.points_scored,
+        points_scored: totalPts,
         new_total_score: p.score,
         earned_bonus_shot: sim.earned_bonus_shot,
         was_golden_marble: wasGolden,
-        headline_es: sim.headline_es,
-        headline_en: sim.headline_en,
+        headline_es: headlineEs,
+        headline_en: headlineEn,
         dicho_es: sim.dicho_es,
         dicho_en: sim.dicho_en,
         feria_sim: null,
@@ -1036,7 +1411,7 @@
       };
     }
 
-    currentRoom.history.unshift({
+    nextRoom.history.unshift({
       shot_number: outcome.shot_number,
       round_number: outcome.round_number,
       stage: outcome.stage,
@@ -1048,16 +1423,33 @@
       summary_en: outcome.headline_en
     });
 
-    if (!outcome.earned_bonus_shot) {
-      const nextIdx = (currentRoom.current_turn_idx + 1) % currentRoom.players.length;
+    if (
+      nextRoom.settings.win_condition === 'target' &&
+      p.score >= nextRoom.settings.target_score
+    ) {
+      nextRoom.state = 'finished';
+      const ranked = [...nextRoom.players].sort((a, b) => b.score - a.score);
+      nextRoom.podium = ranked.slice(0, 3).map((pl, idx) => ({
+        place: idx + 1,
+        player_id: pl.id,
+        name: pl.name,
+        avatar: pl.avatar,
+        color: pl.color,
+        score: pl.score,
+        marbles_captured: pl.marbles_captured
+      }));
+      nextRoom.victory_reason_es = `¡${ranked[0].name} alcanzó la meta con ${ranked[0].score} puntos!`;
+      nextRoom.victory_reason_en = `${ranked[0].name} reached the target with ${ranked[0].score} points!`;
+    } else if (!outcome.earned_bonus_shot) {
+      const nextIdx = (nextRoom.current_turn_idx + 1) % nextRoom.players.length;
       if (nextIdx === 0) {
         if (
-          currentRoom.settings.win_condition === 'rounds' &&
-          currentRoom.round_number >= currentRoom.settings.max_rounds
+          nextRoom.settings.win_condition === 'rounds' &&
+          nextRoom.round_number >= nextRoom.settings.max_rounds
         ) {
-          currentRoom.state = 'finished';
-          const ranked = [...currentRoom.players].sort((a, b) => b.score - a.score);
-          currentRoom.podium = ranked.slice(0, 3).map((pl, idx) => ({
+          nextRoom.state = 'finished';
+          const ranked = [...nextRoom.players].sort((a, b) => b.score - a.score);
+          nextRoom.podium = ranked.slice(0, 3).map((pl, idx) => ({
             place: idx + 1,
             player_id: pl.id,
             name: pl.name,
@@ -1066,9 +1458,9 @@
             score: pl.score,
             marbles_captured: pl.marbles_captured
           }));
-          currentRoom.victory_reason_es = `¡Campeón tras ${currentRoom.settings.max_rounds} rondas con ${ranked[0].score} puntos!`;
-          currentRoom.victory_reason_en = `Champion after ${currentRoom.settings.max_rounds} rounds with ${ranked[0].score} points!`;
-          currentRoom.awards = [
+          nextRoom.victory_reason_es = `¡Campeón tras ${nextRoom.settings.max_rounds} rondas con ${ranked[0].score} puntos!`;
+          nextRoom.victory_reason_en = `Champion after ${nextRoom.settings.max_rounds} rounds with ${ranked[0].score} points!`;
+          nextRoom.awards = [
             {
               id: 'sniper',
               icon: '🎯',
@@ -1081,37 +1473,29 @@
             }
           ];
         } else {
-          currentRoom.round_number++;
-          const nextStage = stageForRoundLocal(
-            currentRoom.settings.game_mode,
-            currentRoom.round_number
-          );
-          if (nextStage !== currentRoom.active_stage) {
-            currentRoom.active_stage = nextStage;
-            currentRoom.patio_targets = generatePatioMarblesLocal(nextStage === 'hoyita');
+          nextRoom.round_number++;
+          if (nextRoom.feria_occupied_holes.length >= 14) {
+            nextRoom.feria_occupied_holes = [];
           }
-          currentRoom.feria_occupied_holes = [];
         }
       }
-      currentRoom.current_turn_idx = nextIdx;
+      nextRoom.current_turn_idx = nextIdx;
     }
 
-    handleServerMessage({ type: 'shot_result', outcome, room: currentRoom });
-
-    if (currentRoom.state === 'playing') {
-      const nextP = currentRoom.players[currentRoom.current_turn_idx];
-      if (nextP && nextP.is_bot) {
-        setTimeout(() => {
-          if (currentRoom && currentRoom.state === 'playing') {
-            executeOfflineShot(
-              0.5 + Math.random() * 0.42,
-              (Math.random() - 0.5) * 0.5,
-              (Math.random() - 0.5) * 0.5
-            );
-          }
-        }, 2500);
-      }
+    if (nextRoom.active_stage !== 'feria') {
+      const nextSeatDeg = outcome.earned_bonus_shot
+        ? seatDeg
+        : nextRoom.current_turn_idx * (360 / Math.max(1, nextRoom.players.length)) + 90;
+      nextRoom.patio_stones = generatePatioStonesLocal(
+        nextRoom.active_stage === 'hoyita',
+        nextRoom.shot_counter,
+        nextSeatDeg,
+        nextRoom.patio_targets
+      );
     }
+
+    refreshOfflineTurnDeadline(nextRoom);
+    handleServerMessage({ type: 'shot_result', outcome, room: nextRoom });
   }
 
   // ==========================================================================
@@ -1201,15 +1585,23 @@
   // 2. WEBSOCKET CONNECTION & PROTOCOL (WITH AUTOMATIC STANDALONE FALLBACK)
   // ==========================================================================
 
+  let pendingWsMessages = [];
+
   function connectWebSocket(onOpenCallback) {
     if (useOfflineEngine) {
       if (onOpenCallback) onOpenCallback();
       return;
     }
-    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
-      if (ws.readyState === WebSocket.OPEN && onOpenCallback) {
+
+    if (onOpenCallback) {
+      if (ws && ws.readyState === WebSocket.OPEN) {
         onOpenCallback();
+        return;
       }
+      pendingWsMessages.push(onOpenCallback);
+    }
+
+    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) {
       return;
     }
 
@@ -1218,7 +1610,15 @@
       ws = new WebSocket(`${proto}//${window.location.host}/ws`);
 
       ws.addEventListener('open', () => {
-        if (onOpenCallback) onOpenCallback();
+        const queued = [...pendingWsMessages];
+        pendingWsMessages = [];
+        queued.forEach((cb) => {
+          try {
+            cb();
+          } catch (e) {
+            console.error(e);
+          }
+        });
       });
 
       ws.addEventListener('message', (ev) => {
@@ -1228,13 +1628,43 @@
         } catch (_) {}
       });
 
+      ws.addEventListener('close', () => {
+        // If we are in an active room, try reconnecting automatically after a brief delay
+        if (currentRoom && myPlayerId && !useOfflineEngine) {
+          setTimeout(() => {
+            if (currentRoom && myPlayerId) {
+              connectWebSocket(() => {
+                sendWs({
+                  type: 'join_room',
+                  roomCode: currentRoom.code,
+                  playerName: getPlayerName(),
+                  avatar: selectedAvatar,
+                  color: selectedColor,
+                  playerId: myPlayerId
+                });
+              });
+            }
+          }, 1200);
+        }
+      });
+
       ws.addEventListener('error', () => {
-        useOfflineEngine = true;
-        if (onOpenCallback) onOpenCallback();
+        if (!currentRoom) {
+          useOfflineEngine = true;
+          const queued = [...pendingWsMessages];
+          pendingWsMessages = [];
+          queued.forEach((cb) => {
+            try { cb(); } catch (e) { console.error(e); }
+          });
+        }
       });
     } catch (_) {
       useOfflineEngine = true;
-      if (onOpenCallback) onOpenCallback();
+      const queued = [...pendingWsMessages];
+      pendingWsMessages = [];
+      queued.forEach((cb) => {
+        try { cb(); } catch (e) { console.error(e); }
+      });
     }
   }
 
@@ -1244,7 +1674,11 @@
       return;
     }
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify(payload));
+      try {
+        ws.send(JSON.stringify(payload));
+      } catch (_) {
+        connectWebSocket(() => sendWs(payload));
+      }
     } else {
       connectWebSocket(() => {
         if (useOfflineEngine) {
@@ -1265,25 +1699,64 @@
     return lang === 'en' ? 'Player 1' : 'Jugador 1';
   }
 
+  let pendingRoomAfterAnim = null;
+  let pendingShotQueue = [];
+
   function handleServerMessage(msg) {
+    if (msg.room && msg.room.settings) {
+      msg.room.active_stage = stageForRoundLocal(msg.room.settings.game_mode, 1);
+    }
+
     switch (msg.type) {
       case 'room_joined': {
+        isAutoReconnecting = false;
+        hideReconnectingOverlay();
         myPlayerId = msg.playerId;
         currentRoom = msg.room;
+        pendingRoomAfterAnim = null;
+        pendingShotQueue = [];
         window.safeStorage.setItem('canicas_player_id', myPlayerId);
         window.safeStorage.setItem('canicas_room_code', currentRoom.code);
+        if (useOfflineEngine) {
+          window.safeStorage.setItem('canicas_offline_room', JSON.stringify(currentRoom));
+        }
+        try {
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, '', `?room=${encodeURIComponent(currentRoom.code)}#pid=${encodeURIComponent(myPlayerId)}`);
+          } else {
+            window.location.hash = `room=${encodeURIComponent(currentRoom.code)}&pid=${encodeURIComponent(myPlayerId)}`;
+          }
+        } catch (_) {
+          try {
+            window.location.hash = `room=${encodeURIComponent(currentRoom.code)}&pid=${encodeURIComponent(myPlayerId)}`;
+          } catch (_) {}
+        }
         renderRoomState();
         break;
       }
 
       case 'room_updated': {
-        currentRoom = msg.room;
-        renderRoomState();
+        if (!isAnimatingShot) {
+          currentRoom = msg.room;
+          if (useOfflineEngine) {
+            window.safeStorage.setItem('canicas_offline_room', JSON.stringify(currentRoom));
+          }
+          renderRoomState();
+        } else {
+          pendingRoomAfterAnim = msg.room;
+          if (currentRoom && msg.room && msg.room.settings) {
+            currentRoom.settings = msg.room.settings;
+            currentRoom.turn_deadline_epoch = msg.room.turn_deadline_epoch;
+            renderGameHUD();
+          }
+        }
         break;
       }
 
       case 'game_started': {
         currentRoom = msg.room;
+        pendingRoomAfterAnim = null;
+        pendingShotQueue = [];
         isAnimatingShot = false;
         activeAnim = null;
         document.getElementById('modal-victory').classList.add('hidden');
@@ -1293,7 +1766,11 @@
       }
 
       case 'shot_result': {
-        currentRoom = msg.room;
+        if (isAnimatingShot) {
+          pendingShotQueue.push(msg);
+          return;
+        }
+        pendingRoomAfterAnim = msg.room;
         startShotAnimation(msg.outcome);
         break;
       }
@@ -1320,6 +1797,8 @@
 
       case 'room_reset': {
         currentRoom = msg.room;
+        pendingRoomAfterAnim = null;
+        pendingShotQueue = [];
         isAnimatingShot = false;
         activeAnim = null;
         document.getElementById('modal-victory').classList.add('hidden');
@@ -1328,7 +1807,23 @@
       }
 
       case 'error': {
+        hideReconnectingOverlay();
         showToast(`⚠️ ${msg.message}`);
+        if (isAutoReconnecting) {
+          isAutoReconnecting = false;
+          window.safeStorage.removeItem('canicas_room_code');
+          window.safeStorage.removeItem('canicas_offline_room');
+          try {
+            if (window.history && window.history.replaceState) {
+              window.history.replaceState({}, '', window.location.pathname);
+            } else {
+              window.location.hash = '';
+            }
+          } catch (_) {
+            try { window.location.hash = ''; } catch (_) {}
+          }
+          switchScreen(screenHome);
+        }
         break;
       }
     }
@@ -1368,14 +1863,13 @@
 
     const s = currentRoom.settings;
     const modeNames = {
-      torneo: lang === 'en' ? '🏆 Mixed Tournament (Feria + Patio)' : '🏆 Torneo Mixto (Feria + Patio)',
       feria: lang === 'en' ? '🎡 Fairground Pinboard' : '🎡 Canicas de la Feria',
       circulo: lang === 'en' ? '⭕ El Círculo (Knockout Ring)' : '⭕ Patio: El Círculo',
       hoyita: lang === 'en' ? '🕳️ La Hoyita (Center Pit)' : '🕳️ Patio: La Hoyita'
     };
 
     const pills = [
-      modeNames[s.game_mode] || modeNames.torneo,
+      modeNames[s.game_mode] || modeNames.feria,
       s.win_condition === 'target'
         ? `🎯 ${s.target_score} pts`
         : `🔄 ${s.max_rounds} ${lang === 'en' ? 'rounds' : 'rondas'}`,
@@ -1412,11 +1906,26 @@
     document.getElementById('host-bot-controls').classList.toggle('hidden', !isHost);
     document.getElementById('btn-start-game').classList.toggle('hidden', !isHost);
     document.getElementById('lobby-wait-msg').classList.toggle('hidden', isHost);
+
+    const lobbyModeSection = document.getElementById('host-lobby-mode-section');
+    if (lobbyModeSection) {
+      lobbyModeSection.classList.toggle('hidden', !isHost);
+    }
+    const activeMode = stageForRoundLocal(s.game_mode, 1);
+    document.querySelectorAll('.lobby-mode-btn').forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.mode === activeMode);
+    });
+
+    const activeTimer = Number(s.turn_timer_seconds) || 0;
+    document.querySelectorAll('.lobby-timer-btn').forEach((btn) => {
+      btn.classList.toggle('active', Number(btn.dataset.timer) === activeTimer);
+    });
   }
 
   function renderGameHUD() {
     document.getElementById('game-room-badge').textContent = currentRoom.code;
     const s = currentRoom.settings;
+    currentRoom.active_stage = stageForRoundLocal(s.game_mode, 1);
     document.getElementById('game-round-badge').textContent =
       s.win_condition === 'rounds'
         ? `${lang === 'en' ? 'ROUND' : 'RONDA'} ${currentRoom.round_number}/${s.max_rounds}`
@@ -1430,13 +1939,41 @@
     document.getElementById('game-stage-badge').textContent =
       stageLabels[currentRoom.active_stage] || stageLabels.feria;
 
+    const switcher = document.getElementById('host-stage-switcher');
+    if (switcher) {
+      switcher.classList.add('hidden');
+    }
+
     const me = currentRoom.players.find((p) => p.id === myPlayerId);
     const isHost = Boolean(me && me.is_host);
-    const switcher = document.getElementById('host-stage-switcher');
-    switcher.classList.toggle('hidden', !isHost);
-    switcher.querySelectorAll('.stage-switch-btn').forEach((btn) => {
-      btn.classList.toggle('active', btn.dataset.stage === currentRoom.active_stage);
-    });
+    const backToSalaBtn = document.getElementById('btn-back-to-sala');
+    if (backToSalaBtn) {
+      backToSalaBtn.classList.toggle('hidden', !isHost);
+    }
+
+    const activeTimer = Number(s.turn_timer_seconds) || 0;
+    const gameTimerSelect = document.getElementById('game-timer-select');
+    if (gameTimerSelect) {
+      gameTimerSelect.disabled = false;
+      const optNone = gameTimerSelect.querySelector('option[value="0"]');
+      if (optNone) {
+        optNone.textContent = lang === 'en' ? '∞ Manual' : '∞ Manual';
+      }
+      if (Number(gameTimerSelect.value) !== activeTimer) {
+        gameTimerSelect.value = String(activeTimer);
+      }
+    }
+
+    const timerDisp = document.getElementById('timer-display');
+    if (timerDisp) {
+      if (activeTimer <= 0 || !currentRoom.turn_deadline_epoch || currentRoom.state !== 'playing') {
+        timerDisp.textContent = '∞';
+      } else {
+        const nowSec = Math.floor(Date.now() / 1000);
+        const rem = Math.max(0, currentRoom.turn_deadline_epoch - nowSec);
+        timerDisp.textContent = `${rem}s`;
+      }
+    }
 
     const seatsRing = document.getElementById('seats-ring');
     seatsRing.innerHTML = currentRoom.players
@@ -1471,8 +2008,18 @@
     const bonusPill = document.getElementById('bonus-shot-pill');
     bonusPill.classList.toggle('hidden', !(activePlayer && activePlayer.bonus_shot_pending));
 
+    const patioSeatCtrl = document.getElementById('patio-seat-control');
+    if (patioSeatCtrl) {
+      patioSeatCtrl.classList.toggle('hidden', currentRoom.active_stage === 'feria');
+      updateSeatPosLabel();
+    }
+
     const shootBtn = document.getElementById('btn-shoot');
     shootBtn.disabled = !isMyTurn || isAnimatingShot;
+    const quickShootBtn = document.getElementById('btn-canvas-shoot');
+    if (quickShootBtn) {
+      quickShootBtn.disabled = !isMyTurn || isAnimatingShot;
+    }
   }
 
   // ==========================================================================
@@ -1492,7 +2039,7 @@
         outcome,
         sim,
         stepFloat: 0,
-        speed: 0.72,
+        speed: 1.15,
         playedHits
       };
     } else if (outcome.patio_sim) {
@@ -1506,7 +2053,7 @@
         sim,
         stepFloat: 0,
         maxSteps,
-        speed: 0.68,
+        speed: 0.85,
         playedCollisions
       };
     } else {
@@ -1517,6 +2064,13 @@
   function finishShotAnimation(outcome) {
     isAnimatingShot = false;
     activeAnim = null;
+    if (pendingRoomAfterAnim) {
+      currentRoom = pendingRoomAfterAnim;
+      pendingRoomAfterAnim = null;
+    }
+    if (useOfflineEngine && currentRoom) {
+      window.safeStorage.setItem('canicas_offline_room', JSON.stringify(currentRoom));
+    }
 
     const headline = lang === 'en' ? outcome.headline_en : outcome.headline_es;
     const dicho = lang === 'en' ? outcome.dicho_en : outcome.dicho_es;
@@ -1543,8 +2097,32 @@
     window.canicasAudio.speak(`${headline}. ${dicho}`, lang);
     renderGameHUD();
 
+    if (pendingShotQueue.length > 0) {
+      const nextMsg = pendingShotQueue.shift();
+      setTimeout(() => {
+        handleServerMessage(nextMsg);
+      }, 450);
+      return;
+    }
+
     if (currentRoom && currentRoom.state === 'finished') {
       setTimeout(() => showVictoryModal(), 900);
+      return;
+    }
+
+    if (useOfflineEngine && currentRoom && currentRoom.state === 'playing') {
+      const nextP = currentRoom.players[currentRoom.current_turn_idx];
+      if (nextP && nextP.is_bot) {
+        setTimeout(() => {
+          if (currentRoom && currentRoom.state === 'playing' && !isAnimatingShot) {
+            executeOfflineShot(
+              0.5 + Math.random() * 0.42,
+              (Math.random() - 0.5) * 0.5,
+              (Math.random() - 0.5) * 0.5
+            );
+          }
+        }, 650);
+      }
     }
   }
 
@@ -1718,10 +2296,77 @@
     requestAnimationFrame(renderArenaCanvas);
   }
 
+  let followCamMode = window.safeStorage.getItem('canicas_follow_cam') === 'off' ? 'off' : 'auto';
+  let camZoom = 1.0;
+  let camX = 500;
+  let camY = 650;
+
+  function updateCameraFollowLabel() {
+    const btn = document.getElementById('btn-camera-follow');
+    const lbl = document.getElementById('camera-follow-label');
+    if (!btn || !lbl) return;
+    if (followCamMode === 'auto') {
+      lbl.textContent = lang === 'en' ? 'Zoom: Follow' : 'Zoom: Auto';
+      btn.classList.remove('off');
+    } else {
+      lbl.textContent = lang === 'en' ? 'Zoom: Fixed' : 'Zoom: Fijo';
+      btn.classList.add('off');
+    }
+  }
+
   function drawFeriaPinboard() {
     const scaleY = 1150 / 1300;
+    const useFollowCam = followCamMode !== 'off';
+
+    let animMarbleX = null;
+    let animMarbleY = null;
+    if (activeAnim && activeAnim.kind === 'feria') {
+      const sim = activeAnim.sim;
+      const previewStep = Math.min(sim.path.length - 1, activeAnim.stepFloat + activeAnim.speed);
+      const pIdx = Math.min(sim.path.length - 1, Math.floor(previewStep));
+      const pNext = Math.min(sim.path.length - 1, pIdx + 1);
+      const pFrac = previewStep - pIdx;
+      animMarbleX = sim.path[pIdx].x + (sim.path[pNext].x - sim.path[pIdx].x) * pFrac;
+      animMarbleY = sim.path[pIdx].y + (sim.path[pNext].y - sim.path[pIdx].y) * pFrac;
+    }
+
+    let targetZoom = 1.0;
+    let targetX = 500;
+    let targetY = 650;
+    if (
+      useFollowCam &&
+      activeAnim &&
+      activeAnim.kind === 'feria' &&
+      animMarbleX !== null &&
+      activeAnim.stepFloat >= 8 &&
+      activeAnim.stepFloat < activeAnim.sim.path.length - 2
+    ) {
+      targetZoom = 1.75;
+      targetX = animMarbleX;
+      targetY = animMarbleY + 30;
+    }
+
+    camZoom += (targetZoom - camZoom) * 0.14;
+    camX += (targetX - camX) * 0.14;
+    camY += (targetY - camY) * 0.14;
+    if (Math.abs(camZoom - 1.0) < 0.005) {
+      camZoom = 1.0;
+      camX = 500;
+      camY = 650;
+    }
+
+    const halfW = 500 / camZoom;
+    const halfH = 650 / camZoom;
+    const clampedCamX = Math.max(halfW, Math.min(1000 - halfW, camX));
+    const clampedCamY = Math.max(halfH, Math.min(1300 - halfH, camY));
+
     ctx.save();
     ctx.scale(1, scaleY);
+    if (camZoom > 1.005) {
+      ctx.translate(500, 650);
+      ctx.scale(camZoom, camZoom);
+      ctx.translate(-clampedCamX, -clampedCamY);
+    }
 
     const woodGrad = ctx.createLinearGradient(0, 0, 1000, 1300);
     const theme = ARENA_THEMES[themeIdx].id;
@@ -1791,7 +2436,7 @@
       ctx.moveTo(908, 980);
       ctx.lineTo(908, 220);
       ctx.quadraticCurveTo(908, 110, previewEntryX, 155);
-      ctx.lineTo(previewEntryX + aimAngle * 45 + shotSpin * 55, 310);
+      ctx.lineTo(previewEntryX + aimAngle * 24 + shotSpin * 28, 212);
       ctx.stroke();
       ctx.restore();
     }
@@ -1803,18 +2448,32 @@
       });
     }
 
-    // Wooden bottom lane dividers between the 5 bottom collector holes (#16..#20)
+    // Solid wooden bottom ramp wedges between the 5 bottom collector holes (#16..#20)
     [233.5, 390.0, 546.5, 702.5].forEach((divX) => {
       ctx.beginPath();
-      ctx.moveTo(divX, 1028);
-      ctx.lineTo(divX - 18, 1126);
-      ctx.lineTo(divX + 18, 1126);
+      ctx.moveTo(divX, 1005);
+      ctx.lineTo(divX - 38, 1090);
+      ctx.lineTo(divX + 38, 1090);
       ctx.closePath();
       ctx.fillStyle = '#b45309';
       ctx.fill();
       ctx.lineWidth = 2;
       ctx.strokeStyle = '#fde047';
       ctx.stroke();
+    });
+
+    // Left and right bottom corner funnel ramps
+    [
+      [104, 1005, 104, 1090, 126, 1090],
+      [832, 1005, 832, 1090, 810, 1090]
+    ].forEach(([x0, y0, x1, y1, x2, y2]) => {
+      ctx.beginPath();
+      ctx.moveTo(x0, y0);
+      ctx.lineTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.closePath();
+      ctx.fillStyle = '#b45309';
+      ctx.fill();
     });
 
     arenaMeta.feria_holes.forEach((h) => {
@@ -1832,7 +2491,13 @@
       ctx.stroke();
 
       const occ = occupiedMap.get(h.id);
-      if (occ && (!activeAnim || activeAnim.sim.hole.id !== h.id || activeAnim.stepFloat < activeAnim.sim.path.length - 3)) {
+      if (
+        occ &&
+        (!activeAnim ||
+          activeAnim.kind !== 'feria' ||
+          activeAnim.sim.hole.id !== h.id ||
+          activeAnim.stepFloat >= activeAnim.sim.path.length - 2)
+      ) {
         drawGlassMarble(
           ctx,
           h.x,
@@ -1915,8 +2580,15 @@
       sim.pin_hits.forEach((hit, hIdx) => {
         if (!activeAnim.playedHits.has(hIdx) && idx >= hit.step) {
           activeAnim.playedHits.add(hIdx);
-          window.canicasAudio.playPinTing(hit.intensity, hit.y / 1200);
-          spawnSparks(hit.x, hit.y * scaleY, '#fde047', 6);
+          const sx = 500 + (hit.x - clampedCamX) * camZoom;
+          const sy = (650 + (hit.y - clampedCamY) * camZoom) * scaleY;
+          if (hit.nail_id >= 1000) {
+            window.canicasAudio.playGlassClack(hit.intensity, false);
+            spawnSparks(sx, sy, '#38bdf8', 10);
+          } else {
+            window.canicasAudio.playPinTing(hit.intensity, hit.y / 1200);
+            spawnSparks(sx, sy, '#fde047', 6);
+          }
         }
       });
 
@@ -2014,13 +2686,63 @@
       ctx.fillStyle = '#fde047';
       ctx.font = '800 12px system-ui, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('🕳️ HOYITA (+50)', 500, 554);
+      ctx.fillText('🕳️ HOYITA (+45)', 500, 554);
     }
+
+    // Draw dynamic courtyard stones ("Piedritas del Patio") that block straight paths and re-randomize every shot
+    const stones =
+      currentRoom.patio_stones && currentRoom.patio_stones.length
+        ? currentRoom.patio_stones
+        : generatePatioStonesLocal(
+            isHoyita,
+            currentRoom.shot_counter || 0,
+            90,
+            currentRoom.patio_targets
+          );
+    stones.forEach((st) => {
+      const sr = st.radius || st.r || 16;
+      ctx.beginPath();
+      ctx.arc(st.x + 2, st.y + 3, sr, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.48)';
+      ctx.fill();
+
+      const sGrad = ctx.createRadialGradient(st.x - 3, st.y - 3, 2, st.x, st.y, sr);
+      sGrad.addColorStop(0, '#d6d3d1');
+      sGrad.addColorStop(0.55, '#78716c');
+      sGrad.addColorStop(1, '#292524');
+      ctx.beginPath();
+      ctx.arc(st.x, st.y, sr, 0, Math.PI * 2);
+      ctx.fillStyle = sGrad;
+      ctx.fill();
+      ctx.lineWidth = 1.8;
+      ctx.strokeStyle = '#fde047';
+      ctx.stroke();
+    });
 
     const skinId = MARBLE_SKINS[skinIdx].id;
     const totalPlayers = Math.max(1, currentRoom.players.length);
     const turnIdx = currentRoom.current_turn_idx;
     const activePlayer = currentRoom.players[turnIdx];
+
+    if (activePlayer && activePlayer.is_cazador) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(185, 28, 28, 0.88)';
+      ctx.strokeStyle = '#fde047';
+      ctx.lineWidth = 2;
+      ctx.fillRect(210, 18, 580, 34);
+      ctx.strokeRect(210, 18, 580, 34);
+      ctx.fillStyle = '#fef08a';
+      ctx.font = '900 14px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(
+        lang === 'en'
+          ? '🔥 HUNTER ACTIVE: Ring Marbles Worth 2x Points! (Aim at Marbles)'
+          : '🔥 MODO CAZADOR ACTIVO: ¡Sacar canicas del ruedo vale PUNTOS DOBLES (x2)!',
+        500,
+        40
+      );
+      ctx.restore();
+    }
 
     if (activeAnim && activeAnim.kind === 'patio') {
       const sim = activeAnim.sim;
@@ -2038,7 +2760,7 @@
             spawnSparks(
               col.x,
               col.y + offsetY,
-              col.kind === 'rival' ? '#ef4444' : '#e0f2fe',
+              col.kind === 'rival' ? '#ef4444' : col.kind === 'stone' ? '#fde047' : '#e0f2fe',
               8
             );
           }
@@ -2109,7 +2831,11 @@
             ctx.fillStyle = '#fde047';
             ctx.font = '900 12px system-ui, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('👑 30', t.x, t.y - t.radius - 6);
+            ctx.fillText(
+              activePlayer && activePlayer.is_cazador ? '👑 60 (x2)' : '👑 30',
+              t.x,
+              t.y - t.radius - 6
+            );
           }
         });
       }
@@ -2134,13 +2860,16 @@
       });
 
       if (activePlayer) {
-        const seatDeg = turnIdx * (360 / totalPlayers) + 90;
+        const isMyTurn = activePlayer.id === myPlayerId;
+        const seatDeg = isMyTurn
+          ? patioSeatAngle
+          : turnIdx * (360 / totalPlayers) + 90;
         const seatRad = (seatDeg * Math.PI) / 180;
         const sx = 500 + 415 * Math.cos(seatRad);
         const sy = 500 + 415 * Math.sin(seatRad);
 
         const inwardAngle = Math.atan2(500 - sy, 500 - sx);
-        const aimRad = inwardAngle + ((aimAngle * 36) * Math.PI) / 180;
+        const aimRad = inwardAngle + ((aimAngle * 42) * Math.PI) / 180;
         const reach = 140 + shotPower * 280;
         const curveX = -Math.sin(aimRad) * shotSpin * 55;
         const curveY = Math.cos(aimRad) * shotSpin * 55;
@@ -2177,7 +2906,15 @@
         ctx.fillStyle = '#fde047';
         ctx.font = '900 13px system-ui, sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`🎯 ${activePlayer.name}`, sx, sy + 34);
+        ctx.fillText(
+          isMyTurn
+            ? lang === 'en'
+              ? `◀ 🏃 ${activePlayer.name} (${Math.round(seatDeg)}°) ▶`
+              : `◀ 🏃 ${activePlayer.name} (${Math.round(seatDeg)}°) ▶`
+            : `🎯 ${activePlayer.name}`,
+          sx,
+          sy + 34
+        );
       }
     }
 
@@ -2240,22 +2977,30 @@
     }
     if (isDraggingCanvas) {
       ctx.save();
-      const pct = Math.round(shotPower * 100);
-      const deg = Math.round(aimAngle * 36);
-      const dirTxt = deg === 0 ? '0°' : deg > 0 ? `+${deg}°` : `${deg}°`;
-      const bannerTxt =
-        lang === 'en'
-          ? `⚡ ${pct}% (${dirTxt}) • RELEASE TO SHOOT!`
-          : `⚡ ${pct}% (${dirTxt}) • ¡SUELTA PARA TIRAR!`;
+      let bannerTxt;
+      if (isDraggingRingPos) {
+        bannerTxt =
+          lang === 'en'
+            ? `🏃 Ring Position: ${Math.round(patioSeatAngle)}° • Release to set position!`
+            : `🏃 Posición en la Raya: ${Math.round(patioSeatAngle)}° • ¡Suelta para colocarte aquí!`;
+      } else {
+        const pct = Math.round(shotPower * 100);
+        const deg = Math.round(aimAngle * 42);
+        const dirTxt = deg === 0 ? '0°' : deg > 0 ? `+${deg}°` : `${deg}°`;
+        bannerTxt =
+          lang === 'en'
+            ? `⚡ ${pct}% (${dirTxt}) • RELEASE TO SHOOT!`
+            : `⚡ ${pct}% (${dirTxt}) • ¡SUELTA PARA TIRAR!`;
+      }
       ctx.fillStyle = 'rgba(15, 23, 42, 0.92)';
       ctx.strokeStyle = '#fde047';
       ctx.lineWidth = 3;
-      ctx.fillRect(220, 1020, 560, 56);
-      ctx.strokeRect(220, 1020, 560, 56);
+      ctx.fillRect(190, 1020, 620, 56);
+      ctx.strokeRect(190, 1020, 620, 56);
       ctx.fillStyle = '#fde047';
-      ctx.font = '900 22px system-ui, sans-serif';
+      ctx.font = '900 20px system-ui, sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText(bannerTxt, 500, 1056);
+      ctx.fillText(bannerTxt, 500, 1055);
       ctx.restore();
     }
   }
@@ -2264,8 +3009,60 @@
   // 6. USER CONTROLS, SLINGSHOT DRAG & EVENT LISTENERS
   // ==========================================================================
 
+  function updateSeatPosLabel() {
+    const deg = Math.round(((patioSeatAngle % 360) + 360) % 360);
+    const label = document.getElementById('seat-pos-val-label');
+    const slider = document.getElementById('input-seat-pos');
+    if (slider) {
+      slider.value = String(deg);
+    }
+    if (label) {
+      let compass = '';
+      if (deg >= 45 && deg < 135) compass = lang === 'en' ? 'South ' : 'Sur ';
+      else if (deg >= 135 && deg < 225) compass = lang === 'en' ? 'West ' : 'Oeste ';
+      else if (deg >= 225 && deg < 315) compass = lang === 'en' ? 'North ' : 'Norte ';
+      else compass = lang === 'en' ? 'East ' : 'Este ';
+      label.textContent = `${compass}(${deg}°)`;
+    }
+    document.querySelectorAll('.seat-preset-btn[data-seat]').forEach((btn) => {
+      btn.classList.toggle('active', Math.abs(Number(btn.dataset.seat) - deg) <= 8);
+    });
+  }
+
+  function setPatioSeatAngle(deg, keepAim = false) {
+    patioSeatAngle = ((Number(deg) % 360) + 360) % 360;
+    if (!keepAim) {
+      aimAngle = 0;
+      const angleInput = document.getElementById('input-angle');
+      if (angleInput) angleInput.value = '0';
+      updateAngleLabel();
+    }
+    updateSeatPosLabel();
+  }
+
+  function aimPatioFromCanvasPoint(pt) {
+    // Convert canvas point (1000x1300) into courtyard coordinates where courtyard center is (500, 500) with offsetY = 75
+    const cx = pt.x;
+    const cy = pt.y - 75;
+    const seatRad = (patioSeatAngle * Math.PI) / 180;
+    const sx = 500 + 415 * Math.cos(seatRad);
+    const sy = 500 + 415 * Math.sin(seatRad);
+
+    const inwardAngle = Math.atan2(500 - sy, 500 - sx);
+    const targetAngle = Math.atan2(cy - sy, cx - sx);
+    const diffDeg = (((targetAngle - inwardAngle) * 180) / Math.PI + 540) % 360 - 180;
+
+    aimAngle = Math.max(-1.0, Math.min(1.0, diffDeg / 42));
+    const angleInput = document.getElementById('input-angle');
+    if (angleInput) angleInput.value = String(Math.round(aimAngle * 100));
+    updateAngleLabel();
+
+    const distFromShooter = Math.hypot(cx - sx, cy - sy);
+    setPower(Math.max(0.18, Math.min(1.0, (distFromShooter - 110) / 300)));
+  }
+
   function updateAngleLabel() {
-    const deg = Math.round(aimAngle * 36);
+    const deg = Math.round(aimAngle * 42);
     const label = document.getElementById('angle-val-label');
     if (deg === 0) {
       label.textContent = lang === 'en' ? 'Center (0°)' : 'Centro (0°)';
@@ -2293,7 +3090,8 @@
       roomCode: currentRoom.code,
       power: shotPower,
       angle: aimAngle,
-      spin: shotSpin
+      spin: shotSpin,
+      seatAngle: patioSeatAngle
     });
   }
 
@@ -2318,6 +3116,22 @@
     isDraggingCanvas = true;
     dragMaxDist = 0;
     dragStartPt = getCanvasCoords(ev);
+
+    // In Patio mode, touching near the outer shooting ring (R=415 around (500, 575)) lets you walk around the ring!
+    if (currentRoom.active_stage !== 'feria') {
+      const distFromCourtyardCenter = Math.hypot(dragStartPt.x - 500, dragStartPt.y - 575);
+      if (distFromCourtyardCenter >= 325) {
+        isDraggingRingPos = true;
+        const newDeg = (Math.atan2(dragStartPt.y - 575, dragStartPt.x - 500) * 180) / Math.PI;
+        setPatioSeatAngle(newDeg);
+      } else {
+        isDraggingRingPos = false;
+        aimPatioFromCanvasPoint(dragStartPt);
+      }
+    } else {
+      isDraggingRingPos = false;
+    }
+
     try {
       canvas.setPointerCapture(ev.pointerId);
     } catch (_) {}
@@ -2328,27 +3142,45 @@
     const pt = getCanvasCoords(ev);
     const dx = pt.x - dragStartPt.x;
     const dy = pt.y - dragStartPt.y;
+    const dist = Math.hypot(dx, dy);
+    dragMaxDist = Math.max(dragMaxDist, dist);
+
+    if (currentRoom && currentRoom.active_stage !== 'feria') {
+      if (isDraggingRingPos) {
+        const newDeg = (Math.atan2(pt.y - 575, pt.x - 500) * 180) / Math.PI;
+        setPatioSeatAngle(newDeg);
+      } else {
+        aimPatioFromCanvasPoint(pt);
+      }
+      return;
+    }
 
     aimAngle = Math.max(-1.0, Math.min(1.0, dx / 220));
     document.getElementById('input-angle').value = String(Math.round(aimAngle * 100));
     updateAngleLabel();
 
-    const dist = Math.hypot(dx, dy);
-    dragMaxDist = Math.max(dragMaxDist, dist);
     if (dist > 12) {
       setPower(Math.min(1.0, 0.25 + dist / 320));
     }
   });
 
-  function finishCanvasTouch(ev) {
+  function finishCanvasTouch() {
     if (!isDraggingCanvas) return;
     const startPt = dragStartPt;
+    const wasRingDrag = isDraggingRingPos;
     isDraggingCanvas = false;
+    isDraggingRingPos = false;
     dragStartPt = null;
 
-    // Shoot when releasing a drag gesture OR when tapping directly on the plunger / shooter marble
-    const tappedPlunger = startPt && startPt.x >= 830 && startPt.y >= 820;
-    const tappedBottomLaunch = startPt && startPt.y >= 860;
+    if (wasRingDrag) {
+      dragMaxDist = 0;
+      return;
+    }
+
+    // Shoot when releasing a drag gesture OR when tapping directly on the plunger / shooter marble in Feria
+    const isFeria = !currentRoom || currentRoom.active_stage === 'feria';
+    const tappedPlunger = isFeria && startPt && startPt.x >= 830 && startPt.y >= 820;
+    const tappedBottomLaunch = isFeria && startPt && startPt.y >= 860;
     if (dragMaxDist >= 14 || tappedPlunger || tappedBottomLaunch) {
       triggerShoot();
     }
@@ -2358,9 +3190,122 @@
   canvas.addEventListener('pointerup', finishCanvasTouch);
   canvas.addEventListener('pointercancel', () => {
     isDraggingCanvas = false;
+    isDraggingRingPos = false;
     dragStartPt = null;
     dragMaxDist = 0;
   });
+
+  const inputSeatPos = document.getElementById('input-seat-pos');
+  if (inputSeatPos) {
+    inputSeatPos.addEventListener('input', (ev) => {
+      setPatioSeatAngle(Number(ev.target.value));
+    });
+  }
+
+  const btnSeatCcw = document.getElementById('btn-seat-ccw');
+  if (btnSeatCcw) {
+    btnSeatCcw.addEventListener('click', () => {
+      setPatioSeatAngle(patioSeatAngle - 15);
+    });
+  }
+
+  const btnSeatCw = document.getElementById('btn-seat-cw');
+  if (btnSeatCw) {
+    btnSeatCw.addEventListener('click', () => {
+      setPatioSeatAngle(patioSeatAngle + 15);
+    });
+  }
+
+  document.querySelectorAll('.seat-preset-btn[data-seat]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setPatioSeatAngle(Number(btn.dataset.seat));
+    });
+  });
+
+  const btnSeatAimRey = document.getElementById('btn-seat-aim-rey');
+  if (btnSeatAimRey) {
+    btnSeatAimRey.addEventListener('click', () => {
+      if (!currentRoom || !currentRoom.patio_targets) return;
+      const activeTargets = currentRoom.patio_targets.filter((m) => m.active);
+      if (activeTargets.length === 0) return;
+      const rey =
+        activeTargets.find((m) => m.kind === 'rey') ||
+        activeTargets.sort((a, b) => b.points - a.points)[0];
+
+      const dx = rey.x - 500;
+      const dy = rey.y - 500;
+      const distFromCenter = Math.hypot(dx, dy);
+      reyAngleToggle = !reyAngleToggle;
+
+      const baseDeg =
+        distFromCenter < 6
+          ? 90
+          : ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
+      const candidateSeatDegs = reyAngleToggle
+        ? [
+            (baseDeg + 42) % 360,
+            (baseDeg + 318) % 360,
+            (baseDeg + 75) % 360,
+            (baseDeg + 285) % 360,
+            baseDeg
+          ]
+        : [
+            baseDeg,
+            (baseDeg + 36) % 360,
+            (baseDeg + 324) % 360,
+            (baseDeg + 68) % 360,
+            (baseDeg + 292) % 360
+          ];
+
+      const stones =
+        currentRoom.patio_stones && currentRoom.patio_stones.length
+          ? currentRoom.patio_stones
+          : [];
+
+      let chosenSeatDeg = candidateSeatDegs[0];
+      for (const candDeg of candidateSeatDegs) {
+        const sRad = (candDeg * Math.PI) / 180;
+        const sx = 500 + 415 * Math.cos(sRad);
+        const sy = 500 + 415 * Math.sin(sRad);
+        const inAng = Math.atan2(500 - sy, 500 - sx);
+        const tAng = Math.atan2(rey.y - sy, rey.x - sx);
+        const dDeg = (((tAng - inAng) * 180) / Math.PI + 540) % 360 - 180;
+        if (Math.abs(dDeg) > 41) continue;
+
+        // Check if any stone blocks the straight line from (sx, sy) to (rey.x, rey.y)
+        const segLen = Math.hypot(rey.x - sx, rey.y - sy);
+        const ux = (rey.x - sx) / Math.max(1, segLen);
+        const uy = (rey.y - sy) / Math.max(1, segLen);
+        const blocked = stones.some((st) => {
+          const sr = (st.radius || st.r || 16) + 17.5;
+          const proj = (st.x - sx) * ux + (st.y - sy) * uy;
+          if (proj <= 0 || proj >= segLen) return false;
+          const perp = Math.abs((st.x - sx) * -uy + (st.y - sy) * ux);
+          return perp < sr;
+        });
+        if (!blocked) {
+          chosenSeatDeg = candDeg;
+          break;
+        }
+      }
+
+      setPatioSeatAngle(chosenSeatDeg, true);
+      const seatRad = (chosenSeatDeg * Math.PI) / 180;
+      const sx = 500 + 415 * Math.cos(seatRad);
+      const sy = 500 + 415 * Math.sin(seatRad);
+      const inwardAngle = Math.atan2(500 - sy, 500 - sx);
+      const targetAngle = Math.atan2(rey.y - sy, rey.x - sx);
+      const diffDeg = (((targetAngle - inwardAngle) * 180) / Math.PI + 540) % 360 - 180;
+      aimAngle = Math.max(-1.0, Math.min(1.0, diffDeg / 42));
+      document.getElementById('input-angle').value = String(Math.round(aimAngle * 100));
+      updateAngleLabel();
+      showToast(
+        lang === 'en'
+          ? `👑 Lined up on ${rey.kind === 'rey' ? 'Bolón Rey' : 'target'} (clear lane)!`
+          : `👑 ¡Alineado al ${rey.kind === 'rey' ? 'Bolón Rey' : 'objetivo'} libre de piedras!`
+      );
+    });
+  }
 
   document.getElementById('input-angle').addEventListener('input', (ev) => {
     aimAngle = Number(ev.target.value) / 100;
@@ -2487,8 +3432,10 @@
 
   document.getElementById('btn-create-room').addEventListener('click', () => {
     window.canicasAudio.ensureContext();
+    const chosenMode = document.getElementById('select-mode').value;
+    const themeSelect = document.getElementById('select-arena-theme');
     const settings = {
-      game_mode: document.getElementById('select-mode').value,
+      game_mode: chosenMode,
       win_condition: document.getElementById('select-win-cond').value,
       max_rounds: Number(document.getElementById('select-max-rounds').value),
       target_score: Number(document.getElementById('select-target-score').value),
@@ -2496,7 +3443,7 @@
       bonus_shot_rule: document.getElementById('chk-bonus-shot').checked,
       combo_multiplier: document.getElementById('chk-combo-mult').checked,
       ponche_steal: document.getElementById('chk-ponche-steal').checked,
-      arena_theme: document.getElementById('select-arena-theme').value
+      arena_theme: themeSelect ? themeSelect.value : chosenMode === 'feria' ? 'feria' : 'patio'
     };
     sendWs({
       type: 'create_room',
@@ -2561,16 +3508,139 @@
   });
 
   function leaveCurrentRoom() {
+    isAutoReconnecting = false;
+    hideReconnectingOverlay();
     if (currentRoom && !useOfflineEngine) {
       sendWs({ type: 'leave_room', roomCode: currentRoom.code });
     }
     window.safeStorage.removeItem('canicas_room_code');
+    window.safeStorage.removeItem('canicas_offline_room');
+    try {
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, '', window.location.pathname);
+      } else {
+        window.location.hash = '';
+      }
+    } catch (_) {
+      try { window.location.hash = ''; } catch (_) {}
+    }
     currentRoom = null;
     switchScreen(screenHome);
   }
 
   document.getElementById('btn-leave-lobby').addEventListener('click', leaveCurrentRoom);
   document.getElementById('btn-leave-game').addEventListener('click', leaveCurrentRoom);
+
+  const btnBackToSala = document.getElementById('btn-back-to-sala');
+  if (btnBackToSala) {
+    btnBackToSala.addEventListener('click', () => {
+      if (currentRoom) {
+        sendWs({ type: 'play_again', roomCode: currentRoom.code });
+      }
+    });
+  }
+
+  document.querySelectorAll('.lobby-mode-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (!currentRoom) return;
+      const mode = btn.dataset.mode;
+      const updatedSettings = Object.assign({}, currentRoom.settings, { game_mode: mode });
+      const homeSelect = document.getElementById('select-mode');
+      if (homeSelect) homeSelect.value = mode;
+      sendWs({
+        type: 'update_settings',
+        roomCode: currentRoom.code,
+        settings: updatedSettings
+      });
+      const modeLabels = {
+        feria: lang === 'en' ? '🎡 Fairground Pinboard' : '🎡 Canicas de la Feria',
+        circulo: lang === 'en' ? '⭕ El Círculo (Ring)' : '⭕ Patio: El Círculo',
+        hoyita: lang === 'en' ? '🕳️ La Hoyita (Pit)' : '🕳️ Patio: La Hoyita'
+      };
+      showToast(
+        lang === 'en'
+          ? `🎪 Mode set to: ${modeLabels[mode] || mode}`
+          : `🎪 Modo cambiado a: ${modeLabels[mode] || mode}`
+      );
+    });
+  });
+
+  const TIMER_PRESETS = [0, 15, 25, 40];
+
+  function setTurnTimerSeconds(seconds) {
+    const cleanSec = TIMER_PRESETS.includes(Number(seconds)) ? Number(seconds) : 0;
+    const homeTimerSelect = document.getElementById('select-timer');
+    if (homeTimerSelect) {
+      homeTimerSelect.value = String(cleanSec);
+    }
+    const gameTimerSelect = document.getElementById('game-timer-select');
+    if (gameTimerSelect) {
+      gameTimerSelect.value = String(cleanSec);
+    }
+
+    if (!currentRoom) return;
+
+    const updatedSettings = Object.assign({}, currentRoom.settings, {
+      turn_timer_seconds: cleanSec
+    });
+    currentRoom.settings = updatedSettings;
+    refreshOfflineTurnDeadline(currentRoom);
+    if (pendingRoomAfterAnim && pendingRoomAfterAnim.settings) {
+      pendingRoomAfterAnim.settings = Object.assign({}, pendingRoomAfterAnim.settings, {
+        turn_timer_seconds: cleanSec
+      });
+      refreshOfflineTurnDeadline(pendingRoomAfterAnim);
+    }
+
+    if (currentRoom.state === 'lobby') {
+      renderLobby();
+    } else {
+      renderGameHUD();
+    }
+
+    sendWs({
+      type: 'update_settings',
+      roomCode: currentRoom.code,
+      settings: updatedSettings
+    });
+
+    const label =
+      cleanSec > 0
+        ? `${cleanSec}s`
+        : lang === 'en'
+          ? 'No limit (∞)'
+          : 'Sin límite (∞)';
+    showToast(
+      lang === 'en'
+        ? `⏱️ Turn timer: ${label}`
+        : `⏱️ Tiempo por turno: ${label}`
+    );
+  }
+
+  const gameTimerSelectEl = document.getElementById('game-timer-select');
+  if (gameTimerSelectEl) {
+    gameTimerSelectEl.addEventListener('change', (e) => {
+      setTurnTimerSeconds(Number(e.target.value));
+    });
+  }
+
+  const btnCycleTimer = document.getElementById('btn-cycle-timer');
+  if (btnCycleTimer) {
+    btnCycleTimer.addEventListener('click', () => {
+      const curr = currentRoom && currentRoom.settings
+        ? Number(currentRoom.settings.turn_timer_seconds) || 0
+        : 0;
+      const idx = TIMER_PRESETS.indexOf(curr);
+      const nextSec = TIMER_PRESETS[(idx + 1) % TIMER_PRESETS.length];
+      setTurnTimerSeconds(nextSec);
+    });
+  }
+
+  document.querySelectorAll('.lobby-timer-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      setTurnTimerSeconds(Number(btn.dataset.timer));
+    });
+  });
 
   document.querySelectorAll('.stage-switch-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -2748,13 +3818,22 @@
 
   setInterval(() => {
     const disp = document.getElementById('timer-display');
-    if (!currentRoom || currentRoom.state !== 'playing' || !currentRoom.turn_deadline_epoch) {
+    if (
+      !currentRoom ||
+      currentRoom.state !== 'playing' ||
+      !currentRoom.settings ||
+      Number(currentRoom.settings.turn_timer_seconds) <= 0 ||
+      !currentRoom.turn_deadline_epoch
+    ) {
       disp.textContent = '∞';
       return;
     }
     const nowSec = Math.floor(Date.now() / 1000);
     const rem = Math.max(0, currentRoom.turn_deadline_epoch - nowSec);
     disp.textContent = `${rem}s`;
+    if (rem === 0 && useOfflineEngine && !isAnimatingShot) {
+      executeOfflineShot(0.68, 0, 0);
+    }
   }, 500);
 
   function escapeHtml(str) {
@@ -2765,45 +3844,124 @@
       .replace(/"/g, '&quot;');
   }
 
-  function checkAutoJoinOrResume() {
-    const params = new URLSearchParams(window.location.search);
-    const urlRoom = params.get('room');
-    if (urlRoom) {
-      document.getElementById('input-room-code').value = urlRoom.toUpperCase();
-      document.getElementById('tab-join').click();
-      return;
-    }
+  let isAutoReconnecting = false;
 
-    const savedRoom = window.safeStorage.getItem('canicas_room_code');
-    if (savedRoom && myPlayerId) {
-      const banner = document.getElementById('resume-banner');
-      document.getElementById('resume-code').textContent = savedRoom;
-      banner.classList.remove('hidden');
-
-      document.getElementById('btn-resume-session').onclick = () => {
-        banner.classList.add('hidden');
-        sendWs({
-          type: 'join_room',
-          roomCode: savedRoom,
-          playerName: getPlayerName(),
-          avatar: selectedAvatar,
-          color: selectedColor,
-          playerId: myPlayerId
-        });
-      };
-
-      document.getElementById('btn-dismiss-session').onclick = () => {
-        window.safeStorage.removeItem('canicas_room_code');
-        banner.classList.add('hidden');
-      };
+  function showReconnectingOverlay(roomCode) {
+    const el = document.getElementById('reconnecting-overlay');
+    if (el) {
+      const title = document.getElementById('reconnecting-title');
+      if (title) {
+        title.textContent = lang === 'en'
+          ? `Reconnecting to room ${roomCode}...`
+          : `Reconectando a la sala ${roomCode}...`;
+      }
+      el.classList.remove('hidden');
     }
   }
 
+  function hideReconnectingOverlay() {
+    const el = document.getElementById('reconnecting-overlay');
+    if (el) {
+      el.classList.add('hidden');
+    }
+  }
+
+  function checkAutoJoinOrResume() {
+    let urlRoom = '';
+    let hashRoom = '';
+    let hashPid = '';
+
+    try {
+      const params = new URLSearchParams(window.location.search);
+      urlRoom = (params.get('room') || '').trim().toUpperCase();
+    } catch (_) {}
+
+    try {
+      if (window.location.hash) {
+        const h = window.location.hash.replace(/^#/, '');
+        const matchRoom = h.match(/(?:^|[&?])room=([A-Za-z0-9]+)/i);
+        const matchPid = h.match(/(?:^|[&?])pid=([A-Za-z0-9_]+)/i);
+        if (matchRoom) hashRoom = matchRoom[1].toUpperCase();
+        if (matchPid) hashPid = matchPid[1];
+        if (!hashRoom && /^[A-Za-z0-9]{6}$/.test(h)) {
+          hashRoom = h.toUpperCase();
+        }
+      }
+    } catch (_) {}
+
+    const savedRoom = (window.safeStorage.getItem('canicas_room_code') || '').trim().toUpperCase();
+    const targetRoom = urlRoom || hashRoom || savedRoom;
+    const targetPid = myPlayerId || hashPid || window.safeStorage.getItem('canicas_player_id');
+
+    // 1. In standalone offline mode, restore the offline room if available
+    const isStandalone = window.location.protocol === 'file:' || !window.location.host;
+    if (isStandalone) {
+      useOfflineEngine = true;
+    }
+    const savedOffline = window.safeStorage.getItem('canicas_offline_room');
+    if ((useOfflineEngine || isStandalone) && savedOffline) {
+      try {
+        const parsed = JSON.parse(savedOffline);
+        if (parsed && parsed.code) {
+          currentRoom = parsed;
+          renderRoomState();
+          return;
+        }
+      } catch (_) {}
+    }
+
+    // 2. Automatically resume room session if targetRoom is known!
+    if (targetRoom) {
+      isAutoReconnecting = true;
+      showReconnectingOverlay(targetRoom);
+      showToast(
+        lang === 'en'
+          ? `🔄 Reconnecting to room ${targetRoom}...`
+          : `🔄 Reconectando a la sala ${targetRoom}...`
+      );
+      sendWs({
+        type: 'join_room',
+        roomCode: targetRoom,
+        playerName: getPlayerName(),
+        avatar: selectedAvatar,
+        color: selectedColor,
+        playerId: targetPid || undefined
+      });
+    }
+  }
+
+  const btnCameraFollow = document.getElementById('btn-camera-follow');
+  if (btnCameraFollow) {
+    btnCameraFollow.addEventListener('click', () => {
+      followCamMode = followCamMode === 'auto' ? 'off' : 'auto';
+      window.safeStorage.setItem('canicas_follow_cam', followCamMode);
+      updateCameraFollowLabel();
+    });
+  }
+
+  if ('caches' in window) {
+    caches
+      .keys()
+      .then((keys) => {
+        keys.forEach((k) => {
+          if (k !== 'canicas-mexicanas-v17') {
+            caches.delete(k).catch(() => {});
+          }
+        });
+      })
+      .catch(() => {});
+  }
   if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
+    navigator.serviceWorker
+      .register('/sw.js?v=17')
+      .then((reg) => {
+        reg.update().catch(() => {});
+      })
+      .catch(() => {});
   }
 
   initProfileUI();
+  updateCameraFollowLabel();
   applyTranslations();
   checkAutoJoinOrResume();
   requestAnimationFrame(renderArenaCanvas);

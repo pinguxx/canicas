@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use crate::canicas::{
-    feria_holes, feria_nails, generate_patio_marbles, simulate_feria_shot, simulate_patio_shot,
-    FeriaHole, FeriaNail, FeriaShotSimulation, PatioShotSimulation, TargetMarble, PATIO_CENTER_X,
+    feria_holes, feria_nails, generate_patio_marbles, generate_patio_marbles_with_phase,
+    generate_patio_stones, simulate_feria_shot, simulate_patio_shot_with_stones, FeriaHole,
+    FeriaNail, FeriaShotSimulation, PatioShotSimulation, PatioStone, TargetMarble, PATIO_CENTER_X,
     PATIO_CENTER_Y, PATIO_SHOOT_RADIUS,
 };
 
@@ -238,6 +239,7 @@ impl ArenaMetadata {
 #[derive(Debug, Clone, Serialize)]
 pub struct Room {
     pub code: String,
+    pub host_id: String,
     pub state: RoomState,
     pub settings: GameSettings,
     pub players: Vec<Player>,
@@ -247,6 +249,7 @@ pub struct Room {
     pub active_stage: String, // "feria", "circulo", "hoyita"
     pub feria_occupied_holes: Vec<OccupiedHole>,
     pub patio_targets: Vec<TargetMarble>,
+    pub patio_stones: Vec<PatioStone>,
     pub last_shot: Option<ShotOutcome>,
     pub history: Vec<ShotHistoryEntry>,
     pub winner_id: Option<String>,
@@ -290,8 +293,12 @@ impl Room {
         let clean_settings = settings.sanitized();
         let initial_stage = stage_for_round(&clean_settings.game_mode, 1);
         let is_hoyita = initial_stage == "hoyita";
+        let initial_targets = generate_patio_marbles(is_hoyita);
+        let initial_stones = generate_patio_stones(is_hoyita, 0, 90.0, &initial_targets);
+        let host_id = host.id.clone();
         Self {
             code,
+            host_id,
             state: RoomState::Lobby,
             settings: clean_settings,
             players: vec![host],
@@ -300,7 +307,8 @@ impl Room {
             shot_counter: 0,
             active_stage: initial_stage,
             feria_occupied_holes: Vec::new(),
-            patio_targets: generate_patio_marbles(is_hoyita),
+            patio_targets: initial_targets,
+            patio_stones: initial_stones,
             last_shot: None,
             history: Vec::new(),
             winner_id: None,
@@ -346,8 +354,10 @@ impl Room {
         self.round_number = 1;
         self.shot_counter = 0;
         self.active_stage = stage_for_round(&self.settings.game_mode, 1);
+        let is_hoyita = self.active_stage == "hoyita";
         self.feria_occupied_holes.clear();
-        self.patio_targets = generate_patio_marbles(self.active_stage == "hoyita");
+        self.patio_targets = generate_patio_marbles(is_hoyita);
+        self.patio_stones = generate_patio_stones(is_hoyita, 0, 90.0, &self.patio_targets);
         self.last_shot = None;
         self.history.clear();
         self.winner_id = None;
@@ -375,8 +385,10 @@ impl Room {
         self.round_number = 1;
         self.shot_counter = 0;
         self.active_stage = stage_for_round(&self.settings.game_mode, 1);
+        let is_hoyita = self.active_stage == "hoyita";
         self.feria_occupied_holes.clear();
-        self.patio_targets = generate_patio_marbles(self.active_stage == "hoyita");
+        self.patio_targets = generate_patio_marbles(is_hoyita);
+        self.patio_stones = generate_patio_stones(is_hoyita, 0, 90.0, &self.patio_targets);
         self.last_shot = None;
         self.turn_deadline_epoch = None;
         for p in &mut self.players {
@@ -453,6 +465,17 @@ impl Room {
         raw_angle: f64,
         raw_spin: f64,
     ) -> Result<ShotOutcome, &'static str> {
+        self.execute_shot_with_seat(player_id, raw_power, raw_angle, raw_spin, None)
+    }
+
+    pub fn execute_shot_with_seat(
+        &mut self,
+        player_id: &str,
+        raw_power: f64,
+        raw_angle: f64,
+        raw_spin: f64,
+        custom_seat_angle: Option<f64>,
+    ) -> Result<ShotOutcome, &'static str> {
         if self.state != RoomState::Playing {
             return Err("La partida no está en curso.");
         }
@@ -475,12 +498,16 @@ impl Room {
         self.shot_counter += 1;
         let stage = self.active_stage.clone();
         let total_players = self.players.len().max(1);
-        let seat_angle_deg = (turn_idx as f64) * (360.0 / (total_players as f64)) + 90.0;
+        let default_seat_deg = (turn_idx as f64) * (360.0 / (total_players as f64)) + 90.0;
+        let seat_angle_deg = custom_seat_angle
+            .filter(|d| d.is_finite())
+            .map(|d| d.rem_euclid(360.0))
+            .unwrap_or(default_seat_deg);
 
         let mut points_scored: u32;
         let earned_bonus_shot: bool;
-        let headline_es: String;
-        let headline_en: String;
+        let mut headline_es: String;
+        let mut headline_en: String;
         let dicho_es: String;
         let dicho_en: String;
         let mut feria_sim_opt = None;
@@ -492,14 +519,11 @@ impl Room {
         let mut hit_combo = false;
 
         if stage == "feria" {
-            let occupied_ids: Vec<u32> = if self.settings.combo_multiplier {
-                self.feria_occupied_holes
-                    .iter()
-                    .map(|h| h.hole_id)
-                    .collect()
-            } else {
-                Vec::new()
-            };
+            let occupied_ids: Vec<u32> = self
+                .feria_occupied_holes
+                .iter()
+                .map(|h| h.hole_id)
+                .collect();
 
             let sim = simulate_feria_shot(
                 raw_power,
@@ -560,7 +584,7 @@ impl Room {
                 .map(|(_, rp)| (rp.id.clone(), rp.shooter_x, rp.shooter_y, rp.color.clone()))
                 .collect();
 
-            let sim = simulate_patio_shot(
+            let sim = simulate_patio_shot_with_stones(
                 &stage,
                 seat_angle_deg,
                 &p_color,
@@ -570,6 +594,7 @@ impl Room {
                 raw_spin,
                 &mut self.patio_targets,
                 &mut rivals,
+                &self.patio_stones,
                 self.settings.bonus_shot_rule && !was_golden_marble,
             );
 
@@ -615,17 +640,24 @@ impl Room {
                 }
             }
 
-            // If all target marbles in the ring have been knocked out, refill the ring!
-            let remaining_active = self.patio_targets.iter().filter(|m| m.active).count();
-            if remaining_active == 0 {
-                self.patio_targets = generate_patio_marbles(stage == "hoyita");
-                ring_refilled = true;
-            }
-
             headline_es = sim.headline_es.clone();
             headline_en = sim.headline_en.clone();
             dicho_es = sim.dicho_es.clone();
             dicho_en = sim.dicho_en.clone();
+
+            // Refill the ring automatically as soon as <= 4 marbles remain so the arena is never sparse!
+            let remaining_active = self.patio_targets.iter().filter(|m| m.active).count();
+            if remaining_active <= 4 {
+                let phase = (self.shot_counter as f64) * 53.0;
+                self.patio_targets = generate_patio_marbles_with_phase(stage == "hoyita", phase);
+                ring_refilled = true;
+                if !sim.captured_ids.is_empty() {
+                    points_scored += 15;
+                    headline_es.push_str(" • 🌊 ¡Nueva tanda (+15)!");
+                    headline_en.push_str(" • 🌊 New wave (+15)!");
+                }
+            }
+
             patio_sim_opt = Some(sim);
         }
 
@@ -723,13 +755,31 @@ impl Room {
                 let next_stage = stage_for_round(&self.settings.game_mode, self.round_number);
                 if next_stage != self.active_stage {
                     self.active_stage = next_stage.clone();
-                    self.patio_targets = generate_patio_marbles(next_stage == "hoyita");
+                    let is_hoyita = next_stage == "hoyita";
+                    self.patio_targets = generate_patio_marbles(is_hoyita);
                     self.position_shooters_on_perimeter();
                 }
                 // Clear Feria holes between rounds so the board is fresh for the new round
                 self.feria_occupied_holes.clear();
             }
             self.current_turn_idx = next_idx;
+        }
+
+        // Re-randomize courtyard rocks after EVERY shot and block the straight line for the NEXT shooter!
+        if self.active_stage != "feria" {
+            let is_hoyita = self.active_stage == "hoyita";
+            let next_seat_deg = if earned_bonus_shot {
+                seat_angle_deg
+            } else {
+                let total = self.players.len().max(1);
+                (self.current_turn_idx as f64) * (360.0 / (total as f64)) + 90.0
+            };
+            self.patio_stones = generate_patio_stones(
+                is_hoyita,
+                self.shot_counter,
+                next_seat_deg,
+                &self.patio_targets,
+            );
         }
 
         self.refresh_turn_deadline();

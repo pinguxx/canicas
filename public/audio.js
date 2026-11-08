@@ -4,17 +4,83 @@
 
 const safeStorage = (() => {
   const mem = {};
+
+  function readWindowNameBag() {
+    try {
+      const raw = window.name;
+      if (raw && typeof raw === 'string' && raw.indexOf('__canicas__=') !== -1) {
+        const jsonPart = raw.slice(raw.indexOf('__canicas__=') + 12);
+        return JSON.parse(jsonPart) || {};
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  function writeWindowNameBag(k, v) {
+    try {
+      let bag = readWindowNameBag() || {};
+      if (v === null || v === undefined) {
+        delete bag[k];
+      } else {
+        bag[k] = String(v);
+      }
+      window.name = '__canicas__=' + JSON.stringify(bag);
+    } catch (_) {}
+  }
+
+  function readCookie(k) {
+    try {
+      if (typeof document !== 'undefined' && document.cookie) {
+        const match = document.cookie.match(new RegExp('(?:^|; )' + encodeURIComponent(k) + '=([^;]*)'));
+        return match ? decodeURIComponent(match[1]) : null;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  function writeCookie(k, v) {
+    try {
+      if (typeof document !== 'undefined') {
+        const val = (v === null || v === undefined) ? '' : encodeURIComponent(String(v));
+        const maxAge = (v === null || v === undefined) ? 'Max-Age=0;' : 'Max-Age=86400; SameSite=Lax; path=/';
+        document.cookie = `${encodeURIComponent(k)}=${val}; ${maxAge}`;
+      }
+    } catch (_) {}
+  }
+
   return {
     getItem(k) {
-      try { return window.localStorage.getItem(k); } catch (_) { return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null; }
+      try {
+        const v = window.localStorage.getItem(k);
+        if (v !== null && v !== undefined) return v;
+      } catch (_) {}
+      try {
+        const v = window.sessionStorage.getItem(k);
+        if (v !== null && v !== undefined) return v;
+      } catch (_) {}
+      const fromName = readWindowNameBag();
+      if (fromName && Object.prototype.hasOwnProperty.call(fromName, k)) {
+        return fromName[k];
+      }
+      const fromCookie = readCookie(k);
+      if (fromCookie !== null && fromCookie !== undefined) {
+        return fromCookie;
+      }
+      return Object.prototype.hasOwnProperty.call(mem, k) ? mem[k] : null;
     },
     setItem(k, v) {
       mem[k] = String(v);
       try { window.localStorage.setItem(k, String(v)); } catch (_) {}
+      try { window.sessionStorage.setItem(k, String(v)); } catch (_) {}
+      writeWindowNameBag(k, v);
+      writeCookie(k, v);
     },
     removeItem(k) {
       delete mem[k];
       try { window.localStorage.removeItem(k); } catch (_) {}
+      try { window.sessionStorage.removeItem(k); } catch (_) {}
+      writeWindowNameBag(k, null);
+      writeCookie(k, null);
     },
   };
 })();

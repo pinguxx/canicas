@@ -264,4 +264,151 @@ mod tests {
         assert_eq!(parsed_shot["type"], "shot_result");
         assert_eq!(parsed_shot["outcome"]["stage"], "feria");
     }
+
+    #[tokio::test]
+    async fn test_websocket_reconnection_preserves_room_and_host_on_refresh() {
+        let state = AppState::new();
+        let app = create_app(state);
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+
+        tokio::spawn(async move {
+            axum::serve(listener, app).await.unwrap();
+        });
+
+        let ws_url = format!("ws://{}/ws", addr);
+
+        // 1. First connection: create room in lobby
+        let (mut ws1, _) = connect_async(&ws_url).await.unwrap();
+        ws1.send(WsMsg::Text(
+            json!({
+                "type": "create_room",
+                "playerName": "Pix",
+                "avatar": "🤠",
+                "color": "#f59e0b"
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+        .unwrap();
+
+        let msg1 = ws1.next().await.unwrap().unwrap();
+        let parsed1: Value = serde_json::from_str(msg1.to_text().unwrap()).unwrap();
+        assert_eq!(parsed1["type"], "room_joined");
+        let room_code = parsed1["room"]["code"].as_str().unwrap().to_string();
+        let player_id = parsed1["playerId"].as_str().unwrap().to_string();
+
+        // 2. Simulate browser refresh in Lobby: drop ws1
+        drop(ws1);
+        tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+
+        // 3. Reconnect with new websocket connection ws2 using saved room_code & player_id
+        let (mut ws2, _) = connect_async(&ws_url).await.unwrap();
+        ws2.send(WsMsg::Text(
+            json!({
+                "type": "join_room",
+                "roomCode": room_code,
+                "playerName": "Pix",
+                "avatar": "🤠",
+                "color": "#f59e0b",
+                "playerId": player_id
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+        .unwrap();
+
+        let msg2 = ws2.next().await.unwrap().unwrap();
+        let parsed2: Value = serde_json::from_str(msg2.to_text().unwrap()).unwrap();
+        assert_eq!(parsed2["type"], "room_joined");
+        assert_eq!(parsed2["playerId"], player_id);
+        assert_eq!(parsed2["room"]["code"], room_code);
+        let players = parsed2["room"]["players"].as_array().unwrap();
+        assert_eq!(players.len(), 1);
+        assert_eq!(players[0]["id"], player_id);
+        assert_eq!(players[0]["connected"], true);
+        assert_eq!(players[0]["is_host"], true);
+
+        // Read room_updated broadcast sent to room members
+        let msg2_bcast = ws2.next().await.unwrap().unwrap();
+        let parsed2_bcast: Value = serde_json::from_str(msg2_bcast.to_text().unwrap()).unwrap();
+        assert_eq!(parsed2_bcast["type"], "room_updated");
+
+        // 4. Start game on ws2
+        ws2.send(WsMsg::Text(
+            json!({
+                "type": "start_game",
+                "roomCode": room_code
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+        .unwrap();
+
+        let msg_start = ws2.next().await.unwrap().unwrap();
+        let parsed_start: Value = serde_json::from_str(msg_start.to_text().unwrap()).unwrap();
+        assert_eq!(parsed_start["type"], "game_started");
+
+        // 5. Simulate browser refresh during active game: drop ws2
+        drop(ws2);
+        tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+
+        // 6. Reconnect on ws3: player is still in the room, state is still playing!
+        let (mut ws3, _) = connect_async(&ws_url).await.unwrap();
+        ws3.send(WsMsg::Text(
+            json!({
+                "type": "join_room",
+                "roomCode": room_code,
+                "playerName": "Pix",
+                "avatar": "🤠",
+                "color": "#f59e0b",
+                "playerId": player_id
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+        .unwrap();
+
+        let msg3 = ws3.next().await.unwrap().unwrap();
+        let parsed3: Value = serde_json::from_str(msg3.to_text().unwrap()).unwrap();
+        assert_eq!(parsed3["type"], "room_joined");
+        assert_eq!(parsed3["room"]["state"], "playing");
+        assert_eq!(parsed3["playerId"], player_id);
+        let players_after = parsed3["room"]["players"].as_array().unwrap();
+        assert_eq!(players_after[0]["connected"], true);
+        assert_eq!(players_after[0]["is_host"], true);
+
+        // 7. Simulate browser refresh where storage/playerId was cleared: drop ws3, reconnect ws4 with NO playerId
+        drop(ws3);
+        tokio::time::sleep(tokio::time::Duration::from_millis(50)).await;
+
+        let (mut ws4, _) = connect_async(&ws_url).await.unwrap();
+        ws4.send(WsMsg::Text(
+            json!({
+                "type": "join_room",
+                "roomCode": room_code,
+                "playerName": "Pix",
+                "avatar": "🤠",
+                "color": "#f59e0b",
+                "playerId": null
+            })
+            .to_string()
+            .into(),
+        ))
+        .await
+        .unwrap();
+
+        let msg4 = ws4.next().await.unwrap().unwrap();
+        let parsed4: Value = serde_json::from_str(msg4.to_text().unwrap()).unwrap();
+        assert_eq!(parsed4["type"], "room_joined");
+        assert_eq!(parsed4["room"]["state"], "playing");
+        assert_eq!(parsed4["playerId"], player_id);
+        let players_after4 = parsed4["room"]["players"].as_array().unwrap();
+        assert_eq!(players_after4[0]["connected"], true);
+        assert_eq!(players_after4[0]["is_host"], true);
+    }
 }

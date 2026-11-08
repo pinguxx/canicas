@@ -67,50 +67,50 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         FeriaHole {
             id: 1,
             x: 468.0,
-            y: 235.0,
-            radius: 31.0,
+            y: 1085.0,
+            radius: 29.0,
             points: 100,
             tier: "oro",
             icon: "👑",
             name_es: "El Gallo de Oro",
             name_en: "The Golden Rooster",
-            dicho_es: "«¡Cien puntos al Gallo de Oro, te llevaste el premio mayor de la feria!»",
-            dicho_en: "\"100 points in the Golden Rooster, you won the grand carnival prize!\"",
+            dicho_es: "«¡Cien puntos al Gallo de Oro hasta el fondo del tablero, te llevaste el premio mayor!»",
+            dicho_en: "\"100 points in the Golden Rooster at the very bottom, you won the grand prize!\"",
             color: "#f59e0b",
         },
         FeriaHole {
             id: 2,
-            x: 255.0,
-            y: 305.0,
-            radius: 30.0,
+            x: 312.0,
+            y: 1085.0,
+            radius: 29.0,
             points: 75,
             tier: "diamante",
             icon: "💎",
             name_es: "La Corona Real",
             name_en: "The Royal Crown",
-            dicho_es: "«¡Tiro de maestro directo a la Corona Real!»",
-            dicho_en: "\"Master shot straight into the Royal Crown!\"",
+            dicho_es: "«¡Tiro de maestro hasta abajo directo a la Corona Real!»",
+            dicho_en: "\"Master shot all the way down into the Royal Crown!\"",
             color: "#06b6d4",
         },
         FeriaHole {
             id: 3,
-            x: 680.0,
-            y: 305.0,
-            radius: 30.0,
+            x: 625.0,
+            y: 1085.0,
+            radius: 29.0,
             points: 75,
             tier: "diamante",
             icon: "🌟",
             name_es: "Estrella Azteca",
             name_en: "Aztec Star",
-            dicho_es: "«¡Brilló la Estrella Azteca con setenta y cinco tantos!»",
-            dicho_en: "\"The Aztec Star shone bright for 75 points!\"",
+            dicho_es: "«¡Brilló la Estrella Azteca en el fondo con setenta y cinco tantos!»",
+            dicho_en: "\"The Aztec Star shone bright at the bottom for 75 points!\"",
             color: "#06b6d4",
         },
         FeriaHole {
             id: 4,
-            x: 355.0,
-            y: 440.0,
-            radius: 30.0,
+            x: 155.0,
+            y: 1085.0,
+            radius: 29.0,
             points: 50,
             tier: "fuego",
             icon: "☀️",
@@ -122,36 +122,36 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 5,
-            x: 580.0,
-            y: 440.0,
-            radius: 30.0,
+            x: 780.0,
+            y: 1085.0,
+            radius: 29.0,
             points: 50,
             tier: "fuego",
             icon: "🔥",
-            name_es: "ElDiablo",
+            name_es: "El Diablo",
             name_en: "The Fire Devil",
-            dicho_es: "«¡Canica encendida, cayó en el hoyito de cincuenta!»",
-            dicho_en: "\"Blazing marble, right into the 50-point hole!\"",
+            dicho_es: "«¡Canica encendida hasta abajo, cayó en el hoyito de cincuenta!»",
+            dicho_en: "\"Blazing marble all the way down into the 50-point hole!\"",
             color: "#ef4444",
         },
         FeriaHole {
             id: 6,
             x: 468.0,
-            y: 565.0,
-            radius: 30.0,
+            y: 955.0,
+            radius: 27.0,
             points: 50,
             tier: "fuego",
             icon: "🌙",
             name_es: "La Luna",
             name_en: "The Moon",
-            dicho_es: "«¡Por el centro del tablero, La Luna te da cincuenta!»",
-            dicho_en: "\"Right down the center, The Moon grants you fifty!\"",
+            dicho_es: "«¡Cruzaste todo el tablero hasta La Luna por cincuenta puntos!»",
+            dicho_en: "\"Crossed the board down to The Moon for fifty points!\"",
             color: "#ec4899",
         },
         FeriaHole {
             id: 7,
-            x: 185.0,
-            y: 565.0,
+            x: 170.0,
+            y: 825.0,
             radius: 29.0,
             points: 30,
             tier: "esmeralda",
@@ -164,8 +164,8 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 8,
-            x: 750.0,
-            y: 565.0,
+            x: 765.0,
+            y: 825.0,
             radius: 29.0,
             points: 30,
             tier: "esmeralda",
@@ -178,8 +178,8 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 9,
-            x: 310.0,
-            y: 695.0,
+            x: 368.0,
+            y: 825.0,
             radius: 29.0,
             points: 30,
             tier: "esmeralda",
@@ -192,8 +192,8 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 10,
-            x: 625.0,
-            y: 695.0,
+            x: 568.0,
+            y: 825.0,
             radius: 29.0,
             points: 30,
             tier: "esmeralda",
@@ -206,9 +206,9 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 11,
-            x: 170.0,
-            y: 825.0,
-            radius: 29.0,
+            x: 185.0,
+            y: 565.0,
+            radius: 30.0,
             points: 20,
             tier: "barrio",
             icon: "🍉",
@@ -220,9 +220,9 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 12,
-            x: 368.0,
-            y: 825.0,
-            radius: 29.0,
+            x: 310.0,
+            y: 695.0,
+            radius: 30.0,
             points: 20,
             tier: "barrio",
             icon: "🌵",
@@ -234,9 +234,9 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 13,
-            x: 568.0,
-            y: 825.0,
-            radius: 29.0,
+            x: 625.0,
+            y: 695.0,
+            radius: 30.0,
             points: 20,
             tier: "barrio",
             icon: "🌶️",
@@ -248,9 +248,9 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 14,
-            x: 765.0,
-            y: 825.0,
-            radius: 29.0,
+            x: 750.0,
+            y: 565.0,
+            radius: 30.0,
             points: 20,
             tier: "barrio",
             icon: "🏺",
@@ -263,8 +263,8 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         FeriaHole {
             id: 15,
             x: 468.0,
-            y: 955.0,
-            radius: 29.0,
+            y: 565.0,
+            radius: 30.0,
             points: 20,
             tier: "barrio",
             icon: "🌺",
@@ -276,9 +276,9 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 16,
-            x: 155.0,
-            y: 1085.0,
-            radius: 29.0,
+            x: 468.0,
+            y: 235.0,
+            radius: 31.0,
             points: 10,
             tier: "madera",
             icon: "🪙",
@@ -290,9 +290,9 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 17,
-            x: 312.0,
-            y: 1085.0,
-            radius: 29.0,
+            x: 255.0,
+            y: 305.0,
+            radius: 30.0,
             points: 10,
             tier: "madera",
             icon: "💀",
@@ -304,9 +304,9 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 18,
-            x: 468.0,
-            y: 1085.0,
-            radius: 29.0,
+            x: 680.0,
+            y: 305.0,
+            radius: 30.0,
             points: 10,
             tier: "madera",
             icon: "🤠",
@@ -318,9 +318,9 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 19,
-            x: 625.0,
-            y: 1085.0,
-            radius: 29.0,
+            x: 355.0,
+            y: 440.0,
+            radius: 30.0,
             points: 10,
             tier: "madera",
             icon: "🐸",
@@ -332,16 +332,16 @@ pub fn feria_holes() -> Vec<FeriaHole> {
         },
         FeriaHole {
             id: 20,
-            x: 780.0,
-            y: 1085.0,
-            radius: 29.0,
+            x: 580.0,
+            y: 440.0,
+            radius: 30.0,
             points: 10,
             tier: "madera",
             icon: "🎺",
             name_es: "La Trompeta",
             name_en: "The Trumpet",
-            dicho_es: "«¡Al final del tablero pero nunca en cero: diez puntos!»",
-            dicho_en: "\"At the bottom of the board but never zero: ten points!\"",
+            dicho_es: "«¡Suena la trompeta de la feria con diez puntos!»",
+            dicho_en: "\"The fairground trumpet sounds for ten points!\"",
             color: "#a855f7",
         },
     ]
@@ -352,56 +352,71 @@ pub fn feria_nails() -> Vec<FeriaNail> {
     let mut nails: Vec<FeriaNail> = Vec::new();
     let mut id_counter = 1;
 
+    // Marble diameter is 27px (r=13.5) and nail radius is 4.5px (min touch dist = 36px).
+    // Enforcing >= 41.5px between nails guarantees at least 32.5px clear gap so a marble never wedges,
+    // while allowing a dense, lively ~105-nail Mexican Feria pinfield!
     let can_place_nail = |nx: f64, ny: f64, existing: &[FeriaNail]| -> bool {
         let too_close_to_hole = holes
             .iter()
-            .any(|h| ((h.x - nx).powi(2) + (h.y - ny).powi(2)).sqrt() < h.radius + 30.0);
+            .any(|h| ((h.x - nx).powi(2) + (h.y - ny).powi(2)).sqrt() < h.radius + 17.5);
         let too_close_to_nail = existing
             .iter()
-            .any(|n| ((n.x - nx).powi(2) + (n.y - ny).powi(2)).sqrt() < 64.0);
+            .any(|n| ((n.x - nx).powi(2) + (n.y - ny).powi(2)).sqrt() < 41.5);
         !too_close_to_hole && !too_close_to_nail
     };
 
-    // 1. Wide flanking shoulder pegs beside the top jackpot holes (leaving a wide 95px+ top funnel opening)
-    let guarded_centers = [
-        (468.0, 235.0, 62.0),
-        (255.0, 305.0, 62.0),
-        (680.0, 305.0, 62.0),
-        (355.0, 440.0, 62.0),
-        (580.0, 440.0, 62.0),
-        (468.0, 565.0, 62.0),
+    // 1. Semicircular 4-nail brass crowns above the middle & lower prize holes (y = 565..955)
+    // and side-wing nails on the top 10-pt holes (leaving top 10-pt hole mouths open!)
+    let guarded_lower_holes: &[(f64, f64, f64, &[f64])] = &[
+        (468.0, 955.0, 52.0, &[-116.0_f64, -64.0]),
+        (170.0, 825.0, 52.0, &[-162.0, -114.0, -66.0, -18.0]),
+        (368.0, 825.0, 52.0, &[-162.0, -114.0, -66.0, -18.0]),
+        (568.0, 825.0, 52.0, &[-162.0, -114.0, -66.0, -18.0]),
+        (765.0, 825.0, 52.0, &[-162.0, -114.0, -66.0, -18.0]),
+        (185.0, 565.0, 52.0, &[-162.0, -114.0, -66.0, -18.0]),
+        (468.0, 565.0, 54.0, &[-162.0, -114.0, -66.0, -18.0]),
+        (750.0, 565.0, 52.0, &[-162.0, -114.0, -66.0, -18.0]),
+        (310.0, 695.0, 52.0, &[-162.0, -114.0, -66.0, -18.0]),
+        (625.0, 695.0, 52.0, &[-162.0, -114.0, -66.0, -18.0]),
+        (468.0, 235.0, 54.0, &[-162.0, -124.0, -56.0, -18.0]),
+        (255.0, 305.0, 54.0, &[-162.0, -124.0, -56.0, -18.0]),
+        (680.0, 305.0, 54.0, &[-162.0, -124.0, -56.0, -18.0]),
+        (355.0, 440.0, 54.0, &[-162.0, -124.0, -56.0, -18.0]),
+        (580.0, 440.0, 54.0, &[-162.0, -124.0, -56.0, -18.0]),
     ];
-    for (cx, cy, r) in guarded_centers {
-        for deg in [-150.0_f64, -30.0] {
+    for &(cx, cy, r, degs) in guarded_lower_holes {
+        for &deg in degs {
             let rad = deg.to_radians();
             let nx = (cx + r * rad.cos()).round();
             let ny = (cy + r * rad.sin()).round();
-            if can_place_nail(nx, ny, &nails) {
+            if (138.0..=798.0).contains(&nx) && can_place_nail(nx, ny, &nails) {
                 nails.push(FeriaNail {
                     id: id_counter,
                     x: nx,
                     y: ny,
-                    radius: 5.0,
+                    radius: 4.5,
                 });
                 id_counter += 1;
             }
         }
     }
 
-    // 2. Staggered lattice rows across the board with >= 64px minimum spacing so a marble can never wedge
-    let row_ys = [175.0, 265.0, 370.0, 495.0, 625.0, 755.0, 885.0, 995.0];
+    // 2. 12 dense staggered lattice rows of brass nails across the board
+    let row_ys = [
+        168.0, 232.0, 298.0, 366.0, 434.0, 502.0, 570.0, 638.0, 706.0, 774.0, 842.0, 910.0,
+    ];
     for (row_idx, &ry) in row_ys.iter().enumerate() {
-        let count = if row_idx % 2 == 0 { 7 } else { 6 };
-        let start_x = if row_idx % 2 == 0 { 145.0 } else { 198.0 };
-        let step_x = 108.0;
+        let count = if row_idx % 2 == 0 { 10 } else { 9 };
+        let start_x = if row_idx % 2 == 0 { 138.0 } else { 174.5 };
+        let step_x = 73.0;
         for i in 0..count {
-            let nx = start_x + (i as f64) * step_x;
-            if can_place_nail(nx, ry, &nails) {
+            let nx = (start_x + (i as f64) * step_x).round();
+            if (138.0..=798.0).contains(&nx) && can_place_nail(nx, ry, &nails) {
                 nails.push(FeriaNail {
                     id: id_counter,
                     x: nx,
                     y: ry,
-                    radius: 5.0,
+                    radius: 4.5,
                 });
                 id_counter += 1;
             }
@@ -434,8 +449,9 @@ pub fn simulate_feria_shot(
 
     let holes = feria_holes();
     let nails = feria_nails();
+    let bottom_dividers: [f64; 4] = [233.5, 390.0, 546.5, 702.5];
 
-    let mut path = Vec::with_capacity(180);
+    let mut path = Vec::with_capacity(220);
     let mut pin_hits = Vec::new();
 
     // Phase 1A: Plunger channel launch (x = 908, y: 1120 -> 220)
@@ -449,7 +465,7 @@ pub fn simulate_feria_shot(
     }
 
     // Phase 1B: Top wooden arch exit point depends on launch power & angle flap
-    let jitter: f64 = rng.random_range(-22.0..22.0);
+    let jitter: f64 = rng.random_range(-20.0..20.0);
     let target_entry_x = (760.0 - power * 520.0 + angle * 135.0 + jitter).clamp(165.0, 775.0);
 
     for i in 1..=14 {
@@ -463,112 +479,246 @@ pub fn simulate_feria_shot(
         });
     }
 
-    // Phase 2: Tilted pinball board descent (continuous downward roll, zero stalling, zero teleporting)
+    // Phase 2: 4x Sub-stepped Newtonian rigid-body descent on tilted wooden pinboard
     let mut x = target_entry_x;
     let mut y = 152.0;
-    let mut vx = angle * 3.4 - power * 1.1 + rng.random_range(-1.2..1.2);
-    let mut vy = 3.2 + power * 1.4;
+    let mut vx = angle * 3.0 - power * 0.9 + rng.random_range(-0.9..0.9);
+    let mut vy = 3.0 + power * 1.4;
     let marble_r = 13.5;
 
     let mut captured_hole: Option<FeriaHole> = None;
+    let mut last_hit_nail_id: u32 = 0;
+    let mut last_hit_step: u32 = 0;
+    let mut last_occupied_deflect_id: u32 = 0;
+    let mut last_occupied_deflect_step: u32 = 0;
 
-    for _sim_step in 0..320 {
+    for _frame in 0..360 {
         let step_idx = path.len() as u32;
-        // Gravity down the tilted wooden board + subtle chanfle spin curve
-        vy = (vy + 0.24).clamp(2.2, 7.2);
-        vx = (vx + spin * 0.08) * 0.96;
-        vx = vx.clamp(-5.8, 5.8);
 
-        x += vx;
-        y += vy;
+        for _sub in 0..4 {
+            // Board tilt gravity + subtle chanfle spin curve (per 0.25 sub-step)
+            vy += 0.095;
+            vx += spin * 0.018;
+            vx *= 0.995;
+            vy *= 0.995;
 
-        // Board side rail rebounds
-        if x < 118.0 {
-            x = 118.0;
-            vx = vx.abs() * 0.75 + 1.4;
-        } else if x > 818.0 {
-            x = 818.0;
-            vx = -vx.abs() * 0.75 - 1.4;
-        }
-
-        // Check collisions with brass nails: rolling marble glides smoothly around the nail's circular arc
-        for nail in &nails {
-            let dx = x - nail.x;
-            let dy = y - nail.y;
-            let dist = (dx * dx + dy * dy).sqrt();
-            let min_dist = marble_r + nail.radius;
-            if dist < min_dist {
-                let side = if dx.abs() > 0.5 {
-                    dx.signum()
-                } else if spin.abs() > 0.05 {
-                    spin.signum()
-                } else if rng.random_bool(0.5) {
-                    1.0
-                } else {
-                    -1.0
-                };
-
-                let cur_ang = dy.atan2(dx);
-                let new_ang = if side > 0.0 {
-                    (cur_ang + 0.34).min(0.45)
-                } else {
-                    (cur_ang - 0.34).max(-PI - 0.45)
-                };
-                let safe_r = min_dist + 0.8;
-                x = (nail.x + safe_r * new_ang.cos()).clamp(118.0, 818.0);
-                y = (nail.y + safe_r * new_ang.sin()).max(y + 1.4);
-                vx = side * rng.random_range(2.6..3.8);
-                vy = (vy * 0.82).clamp(2.2, 5.2);
-
-                let intensity = ((vx.abs() + vy) / 8.5).clamp(0.3, 1.0);
-                pin_hits.push(PinHitEvent {
-                    step: step_idx,
-                    nail_id: nail.id,
-                    x: nail.x,
-                    y: nail.y,
-                    intensity: (intensity * 100.0).round() / 100.0,
-                });
+            let spd = (vx * vx + vy * vy).sqrt();
+            if spd > 8.2 {
+                vx = (vx / spd) * 8.2;
+                vy = (vy / spd) * 8.2;
             }
-        }
 
-        // Bottom wooden lane dividers funnel marbles at the bottom apron (y >= 995) into their lane's bottom hole
-        if y >= 995.0 {
-            if let Some(bottom_hole) = holes.iter().filter(|h| h.y >= 1050.0).min_by(|a, b| {
-                (a.x - x)
-                    .abs()
-                    .partial_cmp(&(b.x - x).abs())
-                    .unwrap_or(std::cmp::Ordering::Equal)
-            }) {
-                let bdx = bottom_hole.x - x;
-                let bdy = (bottom_hole.y - y).max(1.5);
-                let bdist = (bdx * bdx + bdy * bdy).sqrt().max(1.0);
-                vx = vx * 0.55 + (bdx / bdist) * 3.4;
-                vy = (vy * 0.65 + (bdy / bdist) * 2.2).clamp(1.8, 4.8);
+            x += vx * 0.25;
+            y += vy * 0.25;
+
+            // Side wooden rails + bottom corner funnel ramps (y: 1005 -> 1085)
+            let corner_inset = if y > 1005.0 {
+                ((y - 1005.0) / 80.0).clamp(0.0, 1.0) * 22.0
+            } else {
+                0.0
+            };
+            let min_x = 118.0 + corner_inset;
+            let max_x = 818.0 - corner_inset;
+            if x < min_x {
+                x = min_x;
+                vx = vx.abs() * 0.65 + 0.9;
+            } else if x > max_x {
+                x = max_x;
+                vx = -vx.abs() * 0.65 - 0.9;
             }
+
+            // Bottom backstop wooden rail (inside the 5 bottom holes at y = 1085)
             if y > 1088.0 {
                 y = 1088.0;
+                vy = 0.0;
             }
-        }
 
-        // Check hole capture wells
-        for hole in &holes {
-            let dx = hole.x - x;
-            let dy = hole.y - y;
-            let dist = (dx * dx + dy * dy).sqrt();
+            // Rigid-body circle-circle collisions with brass nails
+            for nail in &nails {
+                let dx = x - nail.x;
+                let dy = y - nail.y;
+                let dist = (dx * dx + dy * dy).sqrt();
+                let min_dist = marble_r + nail.radius;
+                if dist < min_dist && dist > 0.0001 {
+                    let nx = dx / dist;
+                    let ny = dy / dist;
+                    x = nail.x + nx * (min_dist + 0.3);
+                    y = nail.y + ny * (min_dist + 0.3);
 
-            // Beveled wooden rim pulls nearby marbles toward the cup center
-            if dist < hole.radius + 14.0 {
-                let pull = if hole.y >= 1050.0 { 1.65 } else { 0.95 };
-                vx = vx * 0.74 + (dx / dist.max(1.0)) * pull;
-                if dy > 0.0 {
-                    vy = (vy * 0.78 + (dy / dist.max(1.0)) * pull).clamp(1.8, 5.2);
+                    let vn = vx * nx + vy * ny;
+                    if vn < 0.0 {
+                        vx -= 1.42 * vn * nx;
+                        vy -= 1.42 * vn * ny;
+                        // On a tilted wooden Feria pinboard, marbles deflect left/right off round brass
+                        // nails and continue rolling downward rather than bouncing upward in place
+                        if ny < -0.15 && vx.abs() < 2.4 {
+                            let side = if nx.abs() > 0.04 {
+                                nx.signum()
+                            } else if spin.abs() > 0.05 {
+                                spin.signum()
+                            } else if rng.random_bool(0.5) {
+                                1.0
+                            } else {
+                                -1.0
+                            };
+                            vx = side * rng.random_range(2.3..3.2);
+                        }
+                        if vy < 1.25 {
+                            vy = 1.25;
+                        }
+                        if nail.id != last_hit_nail_id || step_idx > last_hit_step + 3 {
+                            let intensity = (vn.abs() / 6.0).clamp(0.25, 1.0);
+                            pin_hits.push(PinHitEvent {
+                                step: step_idx,
+                                nail_id: nail.id,
+                                x: nail.x,
+                                y: nail.y,
+                                intensity: (intensity * 100.0).round() / 100.0,
+                            });
+                            last_hit_nail_id = nail.id;
+                            last_hit_step = step_idx;
+                        }
+                    }
                 }
             }
 
-            // Capture inside hole rim (marble is already physically inside the hole!)
-            if dist < hole.radius * 0.74 {
-                captured_hole = Some(hole.clone());
+            // Solid triangular wooden ramp wedges between the 5 bottom holes (y: 1005 -> 1085)
+            // The two inner dividers (390.0 and 546.5) slope outward near their top tips (y < 1042)
+            // so the center 100-pt Gallo de Oro vault (x = 468) requires threading a narrow center needle!
+            if y >= 1005.0 {
+                let ramp_t = ((y - 1005.0) / 80.0).clamp(0.0, 1.0);
+                let wedge_reach = 2.0 + ramp_t * 50.0; // reaches 52px from divider center at y=1085
+                for &div_x in &bottom_dividers {
+                    let dx = x - div_x;
+                    if dx.abs() < wedge_reach {
+                        let side = if dx.abs() > 0.05 {
+                            dx.signum()
+                        } else if vx.abs() > 0.05 {
+                            vx.signum()
+                        } else {
+                            1.0
+                        };
+                        x = div_x + side * (wedge_reach + 0.25);
+                        vx = vx * 0.55 + side * 1.8;
+                        vy = vy.max(2.2);
+                    }
+                }
+            }
+
+            // 3-Zone Hole Interaction:
+            // - Zone 1 (Occupied Hole): Resting marble dome bumps & deflects passing marbles away.
+            // - Zone 2 (Inner Cup `dist < hole.radius - 2.5`): Marble center is over the hole opening ->
+            //   strong cup gravity pulls it in so it NEVER ghosts across a hole without falling in.
+            // - Zone 3 (Bevelled Rim Lip `hole.radius - 2.5 <= dist < hole.radius + 9.5`): Marble edge
+            //   grazes the carved wooden lip -> tips inward if slow, or deflects sideways if fast.
+            for hole in &holes {
+                let dx = hole.x - x;
+                let dy = hole.y - y;
+                let dist = (dx * dx + dy * dy).sqrt();
+                let speed = (vx * vx + vy * vy).sqrt();
+                let is_occupied = occupied_hole_ids.contains(&hole.id);
+
+                if is_occupied && dist < hole.radius + 10.0 && hole.y < 1050.0 {
+                    // Dead-center slow drop can still nestle in for Combo x2, otherwise the resting
+                    // marble in the hole bumps the passing marble and visibly changes its direction!
+                    if dist < 6.8 && speed < 3.1 {
+                        x = hole.x;
+                        y = hole.y;
+                        captured_hole = Some(hole.clone());
+                        break;
+                    } else if hole.id != last_occupied_deflect_id
+                        || step_idx > last_occupied_deflect_step + 4
+                    {
+                        let out_nx = -dx / dist.max(1.0);
+                        let out_ny = -dy / dist.max(1.0);
+                        let side = if out_nx.abs() > 0.06 {
+                            out_nx.signum()
+                        } else if vx.abs() > 0.1 {
+                            vx.signum()
+                        } else if rng.random_bool(0.5) {
+                            1.0
+                        } else {
+                            -1.0
+                        };
+                        if dist < hole.radius - 2.0 {
+                            x = hole.x + out_nx * (hole.radius - 1.5);
+                            y = hole.y + out_ny * (hole.radius - 1.5);
+                        }
+                        vx = vx * 0.35 + out_nx * 1.9 + side * rng.random_range(2.4..3.5);
+                        vy = (vy * 0.82 + out_ny.max(0.25) * 1.35).max(1.85);
+                        pin_hits.push(PinHitEvent {
+                            step: step_idx,
+                            nail_id: 1000 + hole.id,
+                            x: hole.x,
+                            y: hole.y,
+                            intensity: 0.9,
+                        });
+                        last_occupied_deflect_id = hole.id;
+                        last_occupied_deflect_step = step_idx;
+                    }
+                } else if dist < hole.radius - 3.0 {
+                    if is_occupied
+                        && (hole.id != last_occupied_deflect_id
+                            || step_idx > last_occupied_deflect_step + 6)
+                    {
+                        pin_hits.push(PinHitEvent {
+                            step: step_idx,
+                            nail_id: 1000 + hole.id,
+                            x: hole.x,
+                            y: hole.y,
+                            intensity: 0.8,
+                        });
+                        last_occupied_deflect_id = hole.id;
+                        last_occupied_deflect_step = step_idx;
+                    }
+                    // Marble center is physically over the open hole cup: strong cup slope pulls it in
+                    // at ANY speed so a marble never rolls across a hole (like El Nopal) without falling in!
+                    let pull = if hole.y >= 1050.0 { 2.65 } else { 2.45 };
+                    vx = vx * 0.46 + (dx / dist.max(1.0)) * pull;
+                    vy = vy * 0.46 + (dy / dist.max(1.0)) * pull;
+
+                    if dist < 7.5 {
+                        x = hole.x;
+                        y = hole.y;
+                        captured_hole = Some(hole.clone());
+                        break;
+                    }
+                } else if dist < hole.radius + (if hole.points <= 20 { 11.0 } else { 8.5 }) && hole.y < 1050.0 {
+                    // Marble is touching the carved wooden rim/lip around the hole:
+                    // Upper 10pt/20pt holes have a slightly wider bevelled lip so they eagerly catch
+                    // careless shots near the top, making it harder to reach the 50/75/100 holes at the bottom!
+                    let align_ratio = if hole.points <= 20 { 0.80 } else { 0.58 };
+                    let tip_speed = if hole.points <= 20 { 5.2 } else { 4.3 };
+                    if (dx.abs() < hole.radius * align_ratio && dy > -2.5) || speed < tip_speed {
+                        vx = vx * 0.62 + (dx / dist.max(1.0)) * 1.85;
+                        vy = vy * 0.74 + (dy / dist.max(1.0)) * 1.70;
+                    } else {
+                        let out_nx = -dx / dist.max(1.0);
+                        let side = if out_nx.abs() > 0.05 {
+                            out_nx.signum()
+                        } else if vx.abs() > 0.05 {
+                            vx.signum()
+                        } else {
+                            1.0
+                        };
+                        vx = vx * 0.52 + out_nx * 1.35 + side * 1.35;
+                        vy = (vy * 0.94).max(1.75);
+                    }
+                }
+            }
+
+            if captured_hole.is_some() {
                 break;
+            }
+        }
+
+        // Gentle stall safeguard if caught in a low-speed equilibrium
+        if path.len() >= 36 {
+            let prev4 = &path[path.len() - 4];
+            if ((x - prev4.x).powi(2) + (y - prev4.y).powi(2)).sqrt() < 5.0 {
+                let dir = if rng.random_bool(0.5) { 1.0 } else { -1.0 };
+                vx += dir * 2.8;
+                vy = vy.max(2.6);
             }
         }
 
@@ -594,20 +744,11 @@ pub fn simulate_feria_shot(
             .unwrap_or_else(|| holes.last().unwrap().clone())
     });
 
-    // Smooth final cup settle inside the rim of `final_hole`
-    let last_pt = path.last().cloned().unwrap_or(TrajectoryPoint {
+    // Ensure final resting frame is at the exact center of `final_hole`
+    path.push(TrajectoryPoint {
         x: final_hole.x,
         y: final_hole.y,
     });
-    for i in 1..=6 {
-        let frac = (i as f64) / 6.0;
-        let sx = last_pt.x + (final_hole.x - last_pt.x) * frac;
-        let sy = last_pt.y + (final_hole.y - last_pt.y) * frac;
-        path.push(TrajectoryPoint {
-            x: (sx * 10.0).round() / 10.0,
-            y: (sy * 10.0).round() / 10.0,
-        });
-    }
 
     let base_points = final_hole.points;
     let mut multiplier = 1;
@@ -719,14 +860,22 @@ pub struct PatioShotSimulation {
 }
 
 pub fn generate_patio_marbles(is_hoyita: bool) -> Vec<TargetMarble> {
+    generate_patio_marbles_with_phase(is_hoyita, 0.0)
+}
+
+pub fn generate_patio_marbles_with_phase(is_hoyita: bool, phase_deg: f64) -> Vec<TargetMarble> {
     let mut marbles = Vec::with_capacity(13);
     let mut id = 1;
 
-    // 1. Central Bolón Rey (in Hoyita mode, offset slightly so the center pit at (500,500) is open)
+    // 1. Central Bolón Rey (in Hoyita mode, offset around the center pit at R=76)
     let (rey_x, rey_y) = if is_hoyita {
-        (500.0, 428.0)
+        let rey_rad = (phase_deg - 90.0).to_radians();
+        (
+            (PATIO_CENTER_X + 76.0 * rey_rad.cos()).round(),
+            (PATIO_CENTER_Y + 76.0 * rey_rad.sin()).round(),
+        )
     } else {
-        (500.0, 500.0)
+        (PATIO_CENTER_X, PATIO_CENTER_Y)
     };
     marbles.push(TargetMarble {
         id,
@@ -741,10 +890,10 @@ pub fn generate_patio_marbles(is_hoyita: bool) -> Vec<TargetMarble> {
     id += 1;
 
     // 2. Four inner Lecheras (20 pts each)
-    let inner_r = if is_hoyita { 94.0 } else { 78.0 };
+    let inner_r = if is_hoyita { 104.0 } else { 78.0 };
     let lechera_colors = ["#ec4899", "#06b6d4", "#10b981", "#ef4444"];
     for (i, &col) in lechera_colors.iter().enumerate() {
-        let rad = ((i as f64) * 90.0 + 45.0).to_radians();
+        let rad = ((i as f64) * 90.0 + 45.0 + phase_deg).to_radians();
         marbles.push(TargetMarble {
             id,
             x: (PATIO_CENTER_X + inner_r * rad.cos()).round(),
@@ -759,12 +908,12 @@ pub fn generate_patio_marbles(is_hoyita: bool) -> Vec<TargetMarble> {
     }
 
     // 3. Eight outer Agüitas / Ojos de Gato (10 pts each)
-    let outer_r = 152.0;
+    let outer_r = 154.0;
     let aguita_colors = [
         "#3b82f6", "#8b5cf6", "#f97316", "#14b8a6", "#eab308", "#ec4899", "#10b981", "#06b6d4",
     ];
     for (i, &col) in aguita_colors.iter().enumerate() {
-        let rad = ((i as f64) * 45.0).to_radians();
+        let rad = ((i as f64) * 45.0 + phase_deg * 0.5).to_radians();
         marbles.push(TargetMarble {
             id,
             x: (PATIO_CENTER_X + outer_r * rad.cos()).round(),
@@ -779,6 +928,125 @@ pub fn generate_patio_marbles(is_hoyita: bool) -> Vec<TargetMarble> {
     }
 
     marbles
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PatioStone {
+    pub x: f64,
+    pub y: f64,
+    pub r: f64,
+}
+
+pub fn generate_patio_stones(
+    is_hoyita: bool,
+    shot_counter: u32,
+    blocked_seat_deg: f64,
+    targets: &[TargetMarble],
+) -> Vec<PatioStone> {
+    let mut stones: Vec<PatioStone> = Vec::with_capacity(24);
+
+    let is_clear = |sx: f64, sy: f64, sr: f64, existing: &[PatioStone]| -> bool {
+        let min_center_d = if is_hoyita { 52.0 } else { 38.0 };
+        let dc = ((sx - PATIO_CENTER_X).powi(2) + (sy - PATIO_CENTER_Y).powi(2)).sqrt();
+        if dc < min_center_d || dc > 214.0 {
+            return false;
+        }
+        let hits_marble = targets.iter().filter(|m| m.active).any(|m| {
+            ((m.x - sx).powi(2) + (m.y - sy).powi(2)).sqrt() < m.radius + sr + 3.0
+        });
+        if hits_marble {
+            return false;
+        }
+        let hits_stone = existing
+            .iter()
+            .any(|s| ((s.x - sx).powi(2) + (s.y - sy).powi(2)).sqrt() < s.r + sr + 5.0);
+        !hits_stone
+    };
+
+    // Helper: Place a blocker rock directly along a ray angle (tries candidate radii along the ray first)
+    let place_ray_blocker = |ray_deg: f64, sr: f64, stones: &mut Vec<PatioStone>| {
+        let candidate_radii: &[f64] = if is_hoyita {
+            &[74.0, 96.0, 120.0, 146.0, 172.0, 196.0]
+        } else {
+            &[84.0, 110.0, 136.0, 162.0, 188.0]
+        };
+        for &deg_off in &[0.0_f64, 4.0, -4.0, 8.0, -8.0, 12.0, -12.0] {
+            let rad = (ray_deg + deg_off).to_radians();
+            for &dist_r in candidate_radii {
+                let sx = (PATIO_CENTER_X + dist_r * rad.cos()).round();
+                let sy = (PATIO_CENTER_Y + dist_r * rad.sin()).round();
+                if is_clear(sx, sy, sr, stones) {
+                    stones.push(PatioStone { x: sx, y: sy, r: sr });
+                    return;
+                }
+            }
+        }
+    };
+
+    // 1. Primary blocker rock directly on the active shooter's straight ray!
+    place_ray_blocker(blocked_seat_deg, 15.0, &mut stones);
+
+    // Dynamic progression: rocks appear progressively as marbles disappear!
+    let total_expected = if is_hoyita { 12_usize } else { 13_usize };
+    let active_marbles = targets.iter().filter(|m| m.active).count();
+    let missing_marbles = total_expected.saturating_sub(active_marbles);
+
+    // 2. Cardinal entry blockers (90° South, 270° North, 180° West, 0° East)
+    // 0 at start! Unlock 1 cardinal every 3 missing marbles (scales up to 4 when missing >= 12)
+    let cardinal_count = (missing_marbles / 3).min(4);
+    let cardinals = [90.0_f64, 270.0, 180.0, 0.0];
+    for &cardinal_deg in cardinals.iter().take(cardinal_count) {
+        let diff = ((cardinal_deg - blocked_seat_deg + 540.0).rem_euclid(360.0)) - 180.0;
+        if diff.abs() > 16.0 {
+            place_ray_blocker(cardinal_deg, 14.5, &mut stones);
+        }
+    }
+
+    // 3. In Hoyita mode: center pit guardian rocks
+    // At start (0 missing): only 1 guardian rock. Scales up to 4 as marbles disappear.
+    if is_hoyita {
+        let guardian_count = if missing_marbles == 0 {
+            1_usize
+        } else {
+            (1 + missing_marbles / 4).min(4)
+        };
+        let rot_jitter = (((shot_counter * 37) % 90) as f64).to_radians();
+        for i in 0..guardian_count {
+            let base_ang = (i as f64) * std::f64::consts::FRAC_PI_2 + rot_jitter;
+            let dist_r = 66.0 + ((shot_counter + (i as u32) * 5) % 9) as f64;
+            let sx = (PATIO_CENTER_X + dist_r * base_ang.cos()).round();
+            let sy = (PATIO_CENTER_Y + dist_r * base_ang.sin()).round();
+            if is_clear(sx, sy, 13.5, &stones) {
+                stones.push(PatioStone { x: sx, y: sy, r: 13.5 });
+            }
+        }
+    }
+
+    // 4. Scattered random courtyard rocks across mid & outer ring (R = 85..205)
+    // 0 at the start when all marbles are present!
+    // Scales up to 11 as marbles disappear, occupying vacant ground to maintain challenge.
+    let scattered_goal = (missing_marbles * 11) / 13;
+
+    for k in 0..scattered_goal {
+        let seed = (shot_counter.wrapping_add(1))
+            .wrapping_mul(2654435761)
+            .wrapping_add(((k as u32) + 1).wrapping_mul(1013904223));
+        let base_deg = ((seed % 360) as f64) + (k as f64) * 37.0;
+        let dist_r = 85.0 + (((seed >> 8) % 120) as f64); // 85..205px
+        let sr = 13.5 + (((seed >> 16) % 3) as f64); // 13.5..15.5px
+
+        for step in 0..24 {
+            let rad = (base_deg + (step as f64) * 15.0).to_radians();
+            let sx = (PATIO_CENTER_X + dist_r * rad.cos()).round();
+            let sy = (PATIO_CENTER_Y + dist_r * rad.sin()).round();
+            if is_clear(sx, sy, sr, &stones) {
+                stones.push(PatioStone { x: sx, y: sy, r: sr });
+                break;
+            }
+        }
+    }
+
+    stones
 }
 
 #[derive(Clone)]
@@ -802,6 +1070,7 @@ struct SimBody {
 }
 
 #[allow(clippy::too_many_arguments)]
+#[allow(dead_code)]
 pub fn simulate_patio_shot(
     mode: &str, // "circulo" or "hoyita"
     seat_angle_deg: f64,
@@ -812,6 +1081,40 @@ pub fn simulate_patio_shot(
     raw_spin: f64,
     targets: &mut [TargetMarble],
     rival_shooters: &mut [(String, f64, f64, String)], // (player_id, x, y, color)
+    bonus_shot_rule: bool,
+) -> PatioShotSimulation {
+    let default_stones = if mode == "hoyita" {
+        generate_patio_stones(true, 0, seat_angle_deg, targets)
+    } else {
+        Vec::new()
+    };
+    simulate_patio_shot_with_stones(
+        mode,
+        seat_angle_deg,
+        shooter_color,
+        is_cazador,
+        raw_power,
+        raw_angle,
+        raw_spin,
+        targets,
+        rival_shooters,
+        &default_stones,
+        bonus_shot_rule,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn simulate_patio_shot_with_stones(
+    mode: &str, // "circulo" or "hoyita"
+    seat_angle_deg: f64,
+    shooter_color: &str,
+    is_cazador: bool,
+    raw_power: f64,
+    raw_angle: f64,
+    raw_spin: f64,
+    targets: &mut [TargetMarble],
+    rival_shooters: &mut [(String, f64, f64, String)], // (player_id, x, y, color)
+    stones: &[PatioStone],
     bonus_shot_rule: bool,
 ) -> PatioShotSimulation {
     let mut rng = rand::rng();
@@ -833,10 +1136,10 @@ pub fn simulate_patio_shot(
     let start_x = PATIO_CENTER_X + PATIO_SHOOT_RADIUS * seat_rad.cos();
     let start_y = PATIO_CENTER_Y + PATIO_SHOOT_RADIUS * seat_rad.sin();
 
-    // Base direction points inward toward center (500, 500), offset by player's aim angle (-38°..+38°)
+    // Base direction points inward toward center (500, 500), offset by player's aim angle (-42°..+42°)
     let inward_angle = (PATIO_CENTER_Y - start_y).atan2(PATIO_CENTER_X - start_x);
     let micro_jitter = rng.random_range(-0.022..0.022);
-    let aim_rad = inward_angle + (angle * 36.0_f64).to_radians() + micro_jitter;
+    let aim_rad = inward_angle + (angle * 42.0_f64).to_radians() + micro_jitter;
     let initial_speed = 6.2 + power * 14.5;
 
     let mut bodies: Vec<SimBody> = Vec::new();
@@ -943,6 +1246,34 @@ pub fn simulate_patio_shot(
                 b.y += b.vy;
                 b.vx *= 0.968;
                 b.vy *= 0.968;
+
+                // Collide with the dynamic courtyard rocks ("Piedritas del Patio")
+                for st in stones {
+                    let dx_s = b.x - st.x;
+                    let dy_s = b.y - st.y;
+                    let dist_s = (dx_s * dx_s + dy_s * dy_s).sqrt();
+                    let min_s = b.radius + st.r;
+                    if dist_s < min_s && dist_s > 0.001 {
+                        let nx = dx_s / dist_s;
+                        let ny = dy_s / dist_s;
+                        b.x = st.x + nx * min_s;
+                        b.y = st.y + ny * min_s;
+                        let vn = b.vx * nx + b.vy * ny;
+                        if vn < 0.0 {
+                            b.vx -= 1.82 * vn * nx;
+                            b.vy -= 1.82 * vn * ny;
+                            if collisions.len() < 18 {
+                                collisions.push(CollisionEvent {
+                                    step: sample_step,
+                                    x: st.x,
+                                    y: st.y,
+                                    intensity: (vn.abs() / 11.0).clamp(0.25, 0.95),
+                                    kind: "stone".to_string(),
+                                });
+                            }
+                        }
+                    }
+                }
 
                 // Soft outer courtyard boundary (R = 460)
                 let dx_c = b.x - PATIO_CENTER_X;
@@ -1096,10 +1427,9 @@ pub fn simulate_patio_shot(
     let mut captured_ids = Vec::new();
     let mut points_scored = 0_u32;
     let encholada_hoyita = bodies[0].encholada;
-
-    if encholada_hoyita {
-        points_scored += 50;
-    }
+    let hit_marble = collisions
+        .iter()
+        .any(|c| c.kind == "target" || c.kind == "rival");
 
     for b in bodies.iter().skip(1) {
         if let Some(tid) = b.target_id {
@@ -1109,7 +1439,7 @@ pub fn simulate_patio_shot(
                 if b.captured {
                     t.active = false;
                     captured_ids.push(tid);
-                    let mult = if b.encholada { 2 } else { 1 };
+                    let mult = if b.encholada || is_cazador { 2 } else { 1 };
                     points_scored += b.points_val * mult;
                 }
             }
@@ -1118,6 +1448,19 @@ pub fn simulate_patio_shot(
                 r.1 = (b.x * 10.0).round() / 10.0;
                 r.2 = (b.y * 10.0).round() / 10.0;
             }
+        }
+    }
+
+    let repeat_empty_hoyita =
+        encholada_hoyita && is_cazador && !hit_marble && captured_ids.is_empty() && ponchados_ids.is_empty();
+
+    if encholada_hoyita {
+        if repeat_empty_hoyita {
+            points_scored += 10;
+        } else if hit_marble {
+            points_scored += 60;
+        } else {
+            points_scored += 45;
         }
     }
 
@@ -1130,14 +1473,23 @@ pub fn simulate_patio_shot(
     let shooter_final_y = (bodies[0].y * 10.0).round() / 10.0;
 
     let earned_bonus_shot = bonus_shot_rule
-        && (!captured_ids.is_empty() || encholada_hoyita || !ponchados_ids.is_empty());
+        && (!captured_ids.is_empty()
+            || (encholada_hoyita && !repeat_empty_hoyita)
+            || !ponchados_ids.is_empty());
 
-    let (headline_es, headline_en, dicho_es, dicho_en) = if encholada_hoyita {
+    let (headline_es, headline_en, dicho_es, dicho_en) = if repeat_empty_hoyita {
+        (
+            "🔮 ¡Ya eres Cazador! (+10 pts) • ¡Saca canicas para Puntos x2!".to_string(),
+            "🔮 Already Hunter! (+10 pts) • Knock out marbles for 2x Points!".to_string(),
+            "«Como ya eres Cazador, apunta a las canicas del ruedo (valen doble) o haz carambola.»".to_string(),
+            "\"Since you are already Hunter, aim at the ring marbles (worth 2x) or bank off a marble!\"".to_string(),
+        )
+    } else if encholada_hoyita {
         (
             format!("🕳️ ¡ENCHOLADA EN LA HOYITA! (+{} pts)", points_scored),
             format!("🕳️ SUNK IN LA HOYITA! (+{} pts)", points_scored),
-            "«¡Adentro del pochito! Te coronas Cazador con derecho a ponchar.»".to_string(),
-            "\"Right into the dirt pit! You are crowned Hunter with strike rights.\"".to_string(),
+            "«¡Adentro del pochito! Te coronas Cazador: ahora tus canicas valen x2.»".to_string(),
+            "\"Right into the dirt pit! You are crowned Hunter: your marble knockouts now score 2x!\"".to_string(),
         )
     } else if !captured_ids.is_empty() && !ponchados_ids.is_empty() {
         (
@@ -1250,17 +1602,21 @@ mod tests {
         assert_eq!(holes[19].points, 10);
 
         let nails = feria_nails();
-        assert!(nails.len() >= 35);
-        // Verify no nail is inside a hole rim and no two nails can ever wedge a marble
+        assert!(
+            nails.len() >= 70,
+            "Expected dense Feria nail field (>=70 nails), got {}",
+            nails.len()
+        );
+        // Verify no nail is inside a hole rim and no two nails can ever wedge a 27px marble
         for (i, n) in nails.iter().enumerate() {
             for h in &holes {
                 let d = ((h.x - n.x).powi(2) + (h.y - n.y).powi(2)).sqrt();
-                assert!(d >= h.radius + 20.0);
+                assert!(d >= h.radius + 17.0);
             }
             for m in nails.iter().skip(i + 1) {
                 let dn = ((m.x - n.x).powi(2) + (m.y - n.y).powi(2)).sqrt();
                 assert!(
-                    dn >= 61.5,
+                    dn >= 41.0,
                     "Nails {} and {} too close: {:.1}px",
                     n.id,
                     m.id,
@@ -1278,13 +1634,32 @@ mod tests {
         assert!(sim.multiplier >= 2);
         assert!(sim.path.len() >= 35);
 
+        let holes = feria_holes();
+        // Verify all 10-pt holes are at the top (y <= 440) and all 50/75/100-pt holes are at the bottom (y >= 955)
+        for h in &holes {
+            if h.points == 10 {
+                assert!(h.y <= 440.0);
+            } else if h.points >= 50 {
+                assert!(h.y >= 955.0);
+            }
+        }
+
+        let mut count_100 = 0;
+        let mut count_upper_cheap = 0;
         // Stress-test 300 Feria shots across all power/angle/spin combinations:
-        // Verify zero teleporting (no step > 16px in pinfield) and zero stalling between nails.
+        // Verify zero teleporting (no step > 16px in pinfield), zero stalling between nails,
+        // and that a marble never rolls across the inner opening of an empty hole without falling in!
         for s in 0..300 {
             let p = 0.15 + ((s % 10) as f64) * 0.085;
             let a = -0.9 + (((s / 10) % 10) as f64) * 0.2;
             let sp = -0.8 + ((s / 100) as f64) * 0.8;
             let run = simulate_feria_shot(p, a, sp, &[], false, true);
+            if run.hole.points == 100 {
+                count_100 += 1;
+            }
+            if run.hole.points <= 30 {
+                count_upper_cheap += 1;
+            }
             let n = run.path.len();
             assert!(n >= 36);
             // Pinfield starts at index 30 (after 16 plunger + 14 arch points)
@@ -1300,6 +1675,16 @@ mod tests {
                     step_d,
                     run.hole.id
                 );
+                for h in &holes {
+                    let dh = ((run.path[i].x - h.x).powi(2) + (run.path[i].y - h.y).powi(2)).sqrt();
+                    if dh < h.radius - 6.0 {
+                        assert_eq!(
+                            run.hole.id, h.id,
+                            "Marble rolled over inner cup of hole #{} ({}) at dist {:.1}px without falling in (landed in #{})",
+                            h.id, h.name_es, dh, run.hole.id
+                        );
+                    }
+                }
             }
             // Verify marble never sits spinning in place before the final 6-step cup settle
             if n > 46 {
@@ -1317,6 +1702,17 @@ mod tests {
                 }
             }
         }
+        println!("300-shot distribution: 100pt = {}, <=30pt = {}", count_100, count_upper_cheap);
+        assert!(
+            count_100 <= 25,
+            "Expected 100pt jackpot hole to be rare (<=25/300), got {}",
+            count_100
+        );
+        assert!(
+            count_upper_cheap >= 190,
+            "Expected upper/middle <=30pt holes to catch most shots (>=190/300), got {}",
+            count_upper_cheap
+        );
     }
 
     #[test]
@@ -1356,5 +1752,54 @@ mod tests {
         );
         assert_eq!(sim_h.mode, "hoyita");
         assert!(!sim_h.paths.is_empty());
+    }
+
+    #[test]
+    fn test_patio_dynamic_stones_block_rays_and_randomize() {
+        let targets = generate_patio_marbles(true);
+        let stones_turn0 = generate_patio_stones(true, 0, 90.0, &targets);
+        let stones_turn1 = generate_patio_stones(true, 1, 90.0, &targets);
+        let stones_turn2 = generate_patio_stones(true, 2, 180.0, &targets);
+
+        // At start (all 12/13 marbles active): only 1 ray blocker + 1 pit guardian in Hoyita (2 total)!
+        // In Circulo: exactly 1 ray blocker rock!
+        let stones_circulo = generate_patio_stones(false, 0, 90.0, &generate_patio_marbles(false));
+        assert_eq!(stones_circulo.len(), 1, "Expected exactly 1 ray blocker rock at start of Circulo");
+        assert_eq!(stones_turn0.len(), 2, "Expected exactly 2 rocks (1 ray blocker + 1 pit guardian) at start of Hoyita");
+
+        // As marbles disappear, rocks progressively spawn:
+        let mut depleted_targets = generate_patio_marbles(true);
+        for m in depleted_targets.iter_mut().take(10) {
+            m.active = false;
+        }
+        let stones_depleted = generate_patio_stones(true, 5, 90.0, &depleted_targets);
+        assert!(
+            stones_depleted.len() >= 10,
+            "Expected >=10 stones when 10 marbles disappear, got {}",
+            stones_depleted.len()
+        );
+
+        // Check that a stone blocks the straight ray from 90° (South)
+        let has_90_blocker = stones_turn0.iter().any(|st| {
+            let dy = st.y - PATIO_CENTER_Y;
+            let dx = st.x - PATIO_CENTER_X;
+            let deg = (dy.atan2(dx).to_degrees() + 360.0) % 360.0;
+            (deg - 90.0).abs() <= 10.0 && dy > 50.0
+        });
+        assert!(has_90_blocker, "Expected a stone along the 90° straight ray");
+
+        // Check that a stone blocks the straight ray from 180° (West) on turn 2
+        let has_180_blocker = stones_turn2.iter().any(|st| {
+            let dy = st.y - PATIO_CENTER_Y;
+            let dx = st.x - PATIO_CENTER_X;
+            let deg = (dy.atan2(dx).to_degrees() + 360.0) % 360.0;
+            (deg - 180.0).abs() <= 10.0 && dx < -50.0
+        });
+        assert!(has_180_blocker, "Expected a stone along the 180° straight ray");
+
+        // Verify stones shift/re-randomize between shots
+        let coords0: Vec<(i64, i64)> = stones_turn0.iter().map(|s| (s.x as i64, s.y as i64)).collect();
+        let coords1: Vec<(i64, i64)> = stones_turn1.iter().map(|s| (s.x as i64, s.y as i64)).collect();
+        assert_ne!(coords0, coords1, "Stones should re-randomize positions on every shot!");
     }
 }

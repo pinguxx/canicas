@@ -8,11 +8,20 @@
   <title>Canicas Mexicanas 3D • Feria de Clavos, El Círculo y La Hoyita</title>
   <link rel="manifest" href="/manifest.json" />
   <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/style.css?v=17" />
 </head>
 <body>
   <!-- Festive Mexican Fairground & Barrio Top Ribbon -->
   <div class="feria-stripe" aria-hidden="true"></div>
+
+  <!-- Reconnecting Full-screen Overlay -->
+  <div id="reconnecting-overlay" class="reconnecting-overlay hidden" aria-live="polite">
+    <div class="reconnecting-card">
+      <div class="reconnecting-spinner">🔮</div>
+      <h3 id="reconnecting-title">Reconectando a la sala...</h3>
+      <p id="reconnecting-sub">Manteniendo tu turno y tus canicas en el ruedo</p>
+    </div>
+  </div>
 
   <!-- Top Navigation Header -->
   <header class="top-header">
@@ -94,8 +103,7 @@
             <div class="form-group">
               <label for="select-mode" data-i18n="mode_label">🎪 Estilo de Juego de Canicas</label>
               <select id="select-mode">
-                <option value="torneo" selected data-i18n="mode_torneo">🏆 Torneo Mixto (Feria + El Círculo + La Hoyita)</option>
-                <option value="feria" data-i18n="mode_feria">🎡 Canicas de la Feria (Tablero de Clavos y Hoyitos)</option>
+                <option value="feria" selected data-i18n="mode_feria">🎡 Canicas de la Feria (Tablero de Clavos y Hoyitos)</option>
                 <option value="circulo" data-i18n="mode_circulo">⭕ Canicas de Patio: El Círculo (La Rueda)</option>
                 <option value="hoyita" data-i18n="mode_hoyita">🕳️ Canicas de Patio: La Hoyita (El Pochito)</option>
               </select>
@@ -131,25 +139,14 @@
               </div>
             </div>
 
-            <div class="form-row-2">
-              <div class="form-group">
-                <label for="select-timer" data-i18n="turn_timer_label">⏱️ Tiempo por Turno</label>
-                <select id="select-timer">
-                  <option value="0" selected data-i18n="timer_none">Sin límite (Manual)</option>
-                  <option value="15">15 seg (Rápido)</option>
-                  <option value="25">25 seg (Normal)</option>
-                  <option value="40">40 seg (Relajado)</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label for="select-arena-theme" data-i18n="arena_theme_label">🎨 Escenario Inicial</label>
-                <select id="select-arena-theme">
-                  <option value="feria" selected>🎪 Feria de Pueblo</option>
-                  <option value="patio">🏜️ Patio de Tierra</option>
-                  <option value="talavera">🏺 Talavera Poblana</option>
-                </select>
-              </div>
+            <div class="form-group">
+              <label for="select-timer" data-i18n="turn_timer_label">⏱️ Tiempo por Turno</label>
+              <select id="select-timer">
+                <option value="0" selected data-i18n="timer_none">Sin límite (Manual)</option>
+                <option value="15">15 seg (Rápido)</option>
+                <option value="25">25 seg (Normal)</option>
+                <option value="40">40 seg (Relajado)</option>
+              </select>
             </div>
 
             <!-- Barrio & Feria Special Rules -->
@@ -208,6 +205,27 @@
 
       <div id="lobby-rules-pills" class="rules-pills"></div>
 
+      <!-- Host Mode & Turn Timer Selector in La Sala -->
+      <div id="host-lobby-mode-box" class="lobby-mode-box">
+        <div id="host-lobby-mode-section">
+          <label class="lobby-mode-title" data-i18n="lobby_change_mode_label">🎪 Cambiar Tipo de Juego en esta Sala (Anfitrión):</label>
+          <div class="lobby-mode-buttons">
+            <button type="button" class="lobby-mode-btn active" data-mode="feria">🎡 Feria de Clavos</button>
+            <button type="button" class="lobby-mode-btn" data-mode="circulo">⭕ El Círculo</button>
+            <button type="button" class="lobby-mode-btn" data-mode="hoyita">🕳️ La Hoyita</button>
+          </div>
+        </div>
+        <div class="lobby-timer-section">
+          <label class="lobby-mode-title" data-i18n="lobby_change_timer_label">⏱️ Tiempo por Turno (cámbialo cuando quieras):</label>
+          <div class="lobby-timer-buttons">
+            <button type="button" class="lobby-timer-btn active" data-timer="0">∞ Manual</button>
+            <button type="button" class="lobby-timer-btn" data-timer="15">15s</button>
+            <button type="button" class="lobby-timer-btn" data-timer="25">25s</button>
+            <button type="button" class="lobby-timer-btn" data-timer="40">40s</button>
+          </div>
+        </div>
+      </div>
+
       <div class="lobby-players-header">
         <h3 id="lobby-players-count">Jugadores en la Sala (1/10)</h3>
         <div id="host-bot-controls" class="bot-controls">
@@ -250,7 +268,18 @@
         </div>
 
         <div class="topbar-right">
-          <span id="timer-badge" class="pill-badge">⏱️ <span id="timer-display">∞</span></span>
+          <div id="timer-badge" class="pill-badge timer-pill-wrap" title="Cambiar tiempo por turno en cualquier momento">
+            <button id="btn-cycle-timer" type="button" class="timer-cycle-btn" title="Clic para cambiar tiempo por turno">
+              ⏱️ <span id="timer-display">∞</span>
+            </button>
+            <select id="game-timer-select" class="game-timer-select" aria-label="Tiempo por turno" title="Cambiar tiempo por turno">
+              <option value="0">∞ Manual</option>
+              <option value="15">15s</option>
+              <option value="25">25s</option>
+              <option value="40">40s</option>
+            </select>
+          </div>
+          <button id="btn-back-to-sala" type="button" class="pill-btn hidden" title="Volver a la Sala para cambiar el modo de juego">🏠 <span data-i18n="sala_short">Sala</span></button>
           <button id="btn-open-history" type="button" class="pill-btn" title="Crónica de Tiros">📜 <span class="hide-mobile" data-i18n="history_short">Historial</span></button>
           <button id="btn-leave-game" type="button" class="pill-btn danger" title="Salir">🚪</button>
         </div>
@@ -272,9 +301,14 @@
             <div id="canvas-drag-hint" class="canvas-drag-hint">
               👆 <span data-i18n="drag_hint">Arrastra y suelta en el tablero para lanzar, o presiona:</span>
             </div>
-            <button id="btn-canvas-shoot" type="button" class="canvas-shoot-btn">
-              🔮 <span data-i18n="btn_quick_shoot">¡TIRAR!</span>
-            </button>
+            <div class="canvas-touch-actions">
+              <button id="btn-camera-follow" type="button" class="camera-follow-btn" title="Zoom de cámara al rodar la canica">
+                🔍 <span id="camera-follow-label">Zoom: Auto</span>
+              </button>
+              <button id="btn-canvas-shoot" type="button" class="canvas-shoot-btn">
+                🔮 <span data-i18n="btn_quick_shoot">¡TIRAR!</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -301,6 +335,26 @@
             <div class="turn-header-row">
               <div id="turn-indicator" class="turn-indicator">Turno de: ---</div>
               <span id="bonus-shot-pill" class="bonus-pill hidden">🌟 ¡TIRO EXTRA!</span>
+            </div>
+
+            <!-- Patio Outer Ring Position ("Caminar alrededor de la Raya") -->
+            <div id="patio-seat-control" class="control-row hidden">
+              <div class="control-label-row">
+                <span data-i18n="seat_pos_label">🏃 Posición en la Raya (360°)</span>
+                <span id="seat-pos-val-label" class="control-val">Sur (90°)</span>
+              </div>
+              <div class="seat-quick-presets">
+                <button type="button" class="seat-preset-btn" data-seat="90">⬇️ Sur</button>
+                <button type="button" class="seat-preset-btn" data-seat="180">⬅️ Oeste</button>
+                <button type="button" class="seat-preset-btn" data-seat="270">⬆️ Norte</button>
+                <button type="button" class="seat-preset-btn" data-seat="0">➡️ Este</button>
+                <button id="btn-seat-aim-rey" type="button" class="seat-preset-btn highlight" title="Colocarte detrás del Bolón Rey para sacarlo del círculo">👑 Al Rey</button>
+              </div>
+              <div class="angle-controls">
+                <button id="btn-seat-ccw" type="button" class="mini-ctrl-btn">↺ -15°</button>
+                <input id="input-seat-pos" type="range" min="0" max="359" value="90" />
+                <button id="btn-seat-cw" type="button" class="mini-ctrl-btn">+15° ↻</button>
+              </div>
             </div>
 
             <!-- Aim Angle Control -->
@@ -438,7 +492,7 @@
           <div class="face-guide-item">
             <span class="fg-badge todo">🎡 1. CANICAS DE LA FERIA (TABLERO DE CLAVOS)</span>
             <p data-i18n="rule_feria">
-              Lanza tu canica con el resorte de latón por el carril derecho. La canica rebota entre los <strong>56 clavos</strong> hasta caer en uno de los <strong>20 hoyitos numerados</strong> (desde 10 pts hasta <strong>👑 El Gallo de Oro de 100 pts</strong>). ¡Caer en un hoyito ocupado duplica tus puntos (Combo x2)!
+              Lanza tu canica con el resorte de latón por el carril derecho. La canica rebota entre los <strong>80 clavos</strong> hasta caer en uno de los <strong>20 hoyitos numerados</strong> (desde 10 pts hasta <strong>👑 El Gallo de Oro de 100 pts</strong>). ¡Si pasas por un hoyito que ya tiene canica, rebotarás y cambiarás de dirección!
             </p>
           </div>
           <div class="face-guide-item">
@@ -464,8 +518,8 @@
     </div>
   </div>
 
-  <script src="/qrcode.min.js"></script>
-  <script src="/audio.js"></script>
-  <script src="/app.js"></script>
+  <script src="/qrcode.min.js?v=17"></script>
+  <script src="/audio.js?v=17"></script>
+  <script src="/app.js?v=17"></script>
 </body>
 </html>

@@ -8,7 +8,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::{mpsc, RwLock};
 
-use crate::canicas::generate_patio_marbles;
+use crate::canicas::{generate_patio_marbles, generate_patio_stones};
 use crate::game::{
     current_epoch_secs, generate_room_code, GameSettings, Player, PlayerStats, Room, RoomState,
     PLAYER_AVATARS, PLAYER_COLORS,
@@ -161,6 +161,8 @@ pub enum ClientMessage {
         power: Option<f64>,
         angle: Option<f64>,
         spin: Option<f64>,
+        #[serde(rename = "seatAngle")]
+        seat_angle: Option<f64>,
     },
     #[serde(rename = "nudge_arena")]
     NudgeArena {
@@ -445,15 +447,79 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
 
                 // Check if reconnecting with existing playerId
                 let mut resolved_pid: Option<String> = None;
+                let host_id = room.host_id.clone();
+
                 if let Some(ref existing_id) = player_id {
                     if let Some(existing_p) = room.players.iter_mut().find(|p| p.id == *existing_id)
                     {
                         existing_p.connected = true;
                         existing_p.conn_id = conn_id.clone();
+                        existing_p.is_host = existing_p.id == host_id;
                         if !player_name.trim().is_empty() {
                             existing_p.name = sanitize_name(&player_name, &existing_p.name);
                         }
                         resolved_pid = Some(existing_p.id.clone());
+                    }
+                }
+
+                if resolved_pid.is_none() {
+                    // Fallback 1: Match by name if an existing disconnected human has this name
+                    let clean_req = player_name.trim();
+                    if !clean_req.is_empty() {
+                        if let Some(existing_p) = room
+                            .players
+                            .iter_mut()
+                            .find(|p| !p.is_bot && !p.connected && p.name == clean_req)
+                        {
+                            existing_p.connected = true;
+                            existing_p.conn_id = conn_id.clone();
+                            existing_p.is_host = existing_p.id == host_id;
+                            resolved_pid = Some(existing_p.id.clone());
+                        }
+                    }
+                }
+
+                if resolved_pid.is_none() {
+                    // Fallback 2: If there is exactly 1 disconnected human in the room, re-attach them
+                    let disconnected_human_idx: Vec<usize> = room
+                        .players
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, p)| !p.is_bot && !p.connected)
+                        .map(|(idx, _)| idx)
+                        .collect();
+                    if disconnected_human_idx.len() == 1 {
+                        let idx = disconnected_human_idx[0];
+                        let p = &mut room.players[idx];
+                        p.connected = true;
+                        p.conn_id = conn_id.clone();
+                        p.is_host = p.id == host_id;
+                        if !player_name.trim().is_empty() {
+                            p.name = sanitize_name(&player_name, &p.name);
+                        }
+                        resolved_pid = Some(p.id.clone());
+                    }
+                }
+
+                if resolved_pid.is_none() {
+                    // Fallback 3: If the room only has 1 human player total (fast refresh before close completed)
+                    let human_idx: Vec<usize> = room
+                        .players
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, p)| !p.is_bot)
+                        .map(|(idx, _)| idx)
+                        .collect();
+                    if human_idx.len() == 1 {
+                        let idx = human_idx[0];
+                        let p = &mut room.players[idx];
+                        p.connected = true;
+                        p.conn_id = conn_id.clone();
+                        p.is_host = p.id == host_id;
+                        if !player_name.trim().is_empty() {
+                            p.name = sanitize_name(&player_name, &p.name);
+                        }
+                        resolved_pid = Some(p.id.clone());
                     }
                 }
 
@@ -597,14 +663,23 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 let Some(room) = rooms_guard.get_mut(&code) else {
                     continue;
                 };
-                let is_host = room.players.iter().any(|p| p.id == *pid && p.is_host);
-                if !is_host {
+                let is_member = room.players.iter().any(|p| p.id == *pid);
+                if !is_member {
                     continue;
                 }
-                room.settings = settings.sanitized();
+                let is_host = room.players.iter().any(|p| p.id == *pid && p.is_host);
+                let clean = settings.sanitized();
+                if is_host {
+                    room.settings = clean;
+                } else {
+                    room.settings.turn_timer_seconds = clean.turn_timer_seconds;
+                }
                 if room.state == RoomState::Lobby {
                     room.active_stage = crate::game::stage_for_round(&room.settings.game_mode, 1);
-                    room.patio_targets = generate_patio_marbles(room.active_stage == "hoyita");
+                    let is_hoyita = room.active_stage == "hoyita";
+                    room.patio_targets = generate_patio_marbles(is_hoyita);
+                    room.patio_stones =
+                        generate_patio_stones(is_hoyita, 0, 90.0, &room.patio_targets);
                 }
                 room.refresh_turn_deadline();
                 room.touch();
@@ -637,10 +712,13 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 let is_host = room.players.iter().any(|p| p.id == *pid && p.is_host);
                 if !is_host {
                     continue;
-                }
+                };
                 room.active_stage = stage.clone();
                 if stage != "feria" {
-                    room.patio_targets = generate_patio_marbles(stage == "hoyita");
+                    let is_hoyita = stage == "hoyita";
+                    room.patio_targets = generate_patio_marbles(is_hoyita);
+                    room.patio_stones =
+                        generate_patio_stones(is_hoyita, room.shot_counter, 90.0, &room.patio_targets);
                     room.position_shooters_on_perimeter();
                 } else {
                     room.feria_occupied_holes.clear();
@@ -763,6 +841,7 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 power,
                 angle,
                 spin,
+                seat_angle,
             } => {
                 if last_shot_instant.elapsed() < Duration::from_millis(350) {
                     continue;
@@ -777,11 +856,12 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     let Some(room) = rooms_guard.get_mut(&code) else {
                         continue;
                     };
-                    room.execute_shot(
+                    room.execute_shot_with_seat(
                         pid,
                         power.unwrap_or(0.72),
                         angle.unwrap_or(0.0),
                         spin.unwrap_or(0.0),
+                        seat_angle,
                     )
                     .map(|outcome| (outcome, room.clone()))
                 };
@@ -803,7 +883,7 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                         if snapshot.state == RoomState::Playing {
                             if let Some(next_p) = snapshot.current_player() {
                                 if next_p.is_bot {
-                                    schedule_bot_if_needed(state.clone(), code, 2600);
+                                    schedule_bot_if_needed(state.clone(), code, 3400);
                                 }
                             }
                         }
@@ -895,7 +975,7 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     continue;
                 };
                 let is_host = room.players.iter().any(|p| p.id == *pid && p.is_host);
-                if !is_host {
+                if !is_host && room.state != RoomState::Finished {
                     continue;
                 }
                 room.reset_to_lobby();
@@ -915,10 +995,40 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
 
             ClientMessage::LeaveRoom { room_code } => {
                 let code = room_code.trim().to_uppercase();
-                handle_player_disconnect(&state, &code, &conn_id, active_player_id.as_deref())
-                    .await;
+                let mut maybe_snapshot: Option<Room> = None;
+                {
+                    let mut rooms_guard = state.rooms.write().await;
+                    if let Some(room) = rooms_guard.get_mut(&code) {
+                        if let Some(ref pid) = active_player_id {
+                            if room.state == RoomState::Lobby {
+                                room.players.retain(|p| p.id != *pid);
+                                room.position_shooters_on_perimeter();
+                                if room.host_id == *pid {
+                                    if let Some(first_human) = room.players.iter().find(|p| !p.is_bot) {
+                                        room.host_id = first_human.id.clone();
+                                        for p in &mut room.players {
+                                            p.is_host = p.id == room.host_id;
+                                        }
+                                    }
+                                }
+                            } else if let Some(p) = room.players.iter_mut().find(|p| p.id == *pid) {
+                                p.connected = false;
+                            }
+                        }
+                        let any_human = room.players.iter().any(|p| !p.is_bot);
+                        if !any_human {
+                            rooms_guard.remove(&code);
+                        } else {
+                            room.touch();
+                            maybe_snapshot = Some(room.clone());
+                        }
+                    }
+                }
                 active_room_code = None;
                 active_player_id = None;
+                if let Some(snapshot) = maybe_snapshot {
+                    broadcast_to_room(&state, &code, &json!({ "type": "room_updated", "room": snapshot })).await;
+                }
             }
         }
     }
@@ -958,28 +1068,8 @@ async fn handle_player_disconnect(
                     p.connected = false;
                 }
             }
-
-            let any_human_connected = room.players.iter().any(|p| !p.is_bot && p.connected);
-            if !any_human_connected && room.state == RoomState::Lobby {
-                rooms_guard.remove(room_code);
-                return;
-            }
-
-            // Migrate host if current host disconnected
-            let has_connected_host = room
-                .players
-                .iter()
-                .any(|p| p.is_host && p.connected && !p.is_bot);
-            if !has_connected_host {
-                for p in &mut room.players {
-                    p.is_host = false;
-                }
-                if let Some(new_host) = room.players.iter_mut().find(|p| !p.is_bot && p.connected) {
-                    new_host.is_host = true;
-                } else if let Some(first_human) = room.players.iter_mut().find(|p| !p.is_bot) {
-                    first_human.is_host = true;
-                }
-            }
+            // Do NOT delete the room or strip host on temporary socket disconnection!
+            // The room and player state persist across page reloads, network switches, and browser refreshes.
             room.touch();
             maybe_snapshot = Some(room.clone());
         }
@@ -1010,7 +1100,10 @@ pub async fn start_background_maintenance(state: AppState) {
         {
             let rooms_guard = state.rooms.read().await;
             for (code, room) in rooms_guard.iter() {
-                if now.saturating_sub(room.last_activity_epoch) > 7200 {
+                // If all humans are disconnected for > 15 minutes, or inactive for > 2 hours, expire the room
+                let has_connected_human = room.players.iter().any(|p| !p.is_bot && p.connected);
+                let timeout_secs = if has_connected_human { 7200 } else { 900 };
+                if now.saturating_sub(room.last_activity_epoch) > timeout_secs {
                     expired_rooms.push(code.clone());
                     continue;
                 }
@@ -1063,7 +1156,7 @@ pub async fn start_background_maintenance(state: AppState) {
                 if snapshot.state == RoomState::Playing {
                     if let Some(next_p) = snapshot.current_player() {
                         if next_p.is_bot {
-                            schedule_bot_if_needed(state.clone(), code, 2600);
+                            schedule_bot_if_needed(state.clone(), code, 3400);
                         }
                     }
                 }

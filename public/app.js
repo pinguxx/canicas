@@ -2158,7 +2158,7 @@
       });
     }
 
-    window.canicasAudio.speak(`${headline}. ${dicho}`, lang);
+    window.canicasAudio.speakAnnouncement(headline, dicho, lang);
     renderGameHUD();
 
     if (pendingShotQueue.length > 0) {

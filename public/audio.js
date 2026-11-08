@@ -94,6 +94,9 @@ class CanicasAudio {
     this.ctx = null;
     this.muted = safeStorage.getItem('canicas_muted') === 'true';
     this.voiceEnabled = safeStorage.getItem('canicas_voice') !== 'false';
+    this.voices = [];
+    this.voicesChangedBound = false;
+    this.initVoices();
   }
 
   ensureContext() {
@@ -396,18 +399,172 @@ class CanicasAudio {
     });
   }
 
+  initVoices() {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    try {
+      const v = window.speechSynthesis.getVoices();
+      if (v && v.length > 0) {
+        this.voices = v;
+      }
+      if (!this.voicesChangedBound) {
+        this.voicesChangedBound = true;
+        window.speechSynthesis.onvoiceschanged = () => {
+          try {
+            const updated = window.speechSynthesis.getVoices();
+            if (updated && updated.length > 0) {
+              this.voices = updated;
+            }
+          } catch (_) {}
+        };
+      }
+    } catch (_) {}
+  }
+
+  getBestVoice(lang = 'es') {
+    if (!this.voices || this.voices.length === 0) {
+      this.initVoices();
+    }
+    if (!this.voices || this.voices.length === 0) return null;
+
+    const isEs = (lang || '').toLowerCase().startsWith('es');
+    if (isEs) {
+      // 1. Exact Mexican Spanish voices (es-MX or name containing Mexico/Mexican/Sabina/Dalia/Raul/Paulina/Jorge)
+      const mxVoices = this.voices.filter((v) => {
+        const code = (v.lang || '').replace('_', '-').toLowerCase();
+        const name = (v.name || '').toLowerCase();
+        return code === 'es-mx' || name.includes('mexic') || name.includes('sabina') || name.includes('dalia') || name.includes('raul') || name.includes('paulina');
+      });
+      const mxNatural = mxVoices.find((v) => {
+        const n = (v.name || '').toLowerCase();
+        return n.includes('natural') || n.includes('google') || n.includes('neural') || n.includes('online');
+      });
+      if (mxNatural) return mxNatural;
+      if (mxVoices.length > 0) return mxVoices[0];
+
+      // 2. Latin American Spanish (es-US, es-419, Latin America)
+      const latamVoices = this.voices.filter((v) => {
+        const code = (v.lang || '').replace('_', '-').toLowerCase();
+        return code === 'es-us' || code === 'es-419' || (code.startsWith('es-') && code !== 'es-es');
+      });
+      const latamNatural = latamVoices.find((v) => {
+        const n = (v.name || '').toLowerCase();
+        return n.includes('natural') || n.includes('google') || n.includes('neural') || n.includes('online');
+      });
+      if (latamNatural) return latamNatural;
+      if (latamVoices.length > 0) return latamVoices[0];
+
+      // 3. Any Spanish voice (es, es-ES, etc.)
+      const esVoices = this.voices.filter((v) => (v.lang || '').toLowerCase().startsWith('es'));
+      const esNatural = esVoices.find((v) => {
+        const n = (v.name || '').toLowerCase();
+        return n.includes('natural') || n.includes('google') || n.includes('neural') || n.includes('online');
+      });
+      if (esNatural) return esNatural;
+      if (esVoices.length > 0) return esVoices[0];
+    } else {
+      // English voices
+      const enVoices = this.voices.filter((v) => {
+        const code = (v.lang || '').replace('_', '-').toLowerCase();
+        return code === 'en-us' || code.startsWith('en');
+      });
+      const enNatural = enVoices.find((v) => {
+        const n = (v.name || '').toLowerCase();
+        return n.includes('natural') || n.includes('google') || n.includes('neural') || n.includes('jenny') || n.includes('guy') || n.includes('aria');
+      });
+      if (enNatural) return enNatural;
+      if (enVoices.length > 0) return enVoices[0];
+    }
+
+    return null;
+  }
+
+  cleanSpokenText(text, lang = 'es') {
+    if (!text) return '';
+    let clean = String(text);
+
+    // Strip bullet separators and secondary instruction badges (e.g. • ¡Saca canicas para Puntos x2!)
+    clean = clean.replace(/•[^.!?]*(?:[.!?]|$)/g, ' ');
+    clean = clean.replace(/[•·]/g, ' ');
+
+    // Strip emoji and decorative icons
+    clean = clean.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{1F1E6}-\u{1F1FF}\u{1F900}-\u{1F9FF}\u{1FA70}-\u{1FAFF}]/gu, '');
+    clean = clean.replace(/[«»"“”'‘’🔮👑💎🌟☀️🔥🌙🔔❤️🦜🎸🍉🌵🌶️🏺🌺🪙💀🤠🐸🎺🎯💥🕳️💨*~#_|]/g, ' ');
+
+    // Strip parenthetical score annotations: (+10 pts), (2 canicas + 30 pts), (+25), etc.
+    clean = clean.replace(/\(\s*[^)]*(?:pts|puntos|points|canicas|\+|\d)[^)]*\)/gi, ' ');
+    clean = clean.replace(/\(\s*\)/g, ' ');
+
+    // Strip loose score suffixes: +50 pts, +10 pts, +25, 50 pts
+    clean = clean.replace(/\+\s*\d+\s*(?:pts|puntos|points)?/gi, ' ');
+    clean = clean.replace(/\b\d+\s*(?:pts|puntos|points)\b/gi, ' ');
+
+    // Replace multiplier notation "x2" with "doble" in Spanish or "double" in English
+    clean = clean.replace(/\bx(\d+)\b/gi, (m, d) => (lang === 'es' ? (d === '2' ? 'doble' : `por ${d}`) : `times ${d}`));
+    clean = clean.replace(/\b(\d+)x\b/gi, (m, d) => (lang === 'es' ? (d === '2' ? 'doble' : `por ${d}`) : `times ${d}`));
+
+    // In Spanish, fix "1 canica" -> "una canica"
+    if (lang === 'es') {
+      clean = clean.replace(/\b1\s+canica\b/gi, 'una canica');
+    }
+
+    // Convert ALL-CAPS words (e.g. ¡CHIRAS PELAS Y PONCHE!, ¡ENCHOLADA EN LA HOYITA!)
+    // into standard sentence case so TTS engines do not spell them out as acronyms
+    clean = clean.replace(/([¡¿]?\s*)([A-ZÁÉÍÓÚÑ]{2,}(?:\s+[A-ZÁÉÍÓÚÑ]{1,})*)/g, (match, prefix, words) => {
+      const lower = words.toLowerCase();
+      const capitalized = lower.charAt(0).toUpperCase() + lower.slice(1);
+      return prefix + capitalized;
+    });
+
+    // Clean whitespace and punctuation
+    clean = clean.replace(/\s+/g, ' ');
+    clean = clean.replace(/([!?])\s*[.:,;]/g, '$1 ');
+    clean = clean.replace(/[.:,;]\s*([!?])/g, ' $1');
+    clean = clean.replace(/([!?,.])\1+/g, '$1');
+    clean = clean.replace(/\s+([!?,.:;])/g, '$1');
+    clean = clean.replace(/\s+/g, ' ');
+    return clean.trim();
+  }
+
+  speakAnnouncement(headline, dicho, lang = 'es') {
+    if (this.muted || !this.voiceEnabled) return;
+    let head = (headline || '').trim();
+    if (head.includes('•')) {
+      head = head.split('•')[0].trim();
+    }
+    let phrase = '';
+    if (head && dicho) {
+      const headWithoutParens = head.replace(/\s*\([^)]*\)\s*$/g, '').trim();
+      const sep = /[!?.]$/.test(headWithoutParens) ? ' ' : '. ';
+      phrase = `${head}${sep}${dicho}`;
+    } else {
+      phrase = head || dicho || '';
+    }
+    this.speak(phrase, lang);
+  }
+
   speak(text, lang = 'es') {
     if (this.muted || !this.voiceEnabled || !window.speechSynthesis || !text) {
       return;
     }
     try {
       window.speechSynthesis.cancel();
-      const clean = text.replace(/[«»"🔮👑💎🌟☀️🔥🌙🔔❤️🦜🎸🍉🌵🌶️🏺🌺🪙💀🤠🐸🎺🎯💥🕳️💨]/g, '').trim();
+      const clean = this.cleanSpokenText(text, lang);
       if (!clean) return;
+
       const utter = new SpeechSynthesisUtterance(clean);
-      utter.lang = lang === 'en' ? 'en-US' : 'es-MX';
-      utter.rate = 1.04;
-      utter.pitch = 1.05;
+      const voice = this.getBestVoice(lang);
+      if (voice) {
+        utter.voice = voice;
+        utter.lang = voice.lang || (lang === 'en' ? 'en-US' : 'es-MX');
+      } else {
+        utter.lang = lang === 'en' ? 'en-US' : 'es-MX';
+      }
+
+      // Natural, articulate Mexican fairground voice locution (0.88 tempo, natural pitch 1.0)
+      utter.rate = 0.88;
+      utter.pitch = 1.0;
+      utter.volume = 1.0;
+
       window.speechSynthesis.speak(utter);
     } catch (_) {
       // Ignore speech synthesis errors on restricted browsers

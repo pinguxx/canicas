@@ -303,8 +303,8 @@
           <span id="game-stage-badge" class="pill-badge stage-pill">🎡 FERIA DE CLAVOS</span>
         </div>
 
-        <!-- Interactive Game Mode Switcher (Always visible for testing all 3 games) -->
-        <div id="host-stage-switcher" class="stage-switcher">
+        <!-- Mode switcher hidden during match - game mode is locked once started -->
+        <div id="host-stage-switcher" class="stage-switcher hidden" style="display: none;">
           <button type="button" class="stage-switch-btn active" data-stage="feria" title="Tablero de Clavos de la Feria">🎡 Feria</button>
           <button type="button" class="stage-switch-btn" data-stage="circulo" title="Patio: El Círculo (La Rueda)">⭕ Círculo</button>
           <button type="button" class="stage-switch-btn" data-stage="hoyita" title="Patio: La Hoyita (El Pochito)">🕳️ Hoyita</button>
@@ -322,7 +322,7 @@
               <option value="40">40s</option>
             </select>
           </div>
-          <button id="btn-back-to-sala" type="button" class="pill-btn hidden" title="Volver a la Sala para cambiar el modo de juego">🏠 <span data-i18n="sala_short">Sala</span></button>
+          <button id="btn-back-to-sala" type="button" class="pill-btn sala-btn" title="Volver a la Sala para cambiar el modo de juego">🏠 <span data-i18n="sala_short">Sala</span></button>
           <button id="btn-open-history" type="button" class="pill-btn" title="Crónica de Tiros">📜 <span class="hide-mobile" data-i18n="history_short">Historial</span></button>
           <button id="btn-leave-game" type="button" class="pill-btn danger" title="Salir">🚪</button>
         </div>

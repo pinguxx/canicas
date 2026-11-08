@@ -1294,8 +1294,12 @@
         text: payload.text
       });
     } else if (payload.type === 'update_settings' && payload.settings) {
-      currentRoom.settings = Object.assign({}, currentRoom.settings, payload.settings);
-      if (currentRoom.state === 'lobby') {
+      if (currentRoom.state === 'playing') {
+        const safeSettings = Object.assign({}, payload.settings);
+        delete safeSettings.game_mode;
+        currentRoom.settings = Object.assign({}, currentRoom.settings, safeSettings);
+      } else {
+        currentRoom.settings = Object.assign({}, currentRoom.settings, payload.settings);
         currentRoom.active_stage = stageForRoundLocal(currentRoom.settings.game_mode, 1);
         currentRoom.feria_occupied_holes = [];
         currentRoom.patio_targets = generatePatioMarblesLocal(currentRoom.active_stage === 'hoyita');
@@ -1309,6 +1313,9 @@
       refreshOfflineTurnDeadline(currentRoom);
       handleServerMessage({ type: 'room_updated', room: currentRoom });
     } else if (payload.type === 'switch_stage' && payload.stage) {
+      if (currentRoom.state === 'playing') {
+        return; // Changing game mode mid-match is not allowed
+      }
       currentRoom.settings.game_mode = payload.stage;
       currentRoom.active_stage = payload.stage;
       currentRoom.feria_occupied_holes = [];
@@ -1325,7 +1332,33 @@
       checkAndTriggerBotShot();
     } else if (payload.type === 'play_again') {
       currentRoom.state = 'lobby';
+      currentRoom.current_turn_idx = 0;
+      currentRoom.round_number = 1;
+      currentRoom.shot_counter = 0;
+      currentRoom.last_shot = null;
       currentRoom.turn_deadline_epoch = null;
+      currentRoom.feria_occupied_holes = [];
+      currentRoom.winner_id = null;
+      currentRoom.victory_reason_es = null;
+      currentRoom.victory_reason_en = null;
+      currentRoom.podium = [];
+      currentRoom.awards = [];
+      currentRoom.players.forEach((p) => {
+        p.score = 0;
+        p.marbles_captured = 0;
+        p.is_cazador = false;
+        p.bonus_shot_pending = false;
+        p.combo_count = 0;
+      });
+      currentRoom.active_stage = stageForRoundLocal(currentRoom.settings.game_mode, 1);
+      currentRoom.patio_targets = generatePatioMarblesLocal(currentRoom.active_stage === 'hoyita');
+      currentRoom.patio_stones = generatePatioStonesLocal(
+        currentRoom.active_stage === 'hoyita',
+        0,
+        90,
+        currentRoom.patio_targets
+      );
+      saveCurrentRoomLocally();
       handleServerMessage({ type: 'room_reset', room: currentRoom });
     }
   }
@@ -1855,6 +1888,11 @@
       }
 
       case 'room_reset': {
+        if (botShotPendingTimer) {
+          clearTimeout(botShotPendingTimer);
+          botShotPendingTimer = null;
+          botShotTargetId = null;
+        }
         currentRoom = msg.room;
         pendingRoomAfterAnim = null;
         pendingShotQueue = [];
@@ -1956,15 +1994,16 @@
 
     const me = currentRoom.players.find((p) => p.id === myPlayerId);
     const isHost = Boolean(me && me.is_host);
-    document.getElementById('host-bot-controls').classList.toggle('hidden', !isHost);
-    document.getElementById('btn-start-game').classList.toggle('hidden', !isHost);
-    document.getElementById('lobby-wait-msg').classList.toggle('hidden', isHost);
+    const canManageLobby = isHost || useOfflineEngine;
+    document.getElementById('host-bot-controls').classList.toggle('hidden', !canManageLobby);
+    document.getElementById('btn-start-game').classList.toggle('hidden', !canManageLobby);
+    document.getElementById('lobby-wait-msg').classList.toggle('hidden', canManageLobby);
 
     const lobbyModeSection = document.getElementById('host-lobby-mode-section');
     if (lobbyModeSection) {
-      lobbyModeSection.classList.toggle('hidden', !isHost);
+      lobbyModeSection.classList.toggle('hidden', !canManageLobby);
     }
-    const activeMode = stageForRoundLocal(s.game_mode, 1);
+    const activeMode = s.game_mode || 'feria';
     document.querySelectorAll('.lobby-mode-btn').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.mode === activeMode);
     });
@@ -1978,7 +2017,9 @@
   function renderGameHUD() {
     document.getElementById('game-room-badge').textContent = currentRoom.code;
     const s = currentRoom.settings;
-    currentRoom.active_stage = stageForRoundLocal(s.game_mode, 1);
+    if (!currentRoom.active_stage) {
+      currentRoom.active_stage = stageForRoundLocal(s.game_mode, currentRoom.round_number || 1);
+    }
     document.getElementById('game-round-badge').textContent =
       s.win_condition === 'rounds'
         ? `${lang === 'en' ? 'ROUND' : 'RONDA'} ${currentRoom.round_number}/${s.max_rounds}`
@@ -1992,19 +2033,18 @@
     document.getElementById('game-stage-badge').textContent =
       stageLabels[currentRoom.active_stage] || stageLabels.feria;
 
+    // Mid-match stage switching is locked; switcher remains hidden during gameplay
     const switcher = document.getElementById('host-stage-switcher');
     if (switcher) {
-      switcher.classList.remove('hidden');
-      switcher.querySelectorAll('.stage-switch-btn').forEach((b) => {
-        b.classList.toggle('active', b.dataset.stage === currentRoom.active_stage);
-      });
+      switcher.classList.add('hidden');
+      switcher.style.display = 'none';
     }
 
     const me = currentRoom.players.find((p) => p.id === myPlayerId);
     const isHost = Boolean(me && me.is_host);
     const backToSalaBtn = document.getElementById('btn-back-to-sala');
     if (backToSalaBtn) {
-      backToSalaBtn.classList.toggle('hidden', !isHost);
+      backToSalaBtn.classList.toggle('hidden', !isHost && !useOfflineEngine);
     }
 
     const activeTimer = Number(s.turn_timer_seconds) || 0;
@@ -3710,7 +3750,16 @@
   if (btnBackToSala) {
     btnBackToSala.addEventListener('click', () => {
       if (currentRoom) {
-        sendWs({ type: 'play_again', roomCode: currentRoom.code });
+        if (useOfflineEngine) {
+          handleOfflineCommand({ type: 'play_again' });
+        } else {
+          sendWs({ type: 'play_again', roomCode: currentRoom.code });
+        }
+        showToast(
+          lang === 'en'
+            ? '🏠 Returned to the Sala. Pick a game mode to start!'
+            : '🏠 De vuelta en la Sala. Elige el tipo de juego para comenzar.'
+        );
       }
     });
   }
@@ -3820,6 +3869,14 @@
   document.querySelectorAll('.stage-switch-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (!currentRoom) return;
+      if (currentRoom.state === 'playing') {
+        showToast(
+          lang === 'en'
+            ? '⚠️ You cannot change the game mode during a match. Return to the Sala to change it.'
+            : '⚠️ No puedes cambiar el tipo de juego a mitad de la partida. Vuelve a la Sala para cambiarlo.'
+        );
+        return;
+      }
       const targetStage = btn.dataset.stage;
       if (useOfflineEngine) {
         handleOfflineCommand({

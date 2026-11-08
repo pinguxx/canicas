@@ -692,7 +692,13 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 let is_host = room.players.iter().any(|p| p.id == *pid && p.is_host);
                 let clean = settings.sanitized();
                 if is_host {
-                    room.settings = clean;
+                    if room.state == RoomState::Playing {
+                        let old_mode = room.settings.game_mode.clone();
+                        room.settings = clean;
+                        room.settings.game_mode = old_mode;
+                    } else {
+                        room.settings = clean;
+                    }
                 } else {
                     room.settings.turn_timer_seconds = clean.turn_timer_seconds;
                 }
@@ -743,7 +749,12 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 if !is_host {
                     continue;
                 };
+                if room.state == RoomState::Playing {
+                    // Changing game mode during an active game is prohibited mid-match
+                    continue;
+                }
                 room.active_stage = stage.clone();
+                room.settings.game_mode = stage.clone();
                 if stage != "feria" {
                     let is_hoyita = stage == "hoyita";
                     room.patio_targets = generate_patio_marbles(is_hoyita);

@@ -1318,8 +1318,10 @@
         currentRoom.shot_counter || 0,
         90,
         currentRoom.patio_targets
-      );
+      refreshOfflineTurnDeadline(currentRoom);
+      saveCurrentRoomLocally();
       handleServerMessage({ type: 'room_updated', room: currentRoom });
+      checkAndTriggerBotShot();
     } else if (payload.type === 'play_again') {
       currentRoom.state = 'lobby';
       currentRoom.turn_deadline_epoch = null;
@@ -1795,6 +1797,7 @@
           currentRoom = msg.room;
           saveCurrentRoomLocally();
           renderRoomState();
+          checkAndTriggerBotShot();
         } else {
           pendingRoomAfterAnim = msg.room;
           if (currentRoom && msg.room && msg.room.settings) {
@@ -1816,6 +1819,7 @@
         document.getElementById('modal-victory').classList.add('hidden');
         renderRoomState();
         showToast(lang === 'en' ? '🔮 The arena is open! Aim and shoot!' : '🔮 ¡Se abrió el ruedo! Apunta y tira tu canica.');
+        checkAndTriggerBotShot();
         break;
       }
 
@@ -2127,6 +2131,60 @@
     }
   }
 
+  let botShotPendingTimer = null;
+  let botShotTargetId = null;
+
+  function checkAndTriggerBotShot() {
+    if (!currentRoom || currentRoom.state !== 'playing' || isAnimatingShot) {
+      return;
+    }
+    const currP = currentRoom.players[currentRoom.current_turn_idx];
+    if (!currP || !currP.is_bot) {
+      if (botShotPendingTimer) {
+        clearTimeout(botShotPendingTimer);
+        botShotPendingTimer = null;
+        botShotTargetId = null;
+      }
+      return;
+    }
+
+    if (botShotTargetId === currP.id && botShotPendingTimer) {
+      return;
+    }
+
+    botShotTargetId = currP.id;
+    if (botShotPendingTimer) {
+      clearTimeout(botShotPendingTimer);
+    }
+
+    // Natural bot reaction delay (650-750ms) before shooting
+    botShotPendingTimer = setTimeout(() => {
+      botShotPendingTimer = null;
+      botShotTargetId = null;
+      if (currentRoom && currentRoom.state === 'playing' && !isAnimatingShot) {
+        const p = currentRoom.players[currentRoom.current_turn_idx];
+        if (p && p.is_bot) {
+          if (useOfflineEngine) {
+            const pwr = 0.52 + Math.random() * 0.38;
+            const ang = (Math.random() - 0.5) * 0.36;
+            const spn = (Math.random() - 0.5) * 0.4;
+            executeOfflineShot(pwr, ang, spn);
+          } else {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              sendWs({ type: 'bot_ping', roomCode: currentRoom.code });
+            } else {
+              useOfflineEngine = true;
+              const pwr = 0.52 + Math.random() * 0.38;
+              const ang = (Math.random() - 0.5) * 0.36;
+              const spn = (Math.random() - 0.5) * 0.4;
+              executeOfflineShot(pwr, ang, spn);
+            }
+          }
+        }
+      }
+    }, 700);
+  }
+
   function finishShotAnimation(outcome) {
     isAnimatingShot = false;
     activeAnim = null;
@@ -2174,19 +2232,8 @@
       return;
     }
 
-    if (useOfflineEngine && currentRoom && currentRoom.state === 'playing') {
-      const nextP = currentRoom.players[currentRoom.current_turn_idx];
-      if (nextP && nextP.is_bot) {
-        setTimeout(() => {
-          if (currentRoom && currentRoom.state === 'playing' && !isAnimatingShot) {
-            executeOfflineShot(
-              0.5 + Math.random() * 0.42,
-              (Math.random() - 0.5) * 0.5,
-              (Math.random() - 0.5) * 0.5
-            );
-          }
-        }, 650);
-      }
+    if (currentRoom && currentRoom.state === 'playing') {
+      checkAndTriggerBotShot();
     }
   }
 
@@ -3960,6 +4007,9 @@
   // ==========================================================================
 
   setInterval(() => {
+    // 1. Continuous bot watchdog: guarantee bots never get stuck or delayed!
+    checkAndTriggerBotShot();
+
     const disp = document.getElementById('timer-display');
     if (
       !currentRoom ||
@@ -3968,16 +4018,34 @@
       Number(currentRoom.settings.turn_timer_seconds) <= 0 ||
       !currentRoom.turn_deadline_epoch
     ) {
-      disp.textContent = '∞';
+      if (disp) disp.textContent = '∞';
       return;
     }
     const nowSec = Math.floor(Date.now() / 1000);
     const rem = Math.max(0, currentRoom.turn_deadline_epoch - nowSec);
-    disp.textContent = `${rem}s`;
-    if (rem === 0 && useOfflineEngine && !isAnimatingShot) {
-      executeOfflineShot(0.68, 0, 0, patioSeatAngle);
+    if (disp) disp.textContent = `${rem}s`;
+
+    // 2. Strict timeout trigger: if time expires, force shot immediately!
+    if (rem === 0 && !isAnimatingShot) {
+      const currP = currentRoom.players[currentRoom.current_turn_idx];
+      const defaultSeatDeg = (currP && currP.seat_angle != null && Number.isFinite(currP.seat_angle))
+        ? currP.seat_angle
+        : currentRoom.current_turn_idx * (360 / Math.max(1, currentRoom.players.length)) + 90;
+      const seat = (currP && currP.id === myPlayerId) ? patioSeatAngle : defaultSeatDeg;
+
+      if (useOfflineEngine) {
+        executeOfflineShot(0.68, (Math.random() - 0.5) * 0.1, 0, seat);
+      } else {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          sendWs({ type: 'force_timeout', roomCode: currentRoom.code });
+        } else {
+          // If disconnected from backend, seamlessly continue offline without freezing
+          useOfflineEngine = true;
+          executeOfflineShot(0.68, (Math.random() - 0.5) * 0.1, 0, seat);
+        }
+      }
     }
-  }, 500);
+  }, 400);
 
   function escapeHtml(str) {
     return String(str || '')

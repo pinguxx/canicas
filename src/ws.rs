@@ -196,6 +196,16 @@ pub enum ClientMessage {
         #[serde(rename = "roomCode")]
         room_code: String,
     },
+    #[serde(rename = "force_timeout")]
+    ForceTimeout {
+        #[serde(rename = "roomCode")]
+        room_code: String,
+    },
+    #[serde(rename = "bot_ping")]
+    BotPing {
+        #[serde(rename = "roomCode")]
+        room_code: String,
+    },
     #[serde(rename = "ping")]
     Ping,
 }
@@ -707,6 +717,14 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     }),
                 )
                 .await;
+
+                if snapshot.state == RoomState::Playing {
+                    if let Some(curr) = snapshot.current_player() {
+                        if curr.is_bot {
+                            schedule_bot_if_needed(state.clone(), code.clone(), 800);
+                        }
+                    }
+                }
             }
 
             ClientMessage::SwitchStage { room_code, stage } => {
@@ -735,6 +753,7 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 } else {
                     room.feria_occupied_holes.clear();
                 }
+                room.refresh_turn_deadline();
                 room.touch();
                 let snapshot = room.clone();
                 drop(rooms_guard);
@@ -748,6 +767,14 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     }),
                 )
                 .await;
+
+                if snapshot.state == RoomState::Playing {
+                    if let Some(curr) = snapshot.current_player() {
+                        if curr.is_bot {
+                            schedule_bot_if_needed(state.clone(), code.clone(), 800);
+                        }
+                    }
+                }
             }
 
             ClientMessage::AddBot { room_code } => {
@@ -1084,6 +1111,73 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     broadcast_to_room(&state, &code, &json!({ "type": "room_updated", "room": snapshot })).await;
                 }
             }
+
+            ClientMessage::BotPing { room_code } => {
+                let code = room_code.trim().to_uppercase();
+                let rooms_guard = state.rooms.read().await;
+                if let Some(room) = rooms_guard.get(&code) {
+                    if room.state == RoomState::Playing {
+                        if let Some(curr) = room.current_player() {
+                            if curr.is_bot {
+                                drop(rooms_guard);
+                                schedule_bot_if_needed(state.clone(), code, 250);
+                            }
+                        }
+                    }
+                }
+            }
+
+            ClientMessage::ForceTimeout { room_code } => {
+                let code = room_code.trim().to_uppercase();
+                let outcome_opt = {
+                    let mut rooms_guard = state.rooms.write().await;
+                    if let Some(room) = rooms_guard.get_mut(&code) {
+                        if room.state == RoomState::Playing {
+                            if let Some(curr) = room.current_player().cloned() {
+                                let curr_seat = curr.seat_angle;
+                                match room.execute_shot_with_seat(&curr.id, 0.68, 0.0, 0.0, curr_seat) {
+                                    Ok(out) => Some((out, room.clone())),
+                                    Err(e) => {
+                                        eprintln!("Force timeout error in room {}: {}", code, e);
+                                        room.current_turn_idx = (room.current_turn_idx + 1) % room.players.len().max(1);
+                                        room.refresh_turn_deadline();
+                                        room.touch();
+                                        None
+                                    }
+                                }
+                            } else {
+                                None
+                            }
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                };
+
+                if let Some((outcome, snapshot)) = outcome_opt {
+                    broadcast_to_room(
+                        &state,
+                        &code,
+                        &json!({
+                            "type": "shot_result",
+                            "outcome": outcome,
+                            "room": snapshot,
+                            "autoTimeout": true
+                        }),
+                    )
+                    .await;
+
+                    if snapshot.state == RoomState::Playing {
+                        if let Some(next_p) = snapshot.current_player() {
+                            if next_p.is_bot {
+                                schedule_bot_if_needed(state.clone(), code, 750);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -1191,9 +1285,16 @@ pub async fn start_background_maintenance(state: AppState) {
                         .iter()
                         .find(|p| p.id == pid)
                         .and_then(|p| p.seat_angle);
-                    room.execute_shot_with_seat(&pid, 0.68, 0.0, 0.0, curr_seat)
-                        .ok()
-                        .map(|out| (out, room.clone()))
+                    match room.execute_shot_with_seat(&pid, 0.68, 0.0, 0.0, curr_seat) {
+                        Ok(out) => Some((out, room.clone())),
+                        Err(e) => {
+                            eprintln!("Auto timeout shot error in room {}: {}", code, e);
+                            room.current_turn_idx = (room.current_turn_idx + 1) % room.players.len().max(1);
+                            room.refresh_turn_deadline();
+                            room.touch();
+                            None
+                        }
+                    }
                 } else {
                     None
                 }

@@ -2257,7 +2257,7 @@
       });
     }
 
-    window.canicasAudio.speakAnnouncement(headline, dicho, lang);
+    window.canicasAudio.speakOutcomeAnnouncement(outcome, headline, dicho, lang);
     renderGameHUD();
 
     if (pendingShotQueue.length > 0) {
@@ -3958,6 +3958,9 @@
   function showVictoryModal() {
     if (!currentRoom) return;
     window.canicasAudio.playVictoryFanfare();
+    const winner = currentRoom.players.find((p) => p.id === currentRoom.winner_id);
+    const winnerName = winner ? winner.name : '';
+    window.canicasAudio.speakVictory(winnerName, lang);
 
     const reason =
       lang === 'en' ? currentRoom.victory_reason_en : currentRoom.victory_reason_es;

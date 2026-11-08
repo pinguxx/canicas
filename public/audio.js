@@ -96,6 +96,7 @@ class CanicasAudio {
     this.voiceEnabled = safeStorage.getItem('canicas_voice') !== 'false';
     this.voices = [];
     this.voicesChangedBound = false;
+    this.lastSpokenTimestamp = 0;
     this.initVoices();
   }
 
@@ -525,20 +526,99 @@ class CanicasAudio {
     return clean.trim();
   }
 
-  speakAnnouncement(headline, dicho, lang = 'es') {
+  speakAnnouncement(arg1, arg2, arg3, arg4) {
+    if (arg1 && typeof arg1 === 'object') {
+      return this.speakOutcomeAnnouncement(arg1, arg2, arg3, arg4);
+    }
     if (this.muted || !this.voiceEnabled) return;
-    let head = (headline || '').trim();
-    if (head.includes('•')) {
-      head = head.split('•')[0].trim();
+    const lang = typeof arg3 === 'string' ? arg3 : 'es';
+    let phrase = (arg1 || '').trim();
+    this.speak(phrase, lang);
+  }
+
+  /**
+   * Filter and speak only significant or sporadic highlights (avoiding constant chatter)
+   * @param {Object} outcome - Result of the shot
+   * @param {string} [headline] - Visual headline
+   * @param {string} [dicho] - Visual saying
+   * @param {string} [lang] - Language code ('es' | 'en')
+   */
+  speakOutcomeAnnouncement(outcome, headline, dicho, lang = 'es') {
+    if (this.muted || !this.voiceEnabled || !outcome) return;
+
+    const now = Date.now();
+    const timeSinceLast = now - (this.lastSpokenTimestamp || 0);
+
+    // Hard minimum cooldown between any announcements: at least 6 seconds
+    if (timeSinceLast < 6000) {
+      return;
     }
-    let phrase = '';
-    if (head && dicho) {
-      const headWithoutParens = head.replace(/\s*\([^)]*\)\s*$/g, '').trim();
-      const sep = /[!?.]$/.test(headWithoutParens) ? ' ' : '. ';
-      phrase = `${head}${sep}${dicho}`;
-    } else {
-      phrase = head || dicho || '';
+
+    const pts = Number(outcome.points_scored) || 0;
+    const isEncholada = Boolean(outcome.patio_sim && outcome.patio_sim.encholada_hoyita);
+    const hasPonchados = Boolean(
+      outcome.patio_sim &&
+      outcome.patio_sim.ponchados_player_ids &&
+      outcome.patio_sim.ponchados_player_ids.length > 0
+    );
+    const capturedCount = (outcome.patio_sim && outcome.patio_sim.captured_ids)
+      ? outcome.patio_sim.captured_ids.length
+      : 0;
+
+    let phrase = null;
+
+    // =========================================================================
+    // TIER 1: BIG HIGHLIGHTS ONLY (Celebratory, punchy fairground exclamations)
+    // =========================================================================
+
+    // 1. El Gallo de Oro (100 puntos - premio mayor)
+    if (pts >= 100 || (outcome.feria_sim && outcome.feria_sim.hole && outcome.feria_sim.hole.points >= 100)) {
+      phrase = lang === 'en' ? '¡Golden Rooster! Grand prize!' : '¡Al Gallo de Cien! ¡Premio mayor!';
     }
+    // 2. Encholada en La Hoyita (direct hit into the center hole)
+    else if (isEncholada) {
+      phrase = lang === 'en' ? '¡Straight into the pit! Bullseye!' : '¡Directo a la hoyita! ¡Encholada!';
+    }
+    // 3. High-score jackpot (75 puntos - Corona Real / Estrella Azteca)
+    else if (pts >= 75) {
+      phrase = lang === 'en' ? '¡Master shot! Seventy-five points!' : '¡Tiro maestro! ¡Setenta y cinco puntos!';
+    }
+    // 4. Ponchado / Quema (eliminated rival marble)
+    else if (hasPonchados) {
+      phrase = lang === 'en' ? '¡Chiras pelas! Knockout strike!' : '¡Chiras pelas y quema!';
+    }
+    // 5. Multi-marble capture (2 or more in one shot)
+    else if (capturedCount >= 2) {
+      phrase = lang === 'en' ? '¡Double knockout! What a shot!' : '¡Chiras pelas! ¡Carambola doble!';
+    }
+
+    // =========================================================================
+    // TIER 2: SPORADIC NOTABLE SHOTS (Occasional highlight, requires 14s cooldown + 40% chance)
+    // =========================================================================
+    else if (timeSinceLast >= 14000 && Math.random() < 0.40) {
+      // Solid 50 pts hole (El Sol, El Diablo, La Luna)
+      if (pts >= 50) {
+        phrase = lang === 'en' ? '¡Fifty points on the board!' : '¡Cincuenta puntos al marcador!';
+      }
+      // Single marble knocked out from the ring
+      else if (capturedCount === 1 && pts >= 25) {
+        phrase = lang === 'en' ? '¡Clean shot in the ring!' : '¡Buena canica al ruedo!';
+      }
+    }
+
+    // =========================================================================
+    // TIER 3: MINOR / ROUTINE (0 pts, misses, 10, 20, 30 pts) -> COMPLETELY SILENT!
+    // =========================================================================
+    if (phrase) {
+      this.speak(phrase, lang);
+    }
+  }
+
+  speakVictory(winnerName, lang = 'es') {
+    if (this.muted || !this.voiceEnabled) return;
+    const phrase = lang === 'en'
+      ? (winnerName ? `We have a Champion! Congratulations ${winnerName}!` : 'We have a Champion!')
+      : (winnerName ? `¡Tenemos Campeón del Ruedo! ¡Felicidades ${winnerName}!` : '¡Tenemos Campeón del Ruedo!');
     this.speak(phrase, lang);
   }
 
@@ -565,6 +645,7 @@ class CanicasAudio {
       utter.pitch = 1.0;
       utter.volume = 1.0;
 
+      this.lastSpokenTimestamp = Date.now();
       window.speechSynthesis.speak(utter);
     } catch (_) {
       // Ignore speech synthesis errors on restricted browsers

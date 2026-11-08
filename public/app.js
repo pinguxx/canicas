@@ -1803,9 +1803,18 @@
   let pendingRoomAfterAnim = null;
   let pendingShotQueue = [];
 
+  let victoryModalTimer = null;
+
   function handleServerMessage(msg) {
     if (msg.room && msg.room.settings) {
       msg.room.active_stage = stageForRoundLocal(msg.room.settings.game_mode, msg.room.round_number || 1);
+    }
+
+    // Ignore room-specific broadcasts if user has already left the room or is on the main page
+    if (msg.type !== 'room_joined' && msg.type !== 'error') {
+      if (!currentRoom || screenHome.classList.contains('active')) {
+        return;
+      }
     }
 
     switch (msg.type) {
@@ -1903,6 +1912,10 @@
           botShotPendingTimer = null;
           botShotTargetId = null;
         }
+        if (victoryModalTimer) {
+          clearTimeout(victoryModalTimer);
+          victoryModalTimer = null;
+        }
         currentRoom = msg.room;
         pendingRoomAfterAnim = null;
         pendingShotQueue = [];
@@ -1931,14 +1944,18 @@
           errText.includes('cerrada') ||
           errText.includes('expir');
 
-        // If trying to join/resume an invalid room, or room is finished, or room no longer exists on server:
-        if (isInvalidRoom || (isAutoReconnecting && (!currentRoom || currentRoom.state === 'finished'))) {
+        const isSessionError =
+          errText.includes('sesión del jugador') ||
+          errText.includes('player session');
+
+        // If trying to join/resume an invalid room, or session lost, or room is finished, or room no longer exists on server:
+        if (isInvalidRoom || isSessionError || (isAutoReconnecting && (!currentRoom || currentRoom.state === 'finished'))) {
           isAutoReconnecting = false;
           leaveCurrentRoom();
           showToast(
             lang === 'en'
-              ? `⚠️ ${msg.message || 'Room is no longer valid or has expired. Returned to main page.'}`
-              : `⚠️ ${msg.message || 'La sala ya no es válida o ha expirado. Volviste a la página principal.'}`
+              ? `⚠️ ${msg.message || 'Room or session is no longer valid. Returned to main page.'}`
+              : `⚠️ ${msg.message || 'La sala o sesión ya no es válida. Volviste a la página principal.'}`
           );
           break;
         }
@@ -1973,7 +1990,7 @@
   // ==========================================================================
 
   function renderRoomState() {
-    if (!currentRoom) return;
+    if (!currentRoom || screenHome.classList.contains('active')) return;
 
     if (currentRoom.state === 'lobby') {
       switchScreen(screenLobby);
@@ -2312,7 +2329,12 @@
     }
 
     if (currentRoom && currentRoom.state === 'finished') {
-      setTimeout(() => showVictoryModal(), 900);
+      if (victoryModalTimer) clearTimeout(victoryModalTimer);
+      victoryModalTimer = setTimeout(() => {
+        if (currentRoom && currentRoom.state === 'finished' && !screenHome.classList.contains('active')) {
+          showVictoryModal();
+        }
+      }, 900);
       return;
     }
 
@@ -3733,6 +3755,15 @@
       clearTimeout(reconnectTimeoutTimer);
       reconnectTimeoutTimer = null;
     }
+    if (victoryModalTimer) {
+      clearTimeout(victoryModalTimer);
+      victoryModalTimer = null;
+    }
+    if (botShotPendingTimer) {
+      clearTimeout(botShotPendingTimer);
+      botShotPendingTimer = null;
+      botShotTargetId = null;
+    }
     // Close any active modal dialogs (victory, qr, history, rules)
     document.querySelectorAll('.modal-overlay').forEach((m) => m.classList.add('hidden'));
 
@@ -3742,6 +3773,7 @@
       } catch (_) {}
     }
     window.safeStorage.removeItem('canicas_room_code');
+    window.safeStorage.removeItem('canicas_player_id');
     window.safeStorage.removeItem('canicas_offline_room');
     try {
       if (window.history && window.history.replaceState) {
@@ -3753,6 +3785,7 @@
       try { window.location.hash = ''; } catch (_) {}
     }
     currentRoom = null;
+    myPlayerId = null;
     switchScreen(screenHome);
   }
 
@@ -3761,12 +3794,14 @@
 
   const btnBackToSala = document.getElementById('btn-back-to-sala');
   if (btnBackToSala) {
-    btnBackToSala.addEventListener('click', () => {
+    btnBackToSala.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
       if (currentRoom) {
         if (useOfflineEngine) {
           handleOfflineCommand({ type: 'play_again' });
         } else {
-          sendWs({ type: 'play_again', roomCode: currentRoom.code });
+          sendWs({ type: 'play_again', roomCode: currentRoom.code, playerId: myPlayerId });
         }
         showToast(
           lang === 'en'
@@ -3969,7 +4004,7 @@
   // ==========================================================================
 
   function showVictoryModal() {
-    if (!currentRoom) return;
+    if (!currentRoom || screenHome.classList.contains('active')) return;
     window.canicasAudio.playVictoryFanfare();
     const winner = currentRoom.players.find((p) => p.id === currentRoom.winner_id);
     const winnerName = winner ? winner.name : '';
@@ -4005,7 +4040,9 @@
     document.getElementById('modal-victory').classList.remove('hidden');
   }
 
-  document.getElementById('btn-play-again').addEventListener('click', () => {
+  document.getElementById('btn-play-again').addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
     document.getElementById('modal-victory').classList.add('hidden');
     if (!currentRoom) {
       leaveCurrentRoom();
@@ -4019,7 +4056,7 @@
           : '🏠 De vuelta en la Sala. Elige el tipo de juego para comenzar.'
       );
     } else if (ws && ws.readyState === WebSocket.OPEN) {
-      sendWs({ type: 'play_again', roomCode: currentRoom.code });
+      sendWs({ type: 'play_again', roomCode: currentRoom.code, playerId: myPlayerId });
     } else {
       if (currentRoom.code && currentRoom.code.startsWith('OFF-')) {
         useOfflineEngine = true;
@@ -4044,7 +4081,10 @@
 
   const btnVictoryHome = document.getElementById('btn-victory-home');
   if (btnVictoryHome) {
-    btnVictoryHome.addEventListener('click', () => {
+    btnVictoryHome.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      document.getElementById('modal-victory').classList.add('hidden');
       leaveCurrentRoom();
     });
   }

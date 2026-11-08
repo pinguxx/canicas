@@ -468,6 +468,6 @@ mod tests {
         assert!(parsed_err2["message"]
             .as_str()
             .unwrap()
-            .contains("No se encontró la sesión del jugador"));
+            .contains("No se encontró la sala"));
     }
 }

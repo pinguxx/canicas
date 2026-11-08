@@ -190,6 +190,8 @@ pub enum ClientMessage {
     PlayAgain {
         #[serde(rename = "roomCode")]
         room_code: String,
+        #[serde(rename = "playerId", default)]
+        player_id: Option<String>,
     },
     #[serde(rename = "leave_room")]
     LeaveRoom {
@@ -1064,19 +1066,13 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 }
             }
 
-            ClientMessage::PlayAgain { room_code } => {
+            ClientMessage::PlayAgain {
+                room_code,
+                player_id,
+            } => {
                 let code = room_code.trim().to_uppercase();
-                let Some(ref pid) = active_player_id else {
-                    let _ = tx.send(Message::Text(
-                        json!({
-                            "type": "error",
-                            "message": "No se encontró la sesión del jugador."
-                        })
-                        .to_string()
-                        .into(),
-                    ));
-                    continue;
-                };
+                let mut resolved_pid = active_player_id.clone().or(player_id);
+
                 let mut rooms_guard = state.rooms.write().await;
                 let Some(room) = rooms_guard.get_mut(&code) else {
                     let _ = tx.send(Message::Text(
@@ -1089,6 +1085,41 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     ));
                     continue;
                 };
+
+                // Fallback: If only 1 human player was in this room, resolve to their ID
+                if resolved_pid.is_none() || !room.players.iter().any(|p| resolved_pid.as_ref() == Some(&p.id)) {
+                    if let Some(single_human) = room.players.iter().find(|p| !p.is_bot) {
+                        resolved_pid = Some(single_human.id.clone());
+                    }
+                }
+
+                let Some(ref pid) = resolved_pid else {
+                    let _ = tx.send(Message::Text(
+                        json!({
+                            "type": "error",
+                            "message": "No se encontró la sesión del jugador."
+                        })
+                        .to_string()
+                        .into(),
+                    ));
+                    continue;
+                };
+
+                // Re-bind connection to room & player
+                active_player_id = Some(pid.clone());
+                active_room_code = Some(code.clone());
+                {
+                    let mut sockets_guard = state.sockets.write().await;
+                    sockets_guard
+                        .entry(code.clone())
+                        .or_default()
+                        .insert(conn_id.clone(), tx.clone());
+                }
+                if let Some(p) = room.players.iter_mut().find(|p| p.id == *pid) {
+                    p.connected = true;
+                    p.conn_id = conn_id.clone();
+                }
+
                 let is_host = room.players.iter().any(|p| p.id == *pid && p.is_host);
                 if !is_host && room.state != RoomState::Finished {
                     continue;
@@ -1111,6 +1142,19 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
             ClientMessage::LeaveRoom { room_code } => {
                 let code = room_code.trim().to_uppercase();
                 let mut maybe_snapshot: Option<Room> = None;
+
+                // 1. Immediately remove this socket from room socket map so leaving player NEVER receives broadcasts
+                {
+                    let mut sockets_guard = state.sockets.write().await;
+                    if let Some(room_sockets) = sockets_guard.get_mut(&code) {
+                        room_sockets.remove(&conn_id);
+                        if room_sockets.is_empty() {
+                            sockets_guard.remove(&code);
+                        }
+                    }
+                }
+
+                // 2. Remove leaving player and clean up room
                 {
                     let mut rooms_guard = state.rooms.write().await;
                     if let Some(room) = rooms_guard.get_mut(&code) {
@@ -1130,10 +1174,13 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                                 }
                             } else if let Some(p) = room.players.iter_mut().find(|p| p.id == *pid) {
                                 p.connected = false;
+                                if room.state == RoomState::Finished {
+                                    room.players.retain(|pl| pl.id != *pid);
+                                }
                             }
                         }
-                        let any_human = room.players.iter().any(|p| !p.is_bot);
-                        if !any_human {
+                        let any_connected_human = room.players.iter().any(|p| !p.is_bot && p.connected);
+                        if !any_connected_human {
                             rooms_guard.remove(&code);
                         } else {
                             room.touch();

@@ -7,8 +7,29 @@
   <meta name="description" content="Juego multijugador online de Canicas Mexicanas en Rust y WebSockets: incluye Canicas de la Feria (Tablero de Clavos y Hoyitos) y Canicas de Patio (El Círculo y La Hoyita)." />
   <title>Canicas Mexicanas 3D • Feria de Clavos, El Círculo y La Hoyita</title>
   <link rel="manifest" href="/manifest.json" />
+  <link rel="stylesheet" href="/style.css?v=18" />
+  <script>
+    (function() {
+      try {
+        var raw = localStorage.getItem('canicas_offline_room') || sessionStorage.getItem('canicas_offline_room');
+        if (raw) {
+          var p = JSON.parse(raw);
+          if (p && p.state) {
+            document.documentElement.setAttribute('data-pre-state', p.state);
+            document.addEventListener('DOMContentLoaded', function() {
+              var sHome = document.getElementById('screen-home');
+              var sTarget = p.state === 'lobby' ? document.getElementById('screen-lobby') : document.getElementById('screen-game');
+              if (sHome && sTarget) {
+                sHome.classList.remove('active');
+                sTarget.classList.add('active');
+              }
+            });
+          }
+        }
+      } catch(_) {}
+    })();
+  </script>
   <link rel="icon" type="image/svg+xml" href="/icon.svg" />
-  <link rel="stylesheet" href="/style.css?v=17" />
 </head>
 <body>
   <!-- Festive Mexican Fairground & Barrio Top Ribbon -->
@@ -518,8 +539,8 @@
     </div>
   </div>
 
-  <script src="/qrcode.min.js?v=17"></script>
-  <script src="/audio.js?v=17"></script>
-  <script src="/app.js?v=17"></script>
+  <script src="/qrcode.min.js?v=18"></script>
+  <script src="/audio.js?v=18"></script>
+  <script src="/app.js?v=18"></script>
 </body>
 </html>

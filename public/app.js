@@ -1710,14 +1710,12 @@
       });
 
       ws.addEventListener('error', () => {
-        if (!currentRoom) {
-          useOfflineEngine = true;
-          const queued = [...pendingWsMessages];
-          pendingWsMessages = [];
-          queued.forEach((cb) => {
-            try { cb(); } catch (e) { console.error(e); }
-          });
-        }
+        useOfflineEngine = true;
+        const queued = [...pendingWsMessages];
+        pendingWsMessages = [];
+        queued.forEach((cb) => {
+          try { cb(); } catch (e) { console.error(e); }
+        });
       });
     } catch (_) {
       useOfflineEngine = true;
@@ -1865,6 +1863,13 @@
 
       case 'error': {
         hideReconnectingOverlay();
+        if (isAutoReconnecting && currentRoom) {
+          useOfflineEngine = true;
+          isAutoReconnecting = false;
+          renderRoomState();
+          showToast(lang === 'en' ? '🎮 Continuing match offline' : '🎮 Continuando partida en modo local');
+          break;
+        }
         showToast(`⚠️ ${msg.message}`);
         isAutoReconnecting = false;
         break;
@@ -4038,7 +4043,7 @@
       .keys()
       .then((keys) => {
         keys.forEach((k) => {
-          if (k !== 'canicas-mexicanas-v17') {
+          if (k !== 'canicas-mexicanas-v18') {
             caches.delete(k).catch(() => {});
           }
         });
@@ -4047,7 +4052,7 @@
   }
   if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
     navigator.serviceWorker
-      .register('/sw.js?v=17')
+      .register('/sw.js?v=18')
       .then((reg) => {
         reg.update().catch(() => {});
       })

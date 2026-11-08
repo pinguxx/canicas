@@ -41,6 +41,9 @@ const safeStorage = (() => {
   function writeCookie(k, v) {
     try {
       if (typeof document !== 'undefined') {
+        if (k === 'canicas_offline_room' || (v && String(v).length > 500)) {
+          return;
+        }
         const val = (v === null || v === undefined) ? '' : encodeURIComponent(String(v));
         const maxAge = (v === null || v === undefined) ? 'Max-Age=0;' : 'Max-Age=86400; SameSite=Lax; path=/';
         document.cookie = `${encodeURIComponent(k)}=${val}; ${maxAge}`;

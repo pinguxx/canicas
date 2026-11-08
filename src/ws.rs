@@ -8,7 +8,10 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio::sync::{mpsc, RwLock};
 
-use crate::canicas::{generate_patio_marbles, generate_patio_stones};
+use crate::canicas::{
+    generate_patio_marbles, generate_patio_stones, PATIO_CENTER_X, PATIO_CENTER_Y,
+    PATIO_SHOOT_RADIUS,
+};
 use crate::game::{
     current_epoch_secs, generate_room_code, GameSettings, Player, PlayerStats, Room, RoomState,
     PLAYER_AVATARS, PLAYER_COLORS,
@@ -164,6 +167,13 @@ pub enum ClientMessage {
         #[serde(rename = "seatAngle")]
         seat_angle: Option<f64>,
     },
+    #[serde(rename = "set_seat_angle")]
+    SetSeatAngle {
+        #[serde(rename = "roomCode")]
+        room_code: String,
+        #[serde(rename = "seatAngle")]
+        seat_angle: f64,
+    },
     #[serde(rename = "nudge_arena")]
     NudgeArena {
         #[serde(rename = "roomCode")]
@@ -304,7 +314,7 @@ pub fn schedule_bot_if_needed(state: AppState, room_code: String, delay_ms: u64)
             if updated_room.state == RoomState::Playing {
                 if let Some(next_p) = updated_room.current_player() {
                     if next_p.is_bot {
-                        schedule_bot_if_needed(state.clone(), room_code, 2600);
+                        schedule_bot_if_needed(state.clone(), room_code, 1100);
                     }
                 }
             }
@@ -393,6 +403,7 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     is_host: true,
                     conn_id: conn_id.clone(),
                     is_bot: false,
+                    seat_angle: None,
                     stats: PlayerStats::default(),
                 };
 
@@ -463,13 +474,13 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 }
 
                 if resolved_pid.is_none() {
-                    // Fallback 1: Match by name if an existing disconnected human has this name
+                    // Fallback 1: Match by name if an existing human has this name (even during rapid refresh)
                     let clean_req = player_name.trim();
                     if !clean_req.is_empty() {
                         if let Some(existing_p) = room
                             .players
                             .iter_mut()
-                            .find(|p| !p.is_bot && !p.connected && p.name == clean_req)
+                            .find(|p| !p.is_bot && p.name == clean_req)
                         {
                             existing_p.connected = true;
                             existing_p.conn_id = conn_id.clone();
@@ -568,6 +579,7 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                         is_host: false,
                         conn_id: conn_id.clone(),
                         is_bot: false,
+                        seat_angle: None,
                         stats: PlayerStats::default(),
                     };
                     room.players.push(new_player);
@@ -832,7 +844,40 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 .await;
 
                 if first_is_bot {
-                    schedule_bot_if_needed(state.clone(), code, 1500);
+                    schedule_bot_if_needed(state.clone(), code, 1000);
+                }
+            }
+
+            ClientMessage::SetSeatAngle { room_code, seat_angle } => {
+                let code = room_code.trim().to_uppercase();
+                let Some(ref pid) = active_player_id else {
+                    continue;
+                };
+                let mut maybe_snapshot: Option<Room> = None;
+                {
+                    let mut rooms_guard = state.rooms.write().await;
+                    if let Some(room) = rooms_guard.get_mut(&code) {
+                        if let Some(p) = room.players.iter_mut().find(|p| p.id == *pid) {
+                            let deg = seat_angle.rem_euclid(360.0);
+                            p.seat_angle = Some(deg);
+                            let rad = deg.to_radians();
+                            p.shooter_x = (PATIO_CENTER_X + PATIO_SHOOT_RADIUS * rad.cos()).round();
+                            p.shooter_y = (PATIO_CENTER_Y + PATIO_SHOOT_RADIUS * rad.sin()).round();
+                            room.touch();
+                            maybe_snapshot = Some(room.clone());
+                        }
+                    }
+                }
+                if let Some(snapshot) = maybe_snapshot {
+                    broadcast_to_room(
+                        &state,
+                        &code,
+                        &json!({
+                            "type": "room_updated",
+                            "room": snapshot
+                        }),
+                    )
+                    .await;
                 }
             }
 
@@ -856,6 +901,15 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     let Some(room) = rooms_guard.get_mut(&code) else {
                         continue;
                     };
+                    if let Some(p) = room.players.iter_mut().find(|p| p.id == *pid) {
+                        if let Some(sa) = seat_angle {
+                            let deg = sa.rem_euclid(360.0);
+                            p.seat_angle = Some(deg);
+                            let rad = deg.to_radians();
+                            p.shooter_x = (PATIO_CENTER_X + PATIO_SHOOT_RADIUS * rad.cos()).round();
+                            p.shooter_y = (PATIO_CENTER_Y + PATIO_SHOOT_RADIUS * rad.sin()).round();
+                        }
+                    }
                     room.execute_shot_with_seat(
                         pid,
                         power.unwrap_or(0.72),
@@ -883,7 +937,7 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                         if snapshot.state == RoomState::Playing {
                             if let Some(next_p) = snapshot.current_player() {
                                 if next_p.is_bot {
-                                    schedule_bot_if_needed(state.clone(), code, 3400);
+                                    schedule_bot_if_needed(state.clone(), code, 1100);
                                 }
                             }
                         }
@@ -1132,7 +1186,12 @@ pub async fn start_background_maintenance(state: AppState) {
             let outcome_opt = {
                 let mut rooms_guard = state.rooms.write().await;
                 if let Some(room) = rooms_guard.get_mut(&code) {
-                    room.execute_shot(&pid, 0.68, 0.0, 0.0)
+                    let curr_seat = room
+                        .players
+                        .iter()
+                        .find(|p| p.id == pid)
+                        .and_then(|p| p.seat_angle);
+                    room.execute_shot_with_seat(&pid, 0.68, 0.0, 0.0, curr_seat)
                         .ok()
                         .map(|out| (out, room.clone()))
                 } else {
@@ -1156,7 +1215,7 @@ pub async fn start_background_maintenance(state: AppState) {
                 if snapshot.state == RoomState::Playing {
                     if let Some(next_p) = snapshot.current_player() {
                         if next_p.is_bot {
-                            schedule_bot_if_needed(state.clone(), code, 3400);
+                            schedule_bot_if_needed(state.clone(), code, 1100);
                         }
                     }
                 }

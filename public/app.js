@@ -285,6 +285,7 @@
   let shotSpin = 0.0;
   let shotPower = 0.72;
   let patioSeatAngle = 90.0;
+  let lastTurnPlayerId = null;
   let reyAngleToggle = false;
   let isCharging = false;
   let chargeInterval = null;
@@ -411,56 +412,74 @@
     // 1. Primary blocker rock directly on the active shooter's straight ray!
     placeRayBlocker(blockedSeatDeg, 15.0);
 
-    // Dynamic progression: rocks appear progressively as marbles disappear!
+    // 2. Base tactical rock at +120°
+    placeRayBlocker((blockedSeatDeg + 120.0) % 360, 14.0);
+
+    // 3. Base rock at -120° (Circulo) or initial pit guardian (Hoyita)
+    if (isHoyita) {
+      const rotJitter = (((shotCounter * 37) % 90) * Math.PI) / 180;
+      const distR = 68.0;
+      const sx = Math.round(500 + distR * Math.cos(rotJitter));
+      const sy = Math.round(500 + distR * Math.sin(rotJitter));
+      if (isClear(sx, sy, 13.5)) {
+        stones.push({ x: sx, y: sy, r: 13.5 });
+      }
+    } else {
+      placeRayBlocker(((blockedSeatDeg - 120.0) % 360 + 360) % 360, 14.0);
+    }
+
+    // Ensure we start with exactly 3 rocks at the beginning
+    if (stones.length < 3) {
+      for (let step = 1; step < 24; step++) {
+        const altDeg = ((blockedSeatDeg + step * 15.0) % 360 + 360) % 360;
+        placeRayBlocker(altDeg, 14.0);
+        if (stones.length >= 3) break;
+      }
+    }
+
+    // Dynamic progression: rocks ramp up as marbles disappear!
     const totalExpected = isHoyita ? 12 : 13;
     const activeMarbles = (targets || []).filter((m) => m.active).length;
     const missingMarbles = Math.max(0, totalExpected - activeMarbles);
 
-    // 2. Cardinal entry blockers (90° South, 270° North, 180° West, 0° East)
-    // 0 at start! Unlock 1 cardinal every 3 missing marbles (scales up to 4 when missing >= 12)
-    const cardinalCount = Math.min(4, Math.floor(missingMarbles / 3));
-    const cardinals = [90, 270, 180, 0];
-    for (let c = 0; c < cardinalCount; c++) {
-      const cardinalDeg = cardinals[c];
-      const diff = (((cardinalDeg - blockedSeatDeg + 540) % 360) + 360) % 360 - 180;
-      if (Math.abs(diff) > 16) {
-        placeRayBlocker(cardinalDeg, 14.5);
-      }
-    }
-
-    // 3. Center pit guardian rocks in Hoyita mode (only 1 at start, up to 4 when cleared)
-    if (isHoyita) {
-      const guardianCount = missingMarbles === 0 ? 1 : Math.min(4, 1 + Math.floor(missingMarbles / 4));
-      const rotJitter = (((shotCounter * 37) % 90) * Math.PI) / 180;
-      for (let i = 0; i < guardianCount; i++) {
-        const baseAng = i * (Math.PI / 2) + rotJitter;
-        const distR = 66 + ((shotCounter + i * 5) % 9);
-        const sx = Math.round(500 + distR * Math.cos(baseAng));
-        const sy = Math.round(500 + distR * Math.sin(baseAng));
-        if (isClear(sx, sy, 13.5)) {
-          stones.push({ x: sx, y: sy, r: 13.5 });
+    // If missingMarbles === 0 (start of game), we keep exactly 3 rocks!
+    if (missingMarbles > 0) {
+      // Extra Hoyita pit guardians as pit becomes accessible (up to 3 extra)
+      if (isHoyita) {
+        const extraGuardians = Math.min(3, Math.floor(missingMarbles / 4));
+        const rotJitter = (((shotCounter * 37) % 90) * Math.PI) / 180;
+        for (let i = 1; i <= extraGuardians; i++) {
+          const baseAng = i * (Math.PI / 2) + rotJitter;
+          const distR = 66 + ((shotCounter + i * 5) % 9);
+          const sx = Math.round(500 + distR * Math.cos(baseAng));
+          const sy = Math.round(500 + distR * Math.sin(baseAng));
+          if (isClear(sx, sy, 13.5)) {
+            stones.push({ x: sx, y: sy, r: 13.5 });
+          }
         }
       }
-    }
 
-    // 4. Scattered courtyard rocks: 0 at start! Scales up to 11 as marbles disappear.
-    const scatteredGoal = Math.floor((missingMarbles * 11) / 13);
-    for (let k = 0; k < scatteredGoal; k++) {
-      const seed =
-        (Math.imul((shotCounter + 1) >>> 0, 2654435761) +
-          Math.imul((k + 1) >>> 0, 1013904223)) >>>
-        0;
-      const baseDeg = (seed % 360) + k * 37;
-      const distR = 85 + ((seed >>> 8) % 120);
-      const sr = 13.5 + ((seed >>> 16) % 3);
+      // Target total rocks = 3 base rocks + missingMarbles (up to 15 max)
+      const targetTotalStones = 3 + Math.min(12, missingMarbles);
 
-      for (let step = 0; step < 24; step++) {
-        const rad = ((baseDeg + step * 15) * Math.PI) / 180;
-        const sx = Math.round(500 + distR * Math.cos(rad));
-        const sy = Math.round(500 + distR * Math.sin(rad));
-        if (isClear(sx, sy, sr)) {
-          stones.push({ x: sx, y: sy, r: sr });
-          break;
+      for (let k = 0; k < 16; k++) {
+        if (stones.length >= targetTotalStones) break;
+        const seed =
+          (Math.imul((shotCounter + 1) >>> 0, 2654435761) +
+            Math.imul((k + 1) >>> 0, 1013904223)) >>>
+          0;
+        const baseDeg = (seed % 360) + k * 37;
+        const distR = 85 + ((seed >>> 8) % 120);
+        const sr = 13.5 + ((seed >>> 16) % 3);
+
+        for (let step = 0; step < 24; step++) {
+          const rad = ((baseDeg + step * 15) * Math.PI) / 180;
+          const sx = Math.round(500 + distR * Math.cos(rad));
+          const sy = Math.round(500 + distR * Math.sin(rad));
+          if (isClear(sx, sy, sr)) {
+            stones.push({ x: sx, y: sy, r: sr });
+            break;
+          }
         }
       }
     }
@@ -1085,6 +1104,17 @@
     };
   }
 
+  function saveCurrentRoomLocally() {
+    if (!currentRoom) return;
+    try {
+      window.safeStorage.setItem('canicas_room_code', currentRoom.code);
+      if (myPlayerId) {
+        window.safeStorage.setItem('canicas_player_id', myPlayerId);
+      }
+      window.safeStorage.setItem('canicas_offline_room', JSON.stringify(currentRoom));
+    } catch (_) {}
+  }
+
   function handleOfflineCommand(payload) {
     if (payload.type === 'create_room' || payload.type === 'join_room') {
       const code = (payload.roomCode || 'CANI26').trim().toUpperCase();
@@ -1092,10 +1122,10 @@
 
       // Check if reconnecting to an existing saved offline room!
       const savedOffline = window.safeStorage.getItem('canicas_offline_room');
-      if (payload.type === 'join_room' && savedOffline) {
+      if (savedOffline) {
         try {
           const parsed = JSON.parse(savedOffline);
-          if (parsed && parsed.code && parsed.code.toUpperCase() === code) {
+          if (parsed && parsed.code && (!code || parsed.code.toUpperCase() === code)) {
             currentRoom = parsed;
             handleServerMessage({ type: 'room_joined', playerId: myPlayerId, room: currentRoom });
             return;
@@ -1207,12 +1237,37 @@
         p.marbles_captured = 0;
         p.is_cazador = false;
         p.bonus_shot_pending = false;
-        const rad = ((i * (360 / currentRoom.players.length) + 90) * Math.PI) / 180;
+        const deg = (i * (360 / currentRoom.players.length) + 90);
+        p.seat_angle = deg;
+        const rad = (deg * Math.PI) / 180;
         p.shooter_x = Math.round(500 + 415 * Math.cos(rad));
         p.shooter_y = Math.round(500 + 415 * Math.sin(rad));
       });
       refreshOfflineTurnDeadline(currentRoom);
+      saveCurrentRoomLocally();
       handleServerMessage({ type: 'game_started', room: currentRoom });
+      if (currentRoom.players[0] && currentRoom.players[0].is_bot) {
+        setTimeout(() => {
+          if (currentRoom && currentRoom.state === 'playing' && !isAnimatingShot) {
+            executeOfflineShot(
+              0.5 + Math.random() * 0.42,
+              (Math.random() - 0.5) * 0.5,
+              (Math.random() - 0.5) * 0.5
+            );
+          }
+        }, 750);
+      }
+    } else if (payload.type === 'set_seat_angle') {
+      const p = currentRoom.players.find((pl) => pl.id === myPlayerId) || currentRoom.players[currentRoom.current_turn_idx];
+      if (p) {
+        const deg = ((Number(payload.seatAngle) % 360) + 360) % 360;
+        p.seat_angle = deg;
+        const rad = (deg * Math.PI) / 180;
+        p.shooter_x = Math.round(500 + 415 * Math.cos(rad));
+        p.shooter_y = Math.round(500 + 415 * Math.sin(rad));
+        saveCurrentRoomLocally();
+        handleServerMessage({ type: 'room_updated', room: currentRoom });
+      }
     } else if (payload.type === 'shoot_marble') {
       executeOfflineShot(
         payload.power ?? 0.72,
@@ -1338,11 +1393,14 @@
         patio_sim: null
       };
     } else {
-      const defaultSeatDeg = turnIdx * (360 / nextRoom.players.length) + 90;
+      const defaultSeatDeg = (p.seat_angle != null && Number.isFinite(p.seat_angle))
+        ? p.seat_angle
+        : turnIdx * (360 / nextRoom.players.length) + 90;
       const seatDeg =
         typeof customSeatAngle === 'number' && Number.isFinite(customSeatAngle)
           ? ((customSeatAngle % 360) + 360) % 360
-          : defaultSeatDeg;
+          : (p.id === myPlayerId ? patioSeatAngle : defaultSeatDeg);
+      p.seat_angle = seatDeg;
       const rivals = nextRoom.players
         .filter((_, idx) => idx !== turnIdx)
         .map((rp) => ({ id: rp.id, x: rp.shooter_x, y: rp.shooter_y, color: rp.color }));
@@ -1483,9 +1541,11 @@
     }
 
     if (nextRoom.active_stage !== 'feria') {
+      const nextP = nextRoom.players[nextRoom.current_turn_idx];
+      const defaultNextDeg = nextRoom.current_turn_idx * (360 / Math.max(1, nextRoom.players.length)) + 90;
       const nextSeatDeg = outcome.earned_bonus_shot
         ? seatDeg
-        : nextRoom.current_turn_idx * (360 / Math.max(1, nextRoom.players.length)) + 90;
+        : (nextP && nextP.seat_angle != null ? nextP.seat_angle : defaultNextDeg);
       nextRoom.patio_stones = generatePatioStonesLocal(
         nextRoom.active_stage === 'hoyita',
         nextRoom.shot_counter,
@@ -1495,6 +1555,7 @@
     }
 
     refreshOfflineTurnDeadline(nextRoom);
+    saveCurrentRoomLocally();
     handleServerMessage({ type: 'shot_result', outcome, room: nextRoom });
   }
 
@@ -1704,7 +1765,7 @@
 
   function handleServerMessage(msg) {
     if (msg.room && msg.room.settings) {
-      msg.room.active_stage = stageForRoundLocal(msg.room.settings.game_mode, 1);
+      msg.room.active_stage = stageForRoundLocal(msg.room.settings.game_mode, msg.room.round_number || 1);
     }
 
     switch (msg.type) {
@@ -1715,11 +1776,7 @@
         currentRoom = msg.room;
         pendingRoomAfterAnim = null;
         pendingShotQueue = [];
-        window.safeStorage.setItem('canicas_player_id', myPlayerId);
-        window.safeStorage.setItem('canicas_room_code', currentRoom.code);
-        if (useOfflineEngine) {
-          window.safeStorage.setItem('canicas_offline_room', JSON.stringify(currentRoom));
-        }
+        saveCurrentRoomLocally();
         try {
           if (window.history && window.history.replaceState) {
             window.history.replaceState({}, '', `?room=${encodeURIComponent(currentRoom.code)}#pid=${encodeURIComponent(myPlayerId)}`);
@@ -1738,9 +1795,7 @@
       case 'room_updated': {
         if (!isAnimatingShot) {
           currentRoom = msg.room;
-          if (useOfflineEngine) {
-            window.safeStorage.setItem('canicas_offline_room', JSON.stringify(currentRoom));
-          }
+          saveCurrentRoomLocally();
           renderRoomState();
         } else {
           pendingRoomAfterAnim = msg.room;
@@ -1759,6 +1814,7 @@
         pendingShotQueue = [];
         isAnimatingShot = false;
         activeAnim = null;
+        saveCurrentRoomLocally();
         document.getElementById('modal-victory').classList.add('hidden');
         renderRoomState();
         showToast(lang === 'en' ? '🔮 The arena is open! Aim and shoot!' : '🔮 ¡Se abrió el ruedo! Apunta y tira tu canica.');
@@ -1801,6 +1857,7 @@
         pendingShotQueue = [];
         isAnimatingShot = false;
         activeAnim = null;
+        saveCurrentRoomLocally();
         document.getElementById('modal-victory').classList.add('hidden');
         renderRoomState();
         break;
@@ -1809,21 +1866,7 @@
       case 'error': {
         hideReconnectingOverlay();
         showToast(`⚠️ ${msg.message}`);
-        if (isAutoReconnecting) {
-          isAutoReconnecting = false;
-          window.safeStorage.removeItem('canicas_room_code');
-          window.safeStorage.removeItem('canicas_offline_room');
-          try {
-            if (window.history && window.history.replaceState) {
-              window.history.replaceState({}, '', window.location.pathname);
-            } else {
-              window.location.hash = '';
-            }
-          } catch (_) {
-            try { window.location.hash = ''; } catch (_) {}
-          }
-          switchScreen(screenHome);
-        }
+        isAutoReconnecting = false;
         break;
       }
     }
@@ -1996,6 +2039,21 @@
       activePlayer && activePlayer.id === myPlayerId && currentRoom.state === 'playing'
     );
 
+    if (activePlayer && currentRoom.state === 'playing') {
+      if (lastTurnPlayerId !== activePlayer.id) {
+        lastTurnPlayerId = activePlayer.id;
+        if (isMyTurn) {
+          if (typeof activePlayer.seat_angle === 'number' && Number.isFinite(activePlayer.seat_angle)) {
+            patioSeatAngle = activePlayer.seat_angle;
+          } else {
+            const total = (currentRoom.players || []).length || 1;
+            patioSeatAngle = currentRoom.current_turn_idx * (360 / total) + 90;
+          }
+          updateSeatPosLabel();
+        }
+      }
+    }
+
     const turnEl = document.getElementById('turn-indicator');
     if (activePlayer) {
       turnEl.textContent = isMyTurn
@@ -2068,9 +2126,7 @@
       currentRoom = pendingRoomAfterAnim;
       pendingRoomAfterAnim = null;
     }
-    if (useOfflineEngine && currentRoom) {
-      window.safeStorage.setItem('canicas_offline_room', JSON.stringify(currentRoom));
-    }
+    saveCurrentRoomLocally();
 
     const headline = lang === 'en' ? outcome.headline_en : outcome.headline_es;
     const dicho = lang === 'en' ? outcome.dicho_en : outcome.dicho_es;
@@ -3029,8 +3085,28 @@
     });
   }
 
+  let seatAngleSendTimeout = null;
+  function syncSeatAngleToServer() {
+    if (!currentRoom || currentRoom.state !== 'playing') return;
+    sendWs({
+      type: 'set_seat_angle',
+      roomCode: currentRoom.code,
+      seatAngle: patioSeatAngle
+    });
+  }
+
   function setPatioSeatAngle(deg, keepAim = false) {
     patioSeatAngle = ((Number(deg) % 360) + 360) % 360;
+    if (currentRoom && currentRoom.players) {
+      const p = currentRoom.players.find((pl) => pl.id === myPlayerId) || currentRoom.players[currentRoom.current_turn_idx];
+      if (p) {
+        p.seat_angle = patioSeatAngle;
+        const rad = (patioSeatAngle * Math.PI) / 180;
+        p.shooter_x = Math.round(500 + 415 * Math.cos(rad));
+        p.shooter_y = Math.round(500 + 415 * Math.sin(rad));
+      }
+      saveCurrentRoomLocally();
+    }
     if (!keepAim) {
       aimAngle = 0;
       const angleInput = document.getElementById('input-angle');
@@ -3038,6 +3114,8 @@
       updateAngleLabel();
     }
     updateSeatPosLabel();
+    clearTimeout(seatAngleSendTimeout);
+    seatAngleSendTimeout = setTimeout(syncSeatAngleToServer, 50);
   }
 
   function aimPatioFromCanvasPoint(pt) {
@@ -3174,6 +3252,8 @@
 
     if (wasRingDrag) {
       dragMaxDist = 0;
+      clearTimeout(seatAngleSendTimeout);
+      syncSeatAngleToServer();
       return;
     }
 
@@ -3832,7 +3912,7 @@
     const rem = Math.max(0, currentRoom.turn_deadline_epoch - nowSec);
     disp.textContent = `${rem}s`;
     if (rem === 0 && useOfflineEngine && !isAnimatingShot) {
-      executeOfflineShot(0.68, 0, 0);
+      executeOfflineShot(0.68, 0, 0, patioSeatAngle);
     }
   }, 500);
 
@@ -3893,32 +3973,46 @@
     const targetRoom = urlRoom || hashRoom || savedRoom;
     const targetPid = myPlayerId || hashPid || window.safeStorage.getItem('canicas_player_id');
 
-    // 1. In standalone offline mode, restore the offline room if available
-    const isStandalone = window.location.protocol === 'file:' || !window.location.host;
-    if (isStandalone) {
-      useOfflineEngine = true;
-    }
+    // 1. Instantly restore saved room so page refresh NEVER kicks the player out!
     const savedOffline = window.safeStorage.getItem('canicas_offline_room');
-    if ((useOfflineEngine || isStandalone) && savedOffline) {
+    let restoredFromSaved = false;
+    if (savedOffline) {
       try {
         const parsed = JSON.parse(savedOffline);
-        if (parsed && parsed.code) {
+        if (parsed && parsed.code && (!targetRoom || parsed.code.toUpperCase() === targetRoom.toUpperCase())) {
           currentRoom = parsed;
+          myPlayerId = myPlayerId || targetPid || (currentRoom.players[0] && currentRoom.players[0].id) || 'p_local_1';
           renderRoomState();
-          return;
+          restoredFromSaved = true;
+          if (useOfflineEngine && currentRoom.state === 'playing') {
+            const currP = currentRoom.players[currentRoom.current_turn_idx];
+            if (currP && currP.is_bot && !isAnimatingShot) {
+              setTimeout(() => {
+                if (currentRoom && currentRoom.state === 'playing' && !isAnimatingShot) {
+                  executeOfflineShot(
+                    0.5 + Math.random() * 0.42,
+                    (Math.random() - 0.5) * 0.5,
+                    (Math.random() - 0.5) * 0.5
+                  );
+                }
+              }, 750);
+            }
+          }
         }
       } catch (_) {}
     }
 
-    // 2. Automatically resume room session if targetRoom is known!
-    if (targetRoom) {
-      isAutoReconnecting = true;
-      showReconnectingOverlay(targetRoom);
-      showToast(
-        lang === 'en'
-          ? `🔄 Reconnecting to room ${targetRoom}...`
-          : `🔄 Reconectando a la sala ${targetRoom}...`
-      );
+    const isStandalone = window.location.protocol === 'file:' || !window.location.host;
+    if (isStandalone) {
+      useOfflineEngine = true;
+    }
+
+    // 2. Automatically sync with server over WebSocket if targetRoom is known!
+    if (targetRoom && !isStandalone) {
+      if (!restoredFromSaved) {
+        isAutoReconnecting = true;
+        showReconnectingOverlay(targetRoom);
+      }
       sendWs({
         type: 'join_room',
         roomCode: targetRoom,

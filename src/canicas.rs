@@ -986,62 +986,77 @@ pub fn generate_patio_stones(
     // 1. Primary blocker rock directly on the active shooter's straight ray!
     place_ray_blocker(blocked_seat_deg, 15.0, &mut stones);
 
-    // Dynamic progression: rocks appear progressively as marbles disappear!
-    let total_expected = if is_hoyita { 12_usize } else { 13_usize };
-    let active_marbles = targets.iter().filter(|m| m.active).count();
-    let missing_marbles = total_expected.saturating_sub(active_marbles);
+    // 2. Base tactical rock at +120°
+    place_ray_blocker((blocked_seat_deg + 120.0).rem_euclid(360.0), 14.0, &mut stones);
 
-    // 2. Cardinal entry blockers (90° South, 270° North, 180° West, 0° East)
-    // 0 at start! Unlock 1 cardinal every 3 missing marbles (scales up to 4 when missing >= 12)
-    let cardinal_count = (missing_marbles / 3).min(4);
-    let cardinals = [90.0_f64, 270.0, 180.0, 0.0];
-    for &cardinal_deg in cardinals.iter().take(cardinal_count) {
-        let diff = ((cardinal_deg - blocked_seat_deg + 540.0).rem_euclid(360.0)) - 180.0;
-        if diff.abs() > 16.0 {
-            place_ray_blocker(cardinal_deg, 14.5, &mut stones);
+    // 3. Base rock at -120° (Circulo) or initial pit guardian (Hoyita)
+    if is_hoyita {
+        let rot_jitter = (((shot_counter * 37) % 90) as f64).to_radians();
+        let dist_r = 68.0;
+        let sx = (PATIO_CENTER_X + dist_r * rot_jitter.cos()).round();
+        let sy = (PATIO_CENTER_Y + dist_r * rot_jitter.sin()).round();
+        if is_clear(sx, sy, 13.5, &stones) {
+            stones.push(PatioStone { x: sx, y: sy, r: 13.5 });
         }
+    } else {
+        place_ray_blocker((blocked_seat_deg - 120.0).rem_euclid(360.0), 14.0, &mut stones);
     }
 
-    // 3. In Hoyita mode: center pit guardian rocks
-    // At start (0 missing): only 1 guardian rock. Scales up to 4 as marbles disappear.
-    if is_hoyita {
-        let guardian_count = if missing_marbles == 0 {
-            1_usize
-        } else {
-            (1 + missing_marbles / 4).min(4)
-        };
-        let rot_jitter = (((shot_counter * 37) % 90) as f64).to_radians();
-        for i in 0..guardian_count {
-            let base_ang = (i as f64) * std::f64::consts::FRAC_PI_2 + rot_jitter;
-            let dist_r = 66.0 + ((shot_counter + (i as u32) * 5) % 9) as f64;
-            let sx = (PATIO_CENTER_X + dist_r * base_ang.cos()).round();
-            let sy = (PATIO_CENTER_Y + dist_r * base_ang.sin()).round();
-            if is_clear(sx, sy, 13.5, &stones) {
-                stones.push(PatioStone { x: sx, y: sy, r: 13.5 });
+    // Ensure we start with exactly 3 rocks at the beginning
+    if stones.len() < 3 {
+        for step in 1..24 {
+            let alt_deg = (blocked_seat_deg + (step as f64) * 15.0).rem_euclid(360.0);
+            place_ray_blocker(alt_deg, 14.0, &mut stones);
+            if stones.len() >= 3 {
+                break;
             }
         }
     }
 
-    // 4. Scattered random courtyard rocks across mid & outer ring (R = 85..205)
-    // 0 at the start when all marbles are present!
-    // Scales up to 11 as marbles disappear, occupying vacant ground to maintain challenge.
-    let scattered_goal = (missing_marbles * 11) / 13;
+    // Dynamic progression: rocks ramp up as marbles disappear!
+    let total_expected = if is_hoyita { 12_usize } else { 13_usize };
+    let active_marbles = targets.iter().filter(|m| m.active).count();
+    let missing_marbles = total_expected.saturating_sub(active_marbles);
 
-    for k in 0..scattered_goal {
-        let seed = (shot_counter.wrapping_add(1))
-            .wrapping_mul(2654435761)
-            .wrapping_add(((k as u32) + 1).wrapping_mul(1013904223));
-        let base_deg = ((seed % 360) as f64) + (k as f64) * 37.0;
-        let dist_r = 85.0 + (((seed >> 8) % 120) as f64); // 85..205px
-        let sr = 13.5 + (((seed >> 16) % 3) as f64); // 13.5..15.5px
+    // If missing_marbles == 0 (start of game), we keep exactly 3 rocks!
+    if missing_marbles > 0 {
+        // Extra Hoyita pit guardians as pit becomes accessible (up to 3 extra)
+        if is_hoyita {
+            let extra_guardians = (missing_marbles / 4).min(3);
+            let rot_jitter = (((shot_counter * 37) % 90) as f64).to_radians();
+            for i in 1..=extra_guardians {
+                let base_ang = (i as f64) * std::f64::consts::FRAC_PI_2 + rot_jitter;
+                let dist_r = 66.0 + ((shot_counter + (i as u32) * 5) % 9) as f64;
+                let sx = (PATIO_CENTER_X + dist_r * base_ang.cos()).round();
+                let sy = (PATIO_CENTER_Y + dist_r * base_ang.sin()).round();
+                if is_clear(sx, sy, 13.5, &stones) {
+                    stones.push(PatioStone { x: sx, y: sy, r: 13.5 });
+                }
+            }
+        }
 
-        for step in 0..24 {
-            let rad = (base_deg + (step as f64) * 15.0).to_radians();
-            let sx = (PATIO_CENTER_X + dist_r * rad.cos()).round();
-            let sy = (PATIO_CENTER_Y + dist_r * rad.sin()).round();
-            if is_clear(sx, sy, sr, &stones) {
-                stones.push(PatioStone { x: sx, y: sy, r: sr });
+        // Target total rocks = 3 base rocks + missing_marbles (up to 15 max)
+        let target_total_stones = 3 + missing_marbles.min(12);
+
+        for k in 0..16 {
+            if stones.len() >= target_total_stones {
                 break;
+            }
+            let seed = (shot_counter.wrapping_add(1))
+                .wrapping_mul(2654435761)
+                .wrapping_add(((k as u32) + 1).wrapping_mul(1013904223));
+            let base_deg = ((seed % 360) as f64) + (k as f64) * 37.0;
+            let dist_r = 85.0 + (((seed >> 8) % 120) as f64); // 85..205px
+            let sr = 13.5 + (((seed >> 16) % 3) as f64); // 13.5..15.5px
+
+            for step in 0..24 {
+                let rad = (base_deg + (step as f64) * 15.0).to_radians();
+                let sx = (PATIO_CENTER_X + dist_r * rad.cos()).round();
+                let sy = (PATIO_CENTER_Y + dist_r * rad.sin()).round();
+                if is_clear(sx, sy, sr, &stones) {
+                    stones.push(PatioStone { x: sx, y: sy, r: sr });
+                    break;
+                }
             }
         }
     }
@@ -1761,21 +1776,20 @@ mod tests {
         let stones_turn1 = generate_patio_stones(true, 1, 90.0, &targets);
         let stones_turn2 = generate_patio_stones(true, 2, 180.0, &targets);
 
-        // At start (all 12/13 marbles active): only 1 ray blocker + 1 pit guardian in Hoyita (2 total)!
-        // In Circulo: exactly 1 ray blocker rock!
+        // At start (all 12/13 marbles active): exactly 3 rocks in Circulo and Hoyita!
         let stones_circulo = generate_patio_stones(false, 0, 90.0, &generate_patio_marbles(false));
-        assert_eq!(stones_circulo.len(), 1, "Expected exactly 1 ray blocker rock at start of Circulo");
-        assert_eq!(stones_turn0.len(), 2, "Expected exactly 2 rocks (1 ray blocker + 1 pit guardian) at start of Hoyita");
+        assert_eq!(stones_circulo.len(), 3, "Expected exactly 3 rocks at start of Circulo");
+        assert_eq!(stones_turn0.len(), 3, "Expected exactly 3 rocks at start of Hoyita");
 
-        // As marbles disappear, rocks progressively spawn:
+        // As marbles disappear, rocks progressively ramp up:
         let mut depleted_targets = generate_patio_marbles(true);
         for m in depleted_targets.iter_mut().take(10) {
             m.active = false;
         }
         let stones_depleted = generate_patio_stones(true, 5, 90.0, &depleted_targets);
         assert!(
-            stones_depleted.len() >= 10,
-            "Expected >=10 stones when 10 marbles disappear, got {}",
+            stones_depleted.len() >= 12,
+            "Expected >=12 stones when 10 marbles disappear, got {}",
             stones_depleted.len()
         );
 

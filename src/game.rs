@@ -104,8 +104,8 @@ impl GameSettings {
         }
         self.max_rounds = self.max_rounds.clamp(2, 20);
         self.target_score = self.target_score.clamp(80, 2000);
-        if !matches!(self.turn_timer_seconds, 0 | 15 | 25 | 40) {
-            self.turn_timer_seconds = 0;
+        if self.turn_timer_seconds > 0 {
+            self.turn_timer_seconds = self.turn_timer_seconds.clamp(2, 120);
         }
         if !matches!(self.arena_theme.as_str(), "feria" | "patio" | "talavera") {
             self.arena_theme = "feria".to_string();
@@ -142,6 +142,8 @@ pub struct Player {
     pub conn_id: String,
     #[serde(default)]
     pub is_bot: bool,
+    #[serde(default)]
+    pub seat_angle: Option<f64>,
     #[serde(default)]
     pub stats: PlayerStats,
 }
@@ -342,6 +344,7 @@ impl Room {
         let total = self.players.len().max(1);
         for (i, p) in self.players.iter_mut().enumerate() {
             let deg = (i as f64) * (360.0 / (total as f64)) + 90.0;
+            p.seat_angle = Some(deg);
             let rad = deg.to_radians();
             p.shooter_x = (PATIO_CENTER_X + PATIO_SHOOT_RADIUS * rad.cos()).round();
             p.shooter_y = (PATIO_CENTER_Y + PATIO_SHOOT_RADIUS * rad.sin()).round();
@@ -436,6 +439,7 @@ impl Room {
             is_host: false,
             conn_id: String::new(),
             is_bot: true,
+            seat_angle: None,
             stats: PlayerStats::default(),
         };
         self.players.push(bot.clone());
@@ -500,6 +504,7 @@ impl Room {
         let total_players = self.players.len().max(1);
         let default_seat_deg = (turn_idx as f64) * (360.0 / (total_players as f64)) + 90.0;
         let seat_angle_deg = custom_seat_angle
+            .or(current.seat_angle)
             .filter(|d| d.is_finite())
             .map(|d| d.rem_euclid(360.0))
             .unwrap_or(default_seat_deg);
@@ -772,7 +777,8 @@ impl Room {
                 seat_angle_deg
             } else {
                 let total = self.players.len().max(1);
-                (self.current_turn_idx as f64) * (360.0 / (total as f64)) + 90.0
+                let default_deg = (self.current_turn_idx as f64) * (360.0 / (total as f64)) + 90.0;
+                self.current_player().and_then(|p| p.seat_angle).unwrap_or(default_deg)
             };
             self.patio_stones = generate_patio_stones(
                 is_hoyita,
@@ -952,6 +958,7 @@ mod tests {
             is_host: true,
             conn_id: "c1".to_string(),
             is_bot: false,
+            seat_angle: None,
             stats: PlayerStats::default(),
         }
     }

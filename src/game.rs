@@ -778,7 +778,9 @@ impl Room {
             } else {
                 let total = self.players.len().max(1);
                 let default_deg = (self.current_turn_idx as f64) * (360.0 / (total as f64)) + 90.0;
-                self.current_player().and_then(|p| p.seat_angle).unwrap_or(default_deg)
+                self.current_player()
+                    .and_then(|p| p.seat_angle)
+                    .unwrap_or(default_deg)
             };
             self.patio_stones = generate_patio_stones(
                 is_hoyita,

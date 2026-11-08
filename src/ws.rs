@@ -758,8 +758,12 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 if stage != "feria" {
                     let is_hoyita = stage == "hoyita";
                     room.patio_targets = generate_patio_marbles(is_hoyita);
-                    room.patio_stones =
-                        generate_patio_stones(is_hoyita, room.shot_counter, 90.0, &room.patio_targets);
+                    room.patio_stones = generate_patio_stones(
+                        is_hoyita,
+                        room.shot_counter,
+                        90.0,
+                        &room.patio_targets,
+                    );
                     room.position_shooters_on_perimeter();
                 } else {
                     room.feria_occupied_holes.clear();
@@ -886,7 +890,10 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 }
             }
 
-            ClientMessage::SetSeatAngle { room_code, seat_angle } => {
+            ClientMessage::SetSeatAngle {
+                room_code,
+                seat_angle,
+            } => {
                 let code = room_code.trim().to_uppercase();
                 let Some(ref pid) = active_player_id else {
                     continue;
@@ -1096,7 +1103,9 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                                 room.players.retain(|p| p.id != *pid);
                                 room.position_shooters_on_perimeter();
                                 if room.host_id == *pid {
-                                    if let Some(first_human) = room.players.iter().find(|p| !p.is_bot) {
+                                    if let Some(first_human) =
+                                        room.players.iter().find(|p| !p.is_bot)
+                                    {
                                         room.host_id = first_human.id.clone();
                                         for p in &mut room.players {
                                             p.is_host = p.id == room.host_id;
@@ -1119,7 +1128,12 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                 active_room_code = None;
                 active_player_id = None;
                 if let Some(snapshot) = maybe_snapshot {
-                    broadcast_to_room(&state, &code, &json!({ "type": "room_updated", "room": snapshot })).await;
+                    broadcast_to_room(
+                        &state,
+                        &code,
+                        &json!({ "type": "room_updated", "room": snapshot }),
+                    )
+                    .await;
                 }
             }
 
@@ -1146,11 +1160,14 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                         if room.state == RoomState::Playing {
                             if let Some(curr) = room.current_player().cloned() {
                                 let curr_seat = curr.seat_angle;
-                                match room.execute_shot_with_seat(&curr.id, 0.68, 0.0, 0.0, curr_seat) {
+                                match room
+                                    .execute_shot_with_seat(&curr.id, 0.68, 0.0, 0.0, curr_seat)
+                                {
                                     Ok(out) => Some((out, room.clone())),
                                     Err(e) => {
                                         eprintln!("Force timeout error in room {}: {}", code, e);
-                                        room.current_turn_idx = (room.current_turn_idx + 1) % room.players.len().max(1);
+                                        room.current_turn_idx =
+                                            (room.current_turn_idx + 1) % room.players.len().max(1);
                                         room.refresh_turn_deadline();
                                         room.touch();
                                         None
@@ -1300,7 +1317,8 @@ pub async fn start_background_maintenance(state: AppState) {
                         Ok(out) => Some((out, room.clone())),
                         Err(e) => {
                             eprintln!("Auto timeout shot error in room {}: {}", code, e);
-                            room.current_turn_idx = (room.current_turn_idx + 1) % room.players.len().max(1);
+                            room.current_turn_idx =
+                                (room.current_turn_idx + 1) % room.players.len().max(1);
                             room.refresh_turn_deadline();
                             room.touch();
                             None

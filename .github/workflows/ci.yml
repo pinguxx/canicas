@@ -16,22 +16,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Run Gitleaks Scan
-        uses: gitleaks/gitleaks-action@v3
+        uses: gitleaks/gitleaks-action@v2
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   rust-quality:
-    name: Rust Backend Quality, Tests & Audit
+    name: Rust Backend Quality, Tests & Formatting
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
 
       - name: Setup Rust Toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -63,19 +63,48 @@ jobs:
       - name: Build Release Binary
         run: cargo build --release
 
-  docker-security-scan:
-    name: Container Build & Trivy CVE Scan
-    needs: [rust-quality]
+  frontend-quality:
+    name: Frontend Syntax Check & Standalone Bundler
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate JavaScript Syntax
+        run: |
+          node -c public/app.js
+          node -c public/audio.js
+          node -c public/sw.js
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Test Standalone Artifact Bundler
+        run: |
+          python3 bundle_standalone.py dist/canicas_standalone.html
+          test -f dist/canicas_standalone.html
+          echo "Standalone artifact bundle generated successfully!"
+
+  docker-security-scan:
+    name: Container Build & Trivy CVE Scan
+    needs: [rust-quality, frontend-quality]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Application Container
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile

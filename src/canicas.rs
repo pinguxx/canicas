@@ -683,7 +683,9 @@ pub fn simulate_feria_shot(
                         captured_hole = Some(hole.clone());
                         break;
                     }
-                } else if dist < hole.radius + (if hole.points <= 20 { 11.0 } else { 8.5 }) && hole.y < 1050.0 {
+                } else if dist < hole.radius + (if hole.points <= 20 { 11.0 } else { 8.5 })
+                    && hole.y < 1050.0
+                {
                     // Marble is touching the carved wooden rim/lip around the hole:
                     // Upper 10pt/20pt holes have a slightly wider bevelled lip so they eagerly catch
                     // careless shots near the top, making it harder to reach the 50/75/100 holes at the bottom!
@@ -951,9 +953,10 @@ pub fn generate_patio_stones(
         if dc < min_center_d || dc > 214.0 {
             return false;
         }
-        let hits_marble = targets.iter().filter(|m| m.active).any(|m| {
-            ((m.x - sx).powi(2) + (m.y - sy).powi(2)).sqrt() < m.radius + sr + 3.0
-        });
+        let hits_marble = targets
+            .iter()
+            .filter(|m| m.active)
+            .any(|m| ((m.x - sx).powi(2) + (m.y - sy).powi(2)).sqrt() < m.radius + sr + 3.0);
         if hits_marble {
             return false;
         }
@@ -976,7 +979,11 @@ pub fn generate_patio_stones(
                 let sx = (PATIO_CENTER_X + dist_r * rad.cos()).round();
                 let sy = (PATIO_CENTER_Y + dist_r * rad.sin()).round();
                 if is_clear(sx, sy, sr, stones) {
-                    stones.push(PatioStone { x: sx, y: sy, r: sr });
+                    stones.push(PatioStone {
+                        x: sx,
+                        y: sy,
+                        r: sr,
+                    });
                     return;
                 }
             }
@@ -987,7 +994,11 @@ pub fn generate_patio_stones(
     place_ray_blocker(blocked_seat_deg, 15.0, &mut stones);
 
     // 2. Base tactical rock at +120°
-    place_ray_blocker((blocked_seat_deg + 120.0).rem_euclid(360.0), 14.0, &mut stones);
+    place_ray_blocker(
+        (blocked_seat_deg + 120.0).rem_euclid(360.0),
+        14.0,
+        &mut stones,
+    );
 
     // 3. Base rock at -120° (Circulo) or initial pit guardian (Hoyita)
     if is_hoyita {
@@ -996,10 +1007,18 @@ pub fn generate_patio_stones(
         let sx = (PATIO_CENTER_X + dist_r * rot_jitter.cos()).round();
         let sy = (PATIO_CENTER_Y + dist_r * rot_jitter.sin()).round();
         if is_clear(sx, sy, 13.5, &stones) {
-            stones.push(PatioStone { x: sx, y: sy, r: 13.5 });
+            stones.push(PatioStone {
+                x: sx,
+                y: sy,
+                r: 13.5,
+            });
         }
     } else {
-        place_ray_blocker((blocked_seat_deg - 120.0).rem_euclid(360.0), 14.0, &mut stones);
+        place_ray_blocker(
+            (blocked_seat_deg - 120.0).rem_euclid(360.0),
+            14.0,
+            &mut stones,
+        );
     }
 
     // Ensure we start with exactly 3 rocks at the beginning
@@ -1030,7 +1049,11 @@ pub fn generate_patio_stones(
                 let sx = (PATIO_CENTER_X + dist_r * base_ang.cos()).round();
                 let sy = (PATIO_CENTER_Y + dist_r * base_ang.sin()).round();
                 if is_clear(sx, sy, 13.5, &stones) {
-                    stones.push(PatioStone { x: sx, y: sy, r: 13.5 });
+                    stones.push(PatioStone {
+                        x: sx,
+                        y: sy,
+                        r: 13.5,
+                    });
                 }
             }
         }
@@ -1054,7 +1077,11 @@ pub fn generate_patio_stones(
                 let sx = (PATIO_CENTER_X + dist_r * rad.cos()).round();
                 let sy = (PATIO_CENTER_Y + dist_r * rad.sin()).round();
                 if is_clear(sx, sy, sr, &stones) {
-                    stones.push(PatioStone { x: sx, y: sy, r: sr });
+                    stones.push(PatioStone {
+                        x: sx,
+                        y: sy,
+                        r: sr,
+                    });
                     break;
                 }
             }
@@ -1466,8 +1493,11 @@ pub fn simulate_patio_shot_with_stones(
         }
     }
 
-    let repeat_empty_hoyita =
-        encholada_hoyita && is_cazador && !hit_marble && captured_ids.is_empty() && ponchados_ids.is_empty();
+    let repeat_empty_hoyita = encholada_hoyita
+        && is_cazador
+        && !hit_marble
+        && captured_ids.is_empty()
+        && ponchados_ids.is_empty();
 
     if encholada_hoyita {
         if repeat_empty_hoyita {
@@ -1717,7 +1747,10 @@ mod tests {
                 }
             }
         }
-        println!("300-shot distribution: 100pt = {}, <=30pt = {}", count_100, count_upper_cheap);
+        println!(
+            "300-shot distribution: 100pt = {}, <=30pt = {}",
+            count_100, count_upper_cheap
+        );
         assert!(
             count_100 <= 25,
             "Expected 100pt jackpot hole to be rare (<=25/300), got {}",
@@ -1778,8 +1811,16 @@ mod tests {
 
         // At start (all 12/13 marbles active): exactly 3 rocks in Circulo and Hoyita!
         let stones_circulo = generate_patio_stones(false, 0, 90.0, &generate_patio_marbles(false));
-        assert_eq!(stones_circulo.len(), 3, "Expected exactly 3 rocks at start of Circulo");
-        assert_eq!(stones_turn0.len(), 3, "Expected exactly 3 rocks at start of Hoyita");
+        assert_eq!(
+            stones_circulo.len(),
+            3,
+            "Expected exactly 3 rocks at start of Circulo"
+        );
+        assert_eq!(
+            stones_turn0.len(),
+            3,
+            "Expected exactly 3 rocks at start of Hoyita"
+        );
 
         // As marbles disappear, rocks progressively ramp up:
         let mut depleted_targets = generate_patio_marbles(true);
@@ -1800,7 +1841,10 @@ mod tests {
             let deg = (dy.atan2(dx).to_degrees() + 360.0) % 360.0;
             (deg - 90.0).abs() <= 10.0 && dy > 50.0
         });
-        assert!(has_90_blocker, "Expected a stone along the 90° straight ray");
+        assert!(
+            has_90_blocker,
+            "Expected a stone along the 90° straight ray"
+        );
 
         // Check that a stone blocks the straight ray from 180° (West) on turn 2
         let has_180_blocker = stones_turn2.iter().any(|st| {
@@ -1809,11 +1853,23 @@ mod tests {
             let deg = (dy.atan2(dx).to_degrees() + 360.0) % 360.0;
             (deg - 180.0).abs() <= 10.0 && dx < -50.0
         });
-        assert!(has_180_blocker, "Expected a stone along the 180° straight ray");
+        assert!(
+            has_180_blocker,
+            "Expected a stone along the 180° straight ray"
+        );
 
         // Verify stones shift/re-randomize between shots
-        let coords0: Vec<(i64, i64)> = stones_turn0.iter().map(|s| (s.x as i64, s.y as i64)).collect();
-        let coords1: Vec<(i64, i64)> = stones_turn1.iter().map(|s| (s.x as i64, s.y as i64)).collect();
-        assert_ne!(coords0, coords1, "Stones should re-randomize positions on every shot!");
+        let coords0: Vec<(i64, i64)> = stones_turn0
+            .iter()
+            .map(|s| (s.x as i64, s.y as i64))
+            .collect();
+        let coords1: Vec<(i64, i64)> = stones_turn1
+            .iter()
+            .map(|s| (s.x as i64, s.y as i64))
+            .collect();
+        assert_ne!(
+            coords0, coords1,
+            "Stones should re-randomize positions on every shot!"
+        );
     }
 }

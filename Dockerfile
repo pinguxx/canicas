@@ -13,11 +13,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends pkg-config && r
 COPY Cargo.toml Cargo.lock ./
 RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release
-RUN rm -rf src
+RUN rm -rf src target/release/deps/canicas* target/release/canicas*
 
 # Build actual application
 COPY src ./src
-RUN touch src/main.rs
 RUN cargo build --release
 
 # 2. Runtime Stage
@@ -26,9 +25,13 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates && rm -rf /var/lib/apt/lists/*
 
+# Security hardening: run as dedicated non-root user
+RUN useradd -m -u 1000 canicas && chown -R canicas:canicas /app
+USER canicas
+
 # Copy compiled binary and static assets
-COPY --from=builder /app/target/release/canicas /app/canicas
-COPY public /app/public
+COPY --from=builder --chown=canicas:canicas /app/target/release/canicas /app/canicas
+COPY --chown=canicas:canicas public /app/public
 
 # Render dynamically passes PORT (defaults to 3000)
 ENV PORT=3000

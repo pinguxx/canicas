@@ -54,8 +54,67 @@ Part of the traditional Mexican games collection alongside **Lotería Mexicana**
 
 ## 🚀 Running Locally / Cómo Ejecutar Localmente
 
+### Option 1: Native Rust
 ```bash
 cargo run --release
 ```
-
 Then open `http://localhost:3000` in your browser.
+
+### Option 2: Docker Container
+```bash
+docker build -t canicas .
+docker run -p 3000:3000 canicas
+```
+Open `http://localhost:3000` in your browser.
+
+### Option 3: Standalone Single-File HTML (Zero Server Required)
+```bash
+python3 bundle_standalone.py dist/canicas_standalone.html
+```
+Double click or open `dist/canicas_standalone.html` in any web browser. It features the complete offline client simulation engine with 100% functionality and zero network requests.
+
+---
+
+## ☁️ Deployment on Render.com
+
+This repository includes a native [`render.yaml`](./render.yaml) blueprint specification for 1-click deployment on [Render](https://render.com):
+
+1. Fork or push this repository to your GitHub account.
+2. In the **Render Dashboard**, select **New +** > **Blueprint**.
+3. Connect your GitHub repository.
+4. Render will automatically detect `render.yaml` and the multi-stage `Dockerfile`.
+5. Click **Apply**: your game will be built and deployed with live HTTPS and WebSocket support.
+
+---
+
+## 🛡️ Security, Privacy & Compliance Guarantees
+
+- **No Personal Information Leaks**: Zero telemetry trackers, zero third-party analytics (Google Analytics, Mixpanel, etc.), and zero tracking pixels.
+- **Zero External CDNs**: All scripts, fonts, stylesheets, audio synthesis, and graphics are 100% self-contained within the repository.
+- **Content Security Policy (CSP)**: Strict headers configured in the Axum backend:
+  - `default-src 'self'`
+  - `script-src 'self'`
+  - `style-src 'self' 'unsafe-inline'`
+  - `connect-src 'self' ws: wss:`
+  - `object-src 'none'`
+  - `X-Content-Type-Options: nosniff`
+  - `X-Frame-Options: SAMEORIGIN`
+- **Docker Hardening**: Multi-stage build runs under an unprivileged `canicas` non-root user (`UID 1000`).
+- **Input Sanitization & DoS Protection**: WebSocket payload sizes capped at 16KB; room codes, player avatars, and banter text sanitized against injection; stale rooms purged automatically every 15 minutes.
+- **Game Mode Integrity**: Game modes are locked once a match starts to prevent mid-game state corruption; returning to La Sala cleanly resets state and allows choosing new modes.
+
+---
+
+## 🧪 GitHub Actions CI/CD Quality Gates
+
+Every pull request and push to `main` executes automated quality gates in [`.github/workflows/ci.yml`](./.github/workflows/ci.yml):
+- **Secret Detection**: Scans commit history with Gitleaks.
+- **Rust Backend**: `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test --all-targets`, and release compilation.
+- **Frontend Quality**: Validates syntax of JavaScript files with Node.js and tests the standalone artifact bundler.
+- **Container Scan**: Builds the Docker container and scans for vulnerabilities with Trivy.
+
+---
+
+## 📜 License
+
+MIT License. See [LICENSE](./LICENSE) for details.

@@ -2234,6 +2234,26 @@
 
   let botShotPendingTimer = null;
   let botShotTargetId = null;
+  let botTurnStartedAt = 0;
+
+  function triggerBotAction(p) {
+    if (useOfflineEngine) {
+      const pwr = 0.52 + Math.random() * 0.38;
+      const ang = (Math.random() - 0.5) * 0.36;
+      const spn = (Math.random() - 0.5) * 0.4;
+      executeOfflineShot(pwr, ang, spn);
+    } else {
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        sendWs({ type: 'bot_ping', roomCode: currentRoom.code });
+      } else {
+        useOfflineEngine = true;
+        const pwr = 0.52 + Math.random() * 0.38;
+        const ang = (Math.random() - 0.5) * 0.36;
+        const spn = (Math.random() - 0.5) * 0.4;
+        executeOfflineShot(pwr, ang, spn);
+      }
+    }
+  }
 
   function checkAndTriggerBotShot() {
     if (!currentRoom || currentRoom.state !== 'playing' || isAnimatingShot) {
@@ -2244,46 +2264,42 @@
       if (botShotPendingTimer) {
         clearTimeout(botShotPendingTimer);
         botShotPendingTimer = null;
-        botShotTargetId = null;
       }
+      botShotTargetId = null;
+      botTurnStartedAt = 0;
       return;
     }
 
-    if (botShotTargetId === currP.id && botShotPendingTimer) {
+    if (botShotTargetId !== currP.id) {
+      botShotTargetId = currP.id;
+      botTurnStartedAt = Date.now();
+    }
+
+    // Proactive watchdog fallback: if the bot has been waiting for more than 1.6 seconds without a shot arriving, re-trigger immediately!
+    const elapsed = Date.now() - botTurnStartedAt;
+    if (elapsed > 1600) {
+      if (botShotPendingTimer) {
+        clearTimeout(botShotPendingTimer);
+        botShotPendingTimer = null;
+      }
+      triggerBotAction(currP);
       return;
     }
 
-    botShotTargetId = currP.id;
     if (botShotPendingTimer) {
-      clearTimeout(botShotPendingTimer);
+      return;
     }
 
-    // Natural bot reaction delay (650-750ms) before shooting
+    // Snappy and natural bot reaction delay (400ms) before shooting
     botShotPendingTimer = setTimeout(() => {
       botShotPendingTimer = null;
-      botShotTargetId = null;
       if (currentRoom && currentRoom.state === 'playing' && !isAnimatingShot) {
         const p = currentRoom.players[currentRoom.current_turn_idx];
         if (p && p.is_bot) {
-          if (useOfflineEngine) {
-            const pwr = 0.52 + Math.random() * 0.38;
-            const ang = (Math.random() - 0.5) * 0.36;
-            const spn = (Math.random() - 0.5) * 0.4;
-            executeOfflineShot(pwr, ang, spn);
-          } else {
-            if (ws && ws.readyState === WebSocket.OPEN) {
-              sendWs({ type: 'bot_ping', roomCode: currentRoom.code });
-            } else {
-              useOfflineEngine = true;
-              const pwr = 0.52 + Math.random() * 0.38;
-              const ang = (Math.random() - 0.5) * 0.36;
-              const spn = (Math.random() - 0.5) * 0.4;
-              executeOfflineShot(pwr, ang, spn);
-            }
-          }
+          triggerBotAction(p);
         }
       }
-    }, 700);
+    }, 400);
   }
 
   function finishShotAnimation(outcome) {
@@ -2321,10 +2337,12 @@
     renderGameHUD();
 
     if (pendingShotQueue.length > 0) {
+      isAnimatingShot = true;
       const nextMsg = pendingShotQueue.shift();
       setTimeout(() => {
+        isAnimatingShot = false;
         handleServerMessage(nextMsg);
-      }, 450);
+      }, 350);
       return;
     }
 
@@ -3583,46 +3601,81 @@
 
   const btnShoot = document.getElementById('btn-shoot');
   const btnCanvasShoot = document.getElementById('btn-canvas-shoot');
+  let chargeHoldTimeout = null;
   let holdTriggered = false;
 
   function startChargeHold(btnEl) {
     if (!btnEl || btnEl.disabled) return;
     window.canicasAudio.ensureContext();
     holdTriggered = false;
-    let dir = 1;
-    if (chargeInterval) clearInterval(chargeInterval);
-    chargeInterval = setInterval(() => {
-      holdTriggered = true;
-      isCharging = true;
-      let nextP = shotPower + dir * 0.04;
-      if (nextP >= 1.0) {
-        nextP = 1.0;
-        dir = -1;
-      } else if (nextP <= 0.2) {
-        nextP = 0.2;
-        dir = 1;
-      }
-      setPower(nextP);
-      window.canicasAudio.playChargeTick(shotPower);
-    }, 55);
-  }
-
-  function stopChargeAndFire() {
+    isCharging = false;
+    if (chargeHoldTimeout) {
+      clearTimeout(chargeHoldTimeout);
+      chargeHoldTimeout = null;
+    }
     if (chargeInterval) {
       clearInterval(chargeInterval);
       chargeInterval = null;
     }
-    if (isCharging || !holdTriggered) {
-      isCharging = false;
-      triggerShoot();
+
+    // Only modulate/oscillate power if the user intentionally presses and holds for > 260ms
+    // Quick taps or clicks (< 260ms) preserve current power 100% without shifting the aiming line at all!
+    chargeHoldTimeout = setTimeout(() => {
+      chargeHoldTimeout = null;
+      holdTriggered = true;
+      isCharging = true;
+      let dir = 1;
+      chargeInterval = setInterval(() => {
+        let nextP = shotPower + dir * 0.04;
+        if (nextP >= 1.0) {
+          nextP = 1.0;
+          dir = -1;
+        } else if (nextP <= 0.2) {
+          nextP = 0.2;
+          dir = 1;
+        }
+        setPower(nextP);
+        window.canicasAudio.playChargeTick(shotPower);
+      }, 55);
+    }, 260);
+  }
+
+  function stopChargeAndFire() {
+    if (chargeHoldTimeout) {
+      clearTimeout(chargeHoldTimeout);
+      chargeHoldTimeout = null;
     }
+    if (chargeInterval) {
+      clearInterval(chargeInterval);
+      chargeInterval = null;
+    }
+    isCharging = false;
+    holdTriggered = false;
+    triggerShoot();
+  }
+
+  function cancelCharge() {
+    if (chargeHoldTimeout) {
+      clearTimeout(chargeHoldTimeout);
+      chargeHoldTimeout = null;
+    }
+    if (chargeInterval) {
+      clearInterval(chargeInterval);
+      chargeInterval = null;
+    }
+    isCharging = false;
+    holdTriggered = false;
   }
 
   btnShoot.addEventListener('pointerdown', () => startChargeHold(btnShoot));
   btnShoot.addEventListener('pointerup', stopChargeAndFire);
+  btnShoot.addEventListener('pointercancel', cancelCharge);
+  btnShoot.addEventListener('pointerleave', cancelCharge);
   if (btnCanvasShoot) {
     btnCanvasShoot.addEventListener('pointerdown', () => startChargeHold(btnCanvasShoot));
     btnCanvasShoot.addEventListener('pointerup', stopChargeAndFire);
+    btnCanvasShoot.addEventListener('pointercancel', cancelCharge);
+    btnCanvasShoot.addEventListener('pointerleave', cancelCharge);
   }
 
   document.getElementById('btn-marble-skin').addEventListener('click', () => {

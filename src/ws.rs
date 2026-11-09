@@ -306,27 +306,50 @@ pub fn schedule_bot_if_needed(state: AppState, room_code: String, delay_ms: u64)
             if curr.id != bot_id {
                 return;
             }
-            room.execute_shot(&bot_id, power, angle, spin)
-                .ok()
-                .map(|out| (out, room.clone()))
+            let curr_seat = curr.seat_angle;
+            match room.execute_shot_with_seat(&bot_id, power, angle, spin, curr_seat) {
+                Ok(out) => Some((out, room.clone())),
+                Err(err) => {
+                    eprintln!("Bot shot execution error in room {}: {}", room_code, err);
+                    room.current_turn_idx = (room.current_turn_idx + 1) % room.players.len().max(1);
+                    room.refresh_turn_deadline();
+                    room.touch();
+                    None
+                }
+            }
         };
 
-        if let Some((outcome, updated_room)) = outcome_opt {
-            broadcast_to_room(
-                &state,
-                &room_code,
-                &json!({
-                    "type": "shot_result",
-                    "outcome": outcome,
-                    "room": updated_room
-                }),
-            )
-            .await;
+        match outcome_opt {
+            Some((outcome, updated_room)) => {
+                broadcast_to_room(
+                    &state,
+                    &room_code,
+                    &json!({
+                        "type": "shot_result",
+                        "outcome": outcome,
+                        "room": updated_room
+                    }),
+                )
+                .await;
 
-            if updated_room.state == RoomState::Playing {
-                if let Some(next_p) = updated_room.current_player() {
-                    if next_p.is_bot {
-                        schedule_bot_if_needed(state.clone(), room_code, 1100);
+                if updated_room.state == RoomState::Playing {
+                    if let Some(next_p) = updated_room.current_player() {
+                        if next_p.is_bot {
+                            schedule_bot_if_needed(state.clone(), room_code, 1000);
+                        }
+                    }
+                }
+            }
+            None => {
+                let rooms_guard = state.rooms.read().await;
+                if let Some(room) = rooms_guard.get(&room_code) {
+                    if room.state == RoomState::Playing {
+                        if let Some(curr) = room.current_player() {
+                            if curr.is_bot {
+                                drop(rooms_guard);
+                                schedule_bot_if_needed(state.clone(), room_code, 350);
+                            }
+                        }
                     }
                 }
             }
@@ -634,6 +657,14 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     }),
                 )
                 .await;
+
+                if room_snapshot.state == RoomState::Playing {
+                    if let Some(curr) = room_snapshot.current_player() {
+                        if curr.is_bot {
+                            schedule_bot_if_needed(state.clone(), code.clone(), 500);
+                        }
+                    }
+                }
             }
 
             ClientMessage::UpdateProfile {
@@ -1269,7 +1300,19 @@ pub async fn handle_ws_connection(socket: WebSocket, state: AppState) {
                     if snapshot.state == RoomState::Playing {
                         if let Some(next_p) = snapshot.current_player() {
                             if next_p.is_bot {
-                                schedule_bot_if_needed(state.clone(), code, 750);
+                                schedule_bot_if_needed(state.clone(), code, 500);
+                            }
+                        }
+                    }
+                } else {
+                    let rooms_guard = state.rooms.read().await;
+                    if let Some(room) = rooms_guard.get(&code) {
+                        if room.state == RoomState::Playing {
+                            if let Some(curr) = room.current_player() {
+                                if curr.is_bot {
+                                    drop(rooms_guard);
+                                    schedule_bot_if_needed(state.clone(), code, 350);
+                                }
                             }
                         }
                     }
@@ -1414,7 +1457,19 @@ pub async fn start_background_maintenance(state: AppState) {
                 if snapshot.state == RoomState::Playing {
                     if let Some(next_p) = snapshot.current_player() {
                         if next_p.is_bot {
-                            schedule_bot_if_needed(state.clone(), code, 1100);
+                            schedule_bot_if_needed(state.clone(), code, 800);
+                        }
+                    }
+                }
+            } else {
+                let rooms_guard = state.rooms.read().await;
+                if let Some(room) = rooms_guard.get(&code) {
+                    if room.state == RoomState::Playing {
+                        if let Some(curr) = room.current_player() {
+                            if curr.is_bot {
+                                drop(rooms_guard);
+                                schedule_bot_if_needed(state.clone(), code, 350);
+                            }
                         }
                     }
                 }

@@ -79,7 +79,7 @@ pub fn create_app(state: AppState) -> Router {
         .layer(SetResponseHeaderLayer::overriding(
             header::CONTENT_SECURITY_POLICY,
             HeaderValue::from_static(
-                "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data:; connect-src 'self' ws: wss:; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';",
+                "default-src 'self'; script-src 'self' 'unsafe-inline' https://pinguxx.github.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data:; connect-src 'self' ws: wss: https://pinguxx.github.io; frame-ancestors 'self' https://pinguxx.github.io; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self';",
             ),
         ))
         .layer(cors)

@@ -91,14 +91,17 @@ This repository includes a native [`render.yaml`](./render.yaml) blueprint speci
 
 - **No Personal Information Leaks**: Zero telemetry trackers, zero third-party analytics (Google Analytics, Mixpanel, etc.), and zero tracking pixels.
 - **Zero External CDNs**: All scripts, fonts, stylesheets, audio synthesis, and graphics are 100% self-contained within the repository.
-- **Content Security Policy (CSP)**: Strict headers configured in the Axum backend:
+- **Content Security Policy (CSP)**: Strict headers configured in the Axum backend allowing safe integration with La Feria:
   - `default-src 'self'`
-  - `script-src 'self'`
+  - `script-src 'self' 'unsafe-inline' https://pinguxx.github.io`
   - `style-src 'self' 'unsafe-inline'`
-  - `connect-src 'self' ws: wss:`
+  - `connect-src 'self' ws: wss: https://pinguxx.github.io`
+  - `frame-ancestors 'self' https://pinguxx.github.io`
   - `object-src 'none'`
   - `X-Content-Type-Options: nosniff`
   - `X-Frame-Options: SAMEORIGIN`
+- **Render Deployment Support**: Works seamlessly via both **Blueprint / Docker** (`Dockerfile`, `render.yaml`) and **Native Rust Web Service** (`build.sh`, `./target/release/canicas`).
+- **Low-Memory Release Optimizations**: Configured `[profile.release]` with `codegen-units = 1`, `lto = "thin"`, and `strip = true` ensuring zero out-of-memory errors on 512MB RAM free instances.
 - **Docker Hardening**: Multi-stage build runs under an unprivileged `canicas` non-root user (`UID 1000`).
 - **Input Sanitization & DoS Protection**: WebSocket payload sizes capped at 16KB; room codes, player avatars, and banter text sanitized against injection; stale rooms purged automatically every 15 minutes.
 - **Game Mode Integrity**: Game modes are locked once a match starts to prevent mid-game state corruption; returning to La Sala cleanly resets state and allows choosing new modes.

@@ -9,15 +9,18 @@ WORKDIR /app
 
 RUN apt-get update && apt-get install -y --no-install-recommends pkg-config && rm -rf /var/lib/apt/lists/*
 
+ENV CARGO_BUILD_JOBS=2
+
 # Cache dependencies
 COPY Cargo.toml Cargo.lock ./
-RUN mkdir src && echo "fn main() {}" > src/main.rs
+COPY .cargo ./.cargo
+RUN mkdir -p src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release
-RUN rm -rf src target/release/deps/canicas* target/release/canicas*
+RUN rm -rf src target/release/deps/canicas* target/release/canicas* target/release/.fingerprint/canicas*
 
 # Build actual application
 COPY src ./src
-RUN cargo build --release
+RUN touch src/main.rs && cargo build --release
 
 # 2. Runtime Stage
 FROM debian:bookworm-slim
@@ -33,8 +36,9 @@ USER canicas
 COPY --from=builder --chown=canicas:canicas /app/target/release/canicas /app/canicas
 COPY --chown=canicas:canicas public /app/public
 
-# Render dynamically passes PORT (defaults to 3000)
-ENV PORT=3000
-EXPOSE 3000
+# Render dynamically passes PORT (defaults to 10000 on Render, or 3000 locally)
+ENV PORT=10000
+EXPOSE 10000 3000
 
 CMD ["/app/canicas"]
+

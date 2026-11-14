@@ -4063,6 +4063,16 @@
     const winnerName = winner ? winner.name : '';
     window.canicasAudio.speakVictory(winnerName, lang);
 
+    if (window.FeriaBridge && typeof window.FeriaBridge.reportWin === 'function' && winner && winner.id === playerId) {
+      window.FeriaBridge.reportWin({
+        gameId: 'canicas',
+        coins: 100,
+        tickets: 3,
+        score: winner.score || 0,
+        note: 'Victoria en Canicas Mexicanas 3D'
+      });
+    }
+
     const reason =
       lang === 'en' ? currentRoom.victory_reason_en : currentRoom.victory_reason_es;
     document.getElementById('victory-reason').textContent = reason || '';

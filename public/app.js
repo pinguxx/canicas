@@ -4448,7 +4448,7 @@
       .keys()
       .then((keys) => {
         keys.forEach((k) => {
-          if (k !== 'canicas-mexicanas-v18') {
+          if (k !== 'canicas-mexicanas-v19') {
             caches.delete(k).catch(() => {});
           }
         });
@@ -4457,7 +4457,7 @@
   }
   if ('serviceWorker' in navigator && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
     navigator.serviceWorker
-      .register('/sw.js?v=18')
+      .register('/sw.js?v=19')
       .then((reg) => {
         reg.update().catch(() => {});
       })

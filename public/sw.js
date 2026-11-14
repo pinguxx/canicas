@@ -1,12 +1,12 @@
-const CACHE_NAME = 'canicas-mexicanas-v19';
+const CACHE_NAME = 'canicas-mexicanas-v20';
 const ASSETS = [
   '/',
   '/index.html',
-  '/style.css?v=19',
-  '/audio.js?v=19',
-  '/app.js?v=19',
-  '/qrcode.min.js?v=19',
-  '/feria-bridge.js?v=19',
+  '/style.css?v=20',
+  '/audio.js?v=20',
+  '/app.js?v=20',
+  '/qrcode.min.js?v=20',
+  '/feria-bridge.js?v=20',
   '/icon.svg',
   '/manifest.json'
 ];

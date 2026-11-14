@@ -211,9 +211,65 @@
     }
   }
 
-  // 6. Pre-llenar inputs de nombre de jugador si vienen del pasaporte
+  // 6. Sincronizar almacenamiento local y memoria de juegos
+  function syncPlayerStorage() {
+    if (!playerName) return;
+
+    const nameKeys = [
+      'canicas_name',
+      'pirinola_name',
+      'rayuela_player_name',
+      'basta_player_name',
+      'loteria_player_name',
+      'conquian_player_name',
+      'oca_player_name',
+      'shoots_player_name',
+      'player_name',
+      'playerName'
+    ];
+    nameKeys.forEach(k => {
+      try {
+        localStorage.setItem(k, playerName);
+        sessionStorage.setItem(k, playerName);
+        if (window.safeStorage && window.safeStorage.setItem) {
+          window.safeStorage.setItem(k, playerName);
+        }
+      } catch (_) {}
+    });
+
+    if (playerAvatar) {
+      const avatarKeys = [
+        'canicas_avatar',
+        'pirinola_avatar',
+        'rayuela_avatar',
+        'basta_avatar',
+        'loteria_avatar',
+        'conquian_avatar',
+        'oca_avatar',
+        'shoots_avatar'
+      ];
+      avatarKeys.forEach(k => {
+        try {
+          localStorage.setItem(k, playerAvatar);
+          sessionStorage.setItem(k, playerAvatar);
+          if (window.safeStorage && window.safeStorage.setItem) {
+            window.safeStorage.setItem(k, playerAvatar);
+          }
+        } catch (_) {}
+      });
+    }
+  }
+
+  // Ejecutar de inmediato para anticipar la lectura inicial del juego en app.js
+  if (isFromFeria) {
+    syncPlayerStorage();
+  }
+
+  // 7. Pre-llenar inputs de nombre de jugador si vienen del pasaporte
   function autofillPlayerInfo() {
     if (!playerName) return;
+
+    syncPlayerStorage();
 
     const selectors = [
       '#input-name',
@@ -232,10 +288,13 @@
 
     for (const sel of selectors) {
       const el = document.querySelector(sel);
-      if (el && !el.value) {
-        el.value = playerName;
-        el.dispatchEvent(new Event('input', { bubbles: true }));
-        el.dispatchEvent(new Event('change', { bubbles: true }));
+      if (el) {
+        // Actualizar siempre el valor cuando el usuario viene de La Feria
+        if (el.value !== playerName) {
+          el.value = playerName;
+          el.dispatchEvent(new Event('input', { bubbles: true }));
+          el.dispatchEvent(new Event('change', { bubbles: true }));
+        }
         break;
       }
     }
@@ -244,7 +303,7 @@
       try {
         const pickerItems = document.querySelectorAll('.picker-item, .avatar-option, .avatar-btn, [data-avatar]');
         for (const btn of pickerItems) {
-          if (btn.textContent && btn.textContent.includes(playerAvatar)) {
+          if (btn.textContent && (btn.textContent.trim() === playerAvatar || btn.textContent.includes(playerAvatar))) {
             btn.click();
             break;
           }
@@ -254,19 +313,27 @@
   }
 
   function initBridge() {
+    syncPlayerStorage();
     injectBridgeUI();
     autofillPlayerInfo();
 
     // Re-checar si componentes de interfaz se cargan dinámicamente
     setTimeout(() => {
+      syncPlayerStorage();
       injectBridgeUI();
       autofillPlayerInfo();
-    }, 400);
+    }, 150);
+
+    setTimeout(() => {
+      syncPlayerStorage();
+      injectBridgeUI();
+      autofillPlayerInfo();
+    }, 500);
 
     setTimeout(() => {
       injectBridgeUI();
       autofillPlayerInfo();
-    }, 1200);
+    }, 1500);
   }
 
   // Iniciar cuando el DOM esté listo

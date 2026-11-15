@@ -4448,7 +4448,7 @@
       .keys()
       .then((keys) => {
         keys.forEach((k) => {
-          if (k !== 'canicas-mexicanas-v20') {
+          if (k !== 'canicas-mexicanas-v21') {
             caches.delete(k).catch(() => {});
           }
         });

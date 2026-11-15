@@ -1,4 +1,4 @@
-const CACHE_NAME = 'canicas-mexicanas-v20';
+const CACHE_NAME = 'canicas-mexicanas-v21';
 const ASSETS = [
   '/',
   '/index.html',
